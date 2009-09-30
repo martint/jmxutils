@@ -22,33 +22,30 @@ import java.util.regex.Pattern;
 
 public class MBeanExporter
 {
-	private final MBeanServer server;
+    private final MBeanServer server;
 
-	public MBeanExporter(MBeanServer server)
-	{
-		this.server = server;
-	}
+    public MBeanExporter(MBeanServer server)
+    {
+        this.server = server;
+    }
 
-	public void export(String name, Object object)
-	{
+    public void export(String name, Object object)
+    {
         try {
-			ObjectName objectName = new ObjectName(name);
+            ObjectName objectName = new ObjectName(name);
 
             MBeanInfoBuilder builder = new MBeanInfoBuilder();
-			ModelMBeanInfo info = builder.buildInfo(object.getClass());
+            ModelMBeanInfo info = builder.buildInfo(object.getClass());
 
-			RequiredModelMBean mbean = new RequiredModelMBean(info);
-			mbean.setManagedResource(object, "objectReference");
+            RequiredModelMBean mbean = new RequiredModelMBean(info);
+            mbean.setManagedResource(object, "objectReference");
 
-			// register the model MBean in the MBean server
-			server.registerMBean(mbean, objectName);
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-
-
+            // register the model MBean in the MBean server
+            server.registerMBean(mbean, objectName);
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }
