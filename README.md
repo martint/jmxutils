@@ -1,5 +1,6 @@
 # Example
 
+{
 class ManagedObject
 {
     @Managed
@@ -24,4 +25,4 @@ class ManagedObject
 
 MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
 exporter.export("test:name=X", new ManagedObject());
-
+}
