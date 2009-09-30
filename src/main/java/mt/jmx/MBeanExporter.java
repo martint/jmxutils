@@ -52,7 +52,7 @@ public class MBeanExporter
             MBeanInfoBuilder builder = new MBeanInfoBuilder();
             ModelMBeanInfo info = builder.buildInfo(object.getClass());
 
-            RequiredModelMBean mbean = new RequiredModelMBean(info);
+            RequiredModelMBean mbean = new RequiredModelMBean(new GetterStrippingMBeanInfo(info));
             mbean.setManagedResource(object, "objectReference");
 
             // register the model MBean in the MBean server
