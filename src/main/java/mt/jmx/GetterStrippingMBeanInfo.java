@@ -13,7 +13,7 @@ import javax.management.modelmbean.ModelMBeanOperationInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GetterStrippingMBeanInfo
+class GetterStrippingMBeanInfo
         extends ModelMBeanInfoSupport
 {
     public GetterStrippingMBeanInfo(ModelMBeanInfo info)
