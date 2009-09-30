@@ -15,8 +15,13 @@
  */
 package mt.jmx;
 
-import javax.management.IntrospectionException;
+import com.thoughtworks.paranamer.BytecodeReadingParanamer;
+import com.thoughtworks.paranamer.Paranamer;
+
 import javax.management.Descriptor;
+import javax.management.IntrospectionException;
+import javax.management.MBeanOperationInfo;
+import javax.management.MBeanParameterInfo;
 import javax.management.modelmbean.DescriptorSupport;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanConstructorInfo;
@@ -127,10 +132,18 @@ class MBeanInfoBuilder
             // them on, as they will cause problems if they are not serializable (e.g., Method)
             strip(operation);
 
-            operationInfos.add(new ModelMBeanOperationInfo(description, method, operation));
+            Paranamer paranamer = new BytecodeReadingParanamer();
+            String[] names = paranamer.lookupParameterNames(method);
+            Class<?>[] types = method.getParameterTypes();
 
-            // TODO: discover param names
-            // see http://jroller.com/eu/entry/using_asm_to_read_mathod
+            MBeanParameterInfo[] params = new MBeanParameterInfo[names.length];
+
+            for (int i = 0; i < names.length; ++i) {
+                params[i] = new MBeanParameterInfo(names[i], types[i].getName(), null);
+            }
+
+            operationInfos.add(new ModelMBeanOperationInfo(method.getName(), description, params,
+                    method.getReturnType().toString(), MBeanOperationInfo.UNKNOWN));
         }
 
         return new ModelMBeanInfoSupport(clazz.getName(), null,

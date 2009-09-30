@@ -12,9 +12,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Maven: org.testng:testng:jdk15:5.6" level="project" />
     <orderEntry type="library" name="Maven: junit:junit:3.8.1" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.easymock:easymockclassextension:2.4" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.easymock:easymock:2.4" level="project" />
-    <orderEntry type="library" exported="" name="Maven: cglib:cglib-nodep:2.1_3" level="project" />
+    <orderEntry type="library" exported="" name="Maven: com.thoughtworks.paranamer:paranamer:2.1" level="project" />
   </component>
   <component name="org.twodividedbyzero.idea.findbugs">
     <option name="_basePreferences">
