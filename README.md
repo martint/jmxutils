@@ -14,7 +14,7 @@
            ...
         }
 
-        @Managed
+        @Managed(description="do the operation")
         public void operation()
         {
            ...
