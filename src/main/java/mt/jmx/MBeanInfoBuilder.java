@@ -143,7 +143,7 @@ class MBeanInfoBuilder
             }
 
             operationInfos.add(new ModelMBeanOperationInfo(method.getName(), description, params,
-                    method.getReturnType().toString(), MBeanOperationInfo.UNKNOWN));
+                    method.getReturnType().toString(), MBeanOperationInfo.UNKNOWN, operation));
         }
 
         return new ModelMBeanInfoSupport(clazz.getName(), null,
