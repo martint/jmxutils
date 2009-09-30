@@ -52,6 +52,7 @@ public class MBeanExporter
             MBeanInfoBuilder builder = new MBeanInfoBuilder();
             ModelMBeanInfo info = builder.buildInfo(object.getClass());
 
+            // Use the GetterStrippingMBeanInfo to work around http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6339571.
             RequiredModelMBean mbean = new RequiredModelMBean(new GetterStrippingMBeanInfo(info));
             mbean.setManagedResource(object, "objectReference");
 
