@@ -33,7 +33,7 @@
                     protected void configureMBeans()
                     {
                         export(ManagedObject.class).as("test:name=X");
-                        export(ManagedObject.class).annotatedWith(SomeAnnotation.class).as("test:name=X");
+                        export(ManagedObject.class).annotatedWith(SomeAnnotation.class).as("test:name=Y");
                     }
                 }, ...);
 
