@@ -19,67 +19,39 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.name.Names;
-import mt.jmx.SimpleObject;
 import mt.jmx.Child;
+import mt.jmx.SimpleObject;
+import mt.jmx.Util;
+import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import org.testng.annotations.AfterTest;
-import org.testng.Assert;
 
+import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
+import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.management.MBeanServerConnection;
-import javax.management.IntrospectionException;
-import javax.management.InstanceNotFoundException;
 import javax.management.ReflectionException;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXConnectorServer;
-import javax.management.remote.JMXConnectorServerFactory;
-import javax.management.remote.JMXServiceURL;
-import javax.management.remote.JMXConnector;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.rmi.registry.LocateRegistry;
-import java.util.Collections;
 
 public class TestMBeanModule
 {
-    private final int RMI_PORT = 3000;
-
-    private JMXConnectorServer serverConnector;
-    private JMXServiceURL url;
-    private JMXConnector clientConnector;
-    private MBeanServerConnection connection;
+    private MBeanServer server;
 
     @BeforeTest
     private void setup()
             throws IOException, MalformedObjectNameException
     {
-        LocateRegistry.createRegistry(RMI_PORT);
-        JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://:" + RMI_PORT + "/jmxrmi");
-
-        serverConnector = JMXConnectorServerFactory.newJMXConnectorServer(url, Collections.<String, Object>emptyMap(), ManagementFactory.getPlatformMBeanServer());
-        serverConnector.start();
-
-        clientConnector = JMXConnectorFactory.connect(url);
-        connection = clientConnector.getMBeanServerConnection();
+        server = ManagementFactory.getPlatformMBeanServer();
     }
-
-    @AfterTest
-    public void teardown()
-            throws IOException
-    {
-        clientConnector.close();
-        serverConnector.stop();
-    }
-
 
     @Test
     public void testBasic()
-            throws IOException, IntrospectionException, InstanceNotFoundException, ReflectionException, MalformedObjectNameException
+            throws IOException, IntrospectionException, InstanceNotFoundException, ReflectionException, MalformedObjectNameException, MBeanRegistrationException
     {
-        final String name = "test:name=object";
+        final ObjectName name = Util.getUniqueObjectName();
 
         Injector injector = Guice.createInjector(new AbstractModule()
         {
@@ -95,21 +67,22 @@ public class TestMBeanModule
                     @Override
                     protected void configureMBeans()
                     {
-                        export(SimpleObject.class).as(name);
+                        export(SimpleObject.class).as(name.getCanonicalName());
                     }
                 });
 
         injector.getInstance(MBeanServer.class);
 
-        Assert.assertNotNull(connection.getMBeanInfo(new ObjectName(name)));
+        Assert.assertNotNull(server.getMBeanInfo(name));
+        server.unregisterMBean(name);
     }
 
     @Test
     public void testMultipleModules()
-            throws IOException, IntrospectionException, InstanceNotFoundException, ReflectionException, MalformedObjectNameException
+            throws IOException, IntrospectionException, InstanceNotFoundException, ReflectionException, MalformedObjectNameException, MBeanRegistrationException
     {
-        final String name1 = "test:name=object1";
-        final String name2 = "test:name=object2";
+        final ObjectName objectName1 = Util.getUniqueObjectName();
+        final ObjectName objectName2 = Util.getUniqueObjectName();
 
         Injector injector = Guice.createInjector(new AbstractModule()
         {
@@ -126,7 +99,7 @@ public class TestMBeanModule
                     @Override
                     protected void configureMBeans()
                     {
-                        export(SimpleObject.class).as(name1);
+                        export(SimpleObject.class).as(objectName1.getCanonicalName());
                     }
                 },
                 new MBeanModule()
@@ -134,21 +107,24 @@ public class TestMBeanModule
                     @Override
                     protected void configureMBeans()
                     {
-                        export(Child.class).as(name2);
+                        export(Child.class).as(objectName2.getCanonicalName());
                     }
                 });
 
         injector.getInstance(MBeanServer.class);
 
-        Assert.assertNotNull(connection.getMBeanInfo(new ObjectName(name1)));
-        Assert.assertNotNull(connection.getMBeanInfo(new ObjectName(name2)));
+        Assert.assertNotNull(server.getMBeanInfo(objectName1));
+        Assert.assertNotNull(server.getMBeanInfo(objectName2));
+
+        server.unregisterMBean(objectName1);
+        server.unregisterMBean(objectName2);
     }
 
     @Test
     public void testAnnotation()
-            throws IntrospectionException, InstanceNotFoundException, IOException, ReflectionException, MalformedObjectNameException
+            throws IntrospectionException, InstanceNotFoundException, IOException, ReflectionException, MalformedObjectNameException, MBeanRegistrationException
     {
-        final String name1 = "test:name=object1";
+        final ObjectName objectName = Util.getUniqueObjectName();
 
         Injector injector = Guice.createInjector(new AbstractModule()
         {
@@ -164,21 +140,22 @@ public class TestMBeanModule
                     @Override
                     protected void configureMBeans()
                     {
-                        export(SimpleObject.class).annotatedWith(TestAnnotation.class).as(name1);
+                        export(SimpleObject.class).annotatedWith(TestAnnotation.class).as(objectName.getCanonicalName());
                     }
                 });
 
         injector.getInstance(MBeanServer.class);
 
-        Assert.assertNotNull(connection.getMBeanInfo(new ObjectName(name1)));
+        Assert.assertNotNull(server.getMBeanInfo(objectName));
+        server.unregisterMBean(objectName);
     }
 
     @Test
     public void testNamedAnnotations()
-            throws IOException, IntrospectionException, InstanceNotFoundException, ReflectionException, MalformedObjectNameException
+            throws IOException, IntrospectionException, InstanceNotFoundException, ReflectionException, MalformedObjectNameException, MBeanRegistrationException
     {
-        final String name1 = "test:name=object1";
-        final String name2 = "test:name=object2";
+        final ObjectName objectName1 = Util.getUniqueObjectName();
+        final ObjectName objectName2 = Util.getUniqueObjectName();
 
         Injector injector = Guice.createInjector(new AbstractModule()
         {
@@ -195,14 +172,17 @@ public class TestMBeanModule
                     @Override
                     protected void configureMBeans()
                     {
-                        export(SimpleObject.class).annotatedWith(Names.named("1")).as(name1);
-                        export(SimpleObject.class).annotatedWith(Names.named("2")).as(name2);
+                        export(SimpleObject.class).annotatedWith(Names.named("1")).as(objectName1.getCanonicalName());
+                        export(SimpleObject.class).annotatedWith(Names.named("2")).as(objectName2.getCanonicalName());
                     }
                 });
 
         injector.getInstance(MBeanServer.class);
 
-        Assert.assertNotNull(connection.getMBeanInfo(new ObjectName(name1)));
-        Assert.assertNotNull(connection.getMBeanInfo(new ObjectName(name2)));
+        Assert.assertNotNull(server.getMBeanInfo(objectName1));
+        Assert.assertNotNull(server.getMBeanInfo(objectName2));
+
+        server.unregisterMBean(objectName1);
+        server.unregisterMBean(objectName2);
     }
 }
