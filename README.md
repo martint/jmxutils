@@ -25,6 +25,18 @@
     MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
     exporter.export("test:name=X", new ManagedObject());
 
+# Guice support
+
+    Injector injector = Guice.createInjector(
+                new MBeanModule() {
+                    @Override
+                    protected void configureMBeans()
+                    {
+                        export(ManagedObject.class).as("test:name=X");
+                        export(ManagedObject.class).annotatedWith(SomeAnnotation.class).as("test:name=X");
+                    }
+                }, ...);
+
 # Known Limitations
 
 * Doesn't handle inheritance properly. I.e., if a method in a parent class is tagged with @Managed and an overriding

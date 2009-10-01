@@ -13,6 +13,10 @@
     <orderEntry type="library" name="Maven: org.testng:testng:jdk15:5.6" level="project" />
     <orderEntry type="library" name="Maven: junit:junit:3.8.1" level="project" />
     <orderEntry type="library" exported="" name="Maven: com.thoughtworks.paranamer:paranamer:2.1" level="project" />
+    <orderEntry type="library" exported="" name="Maven: com.google.inject:guice:2.0" level="project" />
+    <orderEntry type="library" exported="" name="Maven: aopalliance:aopalliance:1.0" level="project" />
+    <orderEntry type="library" exported="" name="Maven: com.google.inject.extensions:guice-servlet:2.0" level="project" />
+    <orderEntry type="library" exported="" name="Maven: com.google.inject.extensions:guice-multibindings:2.0" level="project" />
   </component>
   <component name="org.twodividedbyzero.idea.findbugs">
     <option name="_basePreferences">

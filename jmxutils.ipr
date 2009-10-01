@@ -120,6 +120,8 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/5.6/testng-5.6-jdk15.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/5.6/testng-5.6-jdk15.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/5.6/testng-5.6-jdk15.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/5.6/testng-5.6-jdk15.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/5.6/testng-5.6-jdk15.jar!/" />
       </CLASSES>
       <JAVADOC>
         <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/5.6/testng-5.6-jdk15-javadoc.jar!/" />
@@ -130,8 +132,12 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/5.6/testng-5.6-jdk15-javadoc.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/5.6/testng-5.6-jdk15-javadoc.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/5.6/testng-5.6-jdk15-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/5.6/testng-5.6-jdk15-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/5.6/testng-5.6-jdk15-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/5.6/testng-5.6-jdk15-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/5.6/testng-5.6-jdk15-sources.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/5.6/testng-5.6-jdk15-sources.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/5.6/testng-5.6-jdk15-sources.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/5.6/testng-5.6-jdk15-sources.jar!/" />
@@ -162,6 +168,50 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/com/thoughtworks/paranamer/paranamer/2.1/paranamer-2.1-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: com.google.inject:guice:2.0">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/inject/guice/2.0/guice-2.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/inject/guice/2.0/guice-2.0-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/inject/guice/2.0/guice-2.0-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: aopalliance:aopalliance:1.0">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/aopalliance/aopalliance/1.0/aopalliance-1.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/aopalliance/aopalliance/1.0/aopalliance-1.0-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/aopalliance/aopalliance/1.0/aopalliance-1.0-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: com.google.inject.extensions:guice-servlet:2.0">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/inject/extensions/guice-servlet/2.0/guice-servlet-2.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/inject/extensions/guice-servlet/2.0/guice-servlet-2.0-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/inject/extensions/guice-servlet/2.0/guice-servlet-2.0-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: com.google.inject.extensions:guice-multibindings:2.0">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/inject/extensions/guice-multibindings/2.0/guice-multibindings-2.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/inject/extensions/guice-multibindings/2.0/guice-multibindings-2.0-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/inject/extensions/guice-multibindings/2.0/guice-multibindings-2.0-sources.jar!/" />
       </SOURCES>
     </library>
   </component>
