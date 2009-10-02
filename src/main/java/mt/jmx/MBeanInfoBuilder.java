@@ -52,14 +52,12 @@ class MBeanInfoBuilder
         Map<String, DescriptorSupport> attributes = new HashMap<String, DescriptorSupport>();
         List<DescriptorSupport> operations = new ArrayList<DescriptorSupport>();
 
-        // TODO: build DAG of methods (who overrides whom) to handle inheritance properly. The most specific method for
-        // any method tagged with @Managed needs to be picked when building the MBeanAttribute/OperationInfo objects.
-        for (Method method : clazz.getMethods()) {
-            Managed annotation = method.getAnnotation(Managed.class);
+        AnnotationFinder resolver = new AnnotationFinder();
 
-            if (annotation == null) {
-                continue;
-            }
+        Map<Method, Managed> methods = resolver.findAnnotatedMethods(clazz);
+        for (Map.Entry<Method, Managed> entry : methods.entrySet()) {
+            Method method = entry.getKey();
+            Managed annotation = entry.getValue();
 
             DescriptorSupport operationDescriptor = new DescriptorSupport();
             operationDescriptor.setField("name", method.getName());

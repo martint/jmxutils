@@ -37,11 +37,6 @@
                     }
                 }, ...);
 
-# Known Limitations
-
-* Doesn't handle inheritance properly. I.e., if a method in a parent class is tagged with @Managed and an overriding
-  method in the child class is not, the operation or attribute will not be exported.
-
 # License
 
 Licensed under the Apache License, Version 2.0 (the "License")

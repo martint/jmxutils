@@ -194,35 +194,6 @@ public class TestExporter
 
         };
     }
-
-
-//    @Test
-    public void testInheritance()
-            throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException
-    {
-        Child child = new Child();
-        ObjectName name = new ObjectName("test:name=child");
-
-        MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
-        exporter.export(name.getCanonicalName(), child);
-
-        child.setValue(1);
-        Assert.assertEquals(server.getAttribute(name, "Value"), 1);
-
-        child.setValue2(2);
-        Assert.assertEquals(server.getAttribute(name, "Value2"), 2);
-
-        child.setValue3(3);
-        Assert.assertEquals(server.getAttribute(name, "Value3"), 3);
-
-        child.setCovariant(4);
-        Assert.assertEquals(server.getAttribute(name, "Covariant"), 4);
-
-        // @Manage on parent class, no annotation on method in child class
-        child.setCovariant(5);
-        Assert.assertEquals(server.getAttribute(name, "Covariant1"), 5);
-
-    }
 }
 
 

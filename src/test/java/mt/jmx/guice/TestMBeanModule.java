@@ -19,7 +19,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.name.Names;
-import mt.jmx.Child;
+import com.google.inject.name.Named;
 import mt.jmx.SimpleObject;
 import mt.jmx.Util;
 import org.testng.Assert;
@@ -89,8 +89,8 @@ public class TestMBeanModule
             @Override
             protected void configure()
             {
-                bind(SimpleObject.class).asEagerSingleton();
-                bind(Child.class).asEagerSingleton();
+                bind(SimpleObject.class).annotatedWith(Names.named("1")).toInstance(new SimpleObject());
+                bind(SimpleObject.class).annotatedWith(Names.named("2")).toInstance(new SimpleObject());
                 bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
             }
         },
@@ -99,7 +99,7 @@ public class TestMBeanModule
                     @Override
                     protected void configureMBeans()
                     {
-                        export(SimpleObject.class).as(objectName1.getCanonicalName());
+                        export(SimpleObject.class).annotatedWith(Names.named("1")).as(objectName1.getCanonicalName());
                     }
                 },
                 new MBeanModule()
@@ -107,7 +107,7 @@ public class TestMBeanModule
                     @Override
                     protected void configureMBeans()
                     {
-                        export(Child.class).as(objectName2.getCanonicalName());
+                        export(SimpleObject.class).annotatedWith(Names.named("2")).as(objectName2.getCanonicalName());
                     }
                 });
 
