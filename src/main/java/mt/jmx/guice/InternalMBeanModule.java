@@ -33,7 +33,6 @@ final class InternalMBeanModule
     @Override
     public boolean equals(Object o)
     {
-        // Is only ever installed internally, so we don't need to check state.
         return o instanceof InternalMBeanModule;
     }
 
