@@ -15,7 +15,6 @@
     <orderEntry type="library" exported="" name="Maven: com.thoughtworks.paranamer:paranamer:2.1" level="project" />
     <orderEntry type="library" exported="" name="Maven: com.google.inject:guice:2.0" level="project" />
     <orderEntry type="library" exported="" name="Maven: aopalliance:aopalliance:1.0" level="project" />
-    <orderEntry type="library" exported="" name="Maven: com.google.inject.extensions:guice-servlet:2.0" level="project" />
     <orderEntry type="library" exported="" name="Maven: com.google.inject.extensions:guice-multibindings:2.0" level="project" />
   </component>
   <component name="org.twodividedbyzero.idea.findbugs">
