@@ -4,7 +4,7 @@
     <groupId>mt.jmx</groupId>
     <artifactId>jmxutils</artifactId>
     <packaging>jar</packaging>
-    <version>1.2</version>
+    <version>1.2.1</version>
     <name>jmxutils</name>
     <url>http://github.com/martint/jmxutils</url>
 
@@ -21,6 +21,7 @@
             <groupId>com.thoughtworks.paranamer</groupId>
             <artifactId>paranamer</artifactId>
             <version>2.1</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
