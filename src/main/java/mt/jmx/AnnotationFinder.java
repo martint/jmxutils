@@ -42,15 +42,14 @@ class AnnotationFinder
 
     private Managed findAnnotation(Class<?> clazz, String methodName, Class<?>[] paramTypes)
     {
+        Managed annotation = null;
         Method method;
         try {
             method = clazz.getDeclaredMethod(methodName, paramTypes);
+            annotation = method.getAnnotation(Managed.class);
         }
         catch (NoSuchMethodException e) {
-            return null;
         }
-
-        Managed annotation = method.getAnnotation(Managed.class);
 
         if (annotation == null && clazz.getSuperclass() != null) {
             annotation = findAnnotation(clazz.getSuperclass(), methodName, paramTypes);
