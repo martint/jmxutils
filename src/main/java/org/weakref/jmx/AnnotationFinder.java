@@ -26,11 +26,13 @@ class AnnotationFinder
         Map<Method, Managed> result = new HashMap<Method, Managed>();
 
         // gather all publicly available methods
+        // this returns everything, even if it's declared in a parent
         for (Method method : clazz.getMethods()) {
             if (method.isSynthetic() || method.isBridge()) {
                 continue;
             }
 
+            // look for annotations recursively in superclasses or interfaces
             Managed annotation = findAnnotation(clazz, method.getName(), method.getParameterTypes());
             if (annotation != null) {
                 result.put(method, annotation);
