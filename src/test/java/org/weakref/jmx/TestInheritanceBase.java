@@ -23,8 +23,8 @@ import java.util.Map;
 
 public abstract class TestInheritanceBase
 {
-    private final Class target;
-    private final Class source;
+    protected final Class target;
+    protected final Class source;
 
     /**
      * @param target class to resolve
