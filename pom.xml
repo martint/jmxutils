@@ -125,7 +125,7 @@
         <snapshotRepository>
             <id>sonatype-snapshots</id>
             <name>Sonatype Snapshots Repository</name>
-            <url>http://oss.sonatype.org/content/repositories/github/</url>
+            <url>http://oss.sonatype.org/content/repositories/github-snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
