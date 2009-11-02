@@ -41,7 +41,6 @@ public class MBeanExporter
             RequiredModelMBean mbean = new RequiredModelMBean(new GetterStrippingMBeanInfo(info));
             mbean.setManagedResource(object, "objectReference");
 
-            // register the model MBean in the MBean server
             server.registerMBean(mbean, objectName);
         }
         catch (Exception e) {
