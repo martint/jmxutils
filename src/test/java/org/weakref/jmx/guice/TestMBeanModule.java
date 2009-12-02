@@ -15,9 +15,12 @@
  */
 package org.weakref.jmx.guice;
 
+import static com.google.inject.Stage.PRODUCTION;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.google.inject.name.Names;
 import org.weakref.jmx.SimpleObject;
 import org.weakref.jmx.Util;
@@ -37,20 +40,11 @@ import java.lang.management.ManagementFactory;
 
 public class TestMBeanModule
 {
-    private MBeanServer server;
-
-    @BeforeTest
-    private void setup()
-            throws IOException, MalformedObjectNameException
+    @Test(expectedExceptions = InstanceNotFoundException.class)
+    public void testNothingExportedInDevelopmentStage() 
+    	throws IntrospectionException, InstanceNotFoundException, ReflectionException 
     {
-        server = ManagementFactory.getPlatformMBeanServer();
-    }
-
-    @Test
-    public void testBasic()
-            throws IOException, IntrospectionException, InstanceNotFoundException, ReflectionException, MalformedObjectNameException, MBeanRegistrationException
-    {
-        final ObjectName name = Util.getUniqueObjectName();
+    	final ObjectName name = Util.getUniqueObjectName();
 
         Injector injector = Guice.createInjector(new AbstractModule()
         {
@@ -69,8 +63,36 @@ public class TestMBeanModule
                         export(SimpleObject.class).as(name.getCanonicalName());
                     }
                 });
+        
+        MBeanServer server = injector.getInstance(MBeanServer.class);
+        Assert.assertNotNull(server.getMBeanInfo(name));
+    }
 
-        injector.getInstance(MBeanServer.class);
+    @Test
+    public void testBasic()
+            throws IOException, IntrospectionException, InstanceNotFoundException, ReflectionException, MalformedObjectNameException, MBeanRegistrationException
+    {
+        final ObjectName name = Util.getUniqueObjectName();
+
+        Injector injector = Guice.createInjector(PRODUCTION, new AbstractModule()
+        {
+            @Override
+            protected void configure()
+            {
+                bind(SimpleObject.class).asEagerSingleton();
+                bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
+            }
+        },
+                new MBeanModule()
+                {
+                    @Override
+                    protected void configureMBeans()
+                    {
+                        export(SimpleObject.class).as(name.getCanonicalName());
+                    }
+                });
+
+        MBeanServer server = injector.getInstance(MBeanServer.class);
 
         Assert.assertNotNull(server.getMBeanInfo(name));
         server.unregisterMBean(name);
@@ -83,7 +105,7 @@ public class TestMBeanModule
         final ObjectName objectName1 = Util.getUniqueObjectName();
         final ObjectName objectName2 = Util.getUniqueObjectName();
 
-        Injector injector = Guice.createInjector(new AbstractModule()
+        Injector injector = Guice.createInjector(PRODUCTION, new AbstractModule()
         {
             @Override
             protected void configure()
@@ -110,7 +132,7 @@ public class TestMBeanModule
                     }
                 });
 
-        injector.getInstance(MBeanServer.class);
+        MBeanServer server = injector.getInstance(MBeanServer.class);
 
         Assert.assertNotNull(server.getMBeanInfo(objectName1));
         Assert.assertNotNull(server.getMBeanInfo(objectName2));
@@ -125,7 +147,7 @@ public class TestMBeanModule
     {
         final ObjectName objectName = Util.getUniqueObjectName();
 
-        Injector injector = Guice.createInjector(new AbstractModule()
+        Injector injector = Guice.createInjector(PRODUCTION, new AbstractModule()
         {
             @Override
             protected void configure()
@@ -143,7 +165,7 @@ public class TestMBeanModule
                     }
                 });
 
-        injector.getInstance(MBeanServer.class);
+        MBeanServer server = injector.getInstance(MBeanServer.class);
 
         Assert.assertNotNull(server.getMBeanInfo(objectName));
         server.unregisterMBean(objectName);
@@ -156,7 +178,7 @@ public class TestMBeanModule
         final ObjectName objectName1 = Util.getUniqueObjectName();
         final ObjectName objectName2 = Util.getUniqueObjectName();
 
-        Injector injector = Guice.createInjector(new AbstractModule()
+        Injector injector = Guice.createInjector(PRODUCTION, new AbstractModule()
         {
             @Override
             protected void configure()
@@ -176,7 +198,7 @@ public class TestMBeanModule
                     }
                 });
 
-        injector.getInstance(MBeanServer.class);
+        MBeanServer server = injector.getInstance(MBeanServer.class);
 
         Assert.assertNotNull(server.getMBeanInfo(objectName1));
         Assert.assertNotNull(server.getMBeanInfo(objectName2));
