@@ -45,7 +45,7 @@
                 * in this case.
                 */
                ExportBuilder builder = MBeanModule.newExporter();
-               builder.export(AnotherManagedObject.class).as("test:name="X");
+               builder.export(AnotherManagedObject.class).as("test:name="Z");
             }
         }, ...);
 
