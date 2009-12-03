@@ -1,3 +1,6 @@
 /target
 /*.iws
 /test-output
+.classpath
+.project
+.settings

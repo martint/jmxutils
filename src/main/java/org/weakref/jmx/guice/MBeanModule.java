@@ -15,18 +15,20 @@
  */
 package org.weakref.jmx.guice;
 
+import static com.google.inject.multibindings.Multibinder.newSetBinder;
+
 import com.google.inject.AbstractModule;
-import com.google.inject.multibindings.Multibinder;
+import com.google.inject.Binder;
 
 public abstract class MBeanModule
         extends AbstractModule
 {
-    private Multibinder<Mapping> binder;
+    private ExportBuilder builder;
 
     @Override
     protected final void configure()
     {
-        binder = Multibinder.newSetBinder(binder(), Mapping.class);
+        builder = newExporter(binder());
 
         install(new InternalMBeanModule());
         configureMBeans();
@@ -36,7 +38,12 @@ public abstract class MBeanModule
 
     protected AnnotatedExportBuilder export(Class<?> clazz)
     {
-        return new AnnotatedExportBuilder(binder, clazz);
+        return builder.export(clazz);
+    }
+    
+    public static ExportBuilder newExporter(Binder binder) 
+    {
+    	return new ExportBuilder(newSetBinder(binder, Mapping.class));
     }
 
 }

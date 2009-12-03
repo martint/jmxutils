@@ -28,14 +28,26 @@
 # Guice support
 
     Injector injector = Guice.createInjector(
-                new MBeanModule() {
-                    @Override
-                    protected void configureMBeans()
-                    {
-                        export(ManagedObject.class).as("test:name=X");
-                        export(ManagedObject.class).annotatedWith(SomeAnnotation.class).as("test:name=Y");
-                    }
-                }, ...);
+        new MBeanModule() {
+            @Override
+            protected void configureMBeans()
+            {
+                export(ManagedObject.class).as("test:name=X");
+                export(ManagedObject.class).annotatedWith(SomeAnnotation.class).as("test:name=Y");
+            }
+        }, new AbstractModule() {
+	    @Override
+   	    protected void configure() {	
+                /* 
+		 * You don't want to install() a MBeanModule in another module
+		 * because you'll get binding errors; MBeanModule requires you 
+		 * to bind a MBeanServer outside of it. Use the ExportBuilder
+		 * in this case.
+		 */
+                ExportBuilder builder = MBeanModule.newExporter();
+		builder.export(AnotherManagedObject.class).as("test:name="X");
+	    }
+        }, ...);
 
 # License
 

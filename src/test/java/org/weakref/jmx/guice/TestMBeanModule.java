@@ -20,7 +20,10 @@ import static com.google.inject.Stage.PRODUCTION;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.Stage;
+import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import org.weakref.jmx.SimpleObject;
 import org.weakref.jmx.Util;
@@ -197,6 +200,44 @@ public class TestMBeanModule
                         export(SimpleObject.class).annotatedWith(Names.named("2")).as(objectName2.getCanonicalName());
                     }
                 });
+
+        MBeanServer server = injector.getInstance(MBeanServer.class);
+
+        Assert.assertNotNull(server.getMBeanInfo(objectName1));
+        Assert.assertNotNull(server.getMBeanInfo(objectName2));
+
+        server.unregisterMBean(objectName1);
+        server.unregisterMBean(objectName2);
+    }
+    
+    @Test
+    public void testExportBuilder() 
+    	throws IntrospectionException, InstanceNotFoundException, ReflectionException, MBeanRegistrationException
+    {
+    	final ObjectName objectName1 = Util.getUniqueObjectName();
+        final ObjectName objectName2 = Util.getUniqueObjectName();
+
+        Injector injector = Guice.createInjector(PRODUCTION, new MBeanModule() {
+			@Override
+			protected void configureMBeans() {
+				
+			}}, new AbstractModule()
+        {
+			@Override
+			protected void configure() {
+                bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
+                bind(SimpleObject.class).annotatedWith(Names.named("1")).toInstance(new SimpleObject());
+                bind(SimpleObject.class).annotatedWith(Names.named("2")).toInstance(new SimpleObject());
+
+                ExportBuilder exporter = MBeanModule.newExporter(binder());
+				exporter.export(SimpleObject.class)
+					.annotatedWith(Names.named("1"))
+					.as(objectName1.getCanonicalName());
+				exporter.export(SimpleObject.class)
+					.annotatedWith(Names.named("2"))
+					.as(objectName2.getCanonicalName());
+			}
+        });
 
         MBeanServer server = injector.getInstance(MBeanServer.class);
 
