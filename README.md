@@ -42,7 +42,7 @@
                 export(ManagedObject.class).as("test:name=X");
                 export(ManagedObject.class).annotatedWith(SomeAnnotation.class).as("test:name=Y");
             }
-        }); 
+        }, ...); 
 
 
     Injector injector = Guice.createInjector(
@@ -50,6 +50,9 @@
 	    new AbstractModule() {
                 @Override
                 protected void configure() {
+                   // MBeanModule expects an MBeanServer to be bound
+                   binder().bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
+
                    ExportBuilder builder = MBeanModule.newExporter(binder());
                    builder.export(AnotherManagedObject.class).as("test:name="Z");
                 }
