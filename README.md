@@ -50,7 +50,7 @@
 	    new AbstractModule() {
                 @Override
                 protected void configure() {
-                   ExportBuilder builder = MBeanModule.newExporter();
+                   ExportBuilder builder = MBeanModule.newExporter(binder());
                    builder.export(AnotherManagedObject.class).as("test:name="Z");
                 }
         }, ...);
