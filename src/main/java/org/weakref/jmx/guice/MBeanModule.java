@@ -20,7 +20,7 @@ import static com.google.inject.multibindings.Multibinder.newSetBinder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 
-public abstract class MBeanModule
+public class MBeanModule
         extends AbstractModule
 {
     private ExportBuilder builder;
@@ -34,7 +34,28 @@ public abstract class MBeanModule
         configureMBeans();
     }
 
-    protected abstract void configureMBeans();
+    /**
+     * To be overridden by subclasses. E.g.,
+     *
+     * protected void configureMBeans() {
+     *    export(ManagedObject.class).as("test:name=X");
+     *    export(ManagedObject.class).annotatedWith(SomeAnnotation.class).as("test:name=Y");
+     * }
+     *
+     * When ExportBuilder is used, a raw MBeanModule can be imported to trigger the
+     * registration of exported mbeans:
+     *
+     * Injector injector = Guice.createInjector(new MBeanModule(),
+     *      new AbstractModule() {
+     *          @Override
+     *          protected void configure() {
+     *              ExportBuilder builder = MBeanModule.newExporter();
+     *              builder.export(AnotherManagedObject.class).as("test:name="Z");
+     *          }
+     *      });
+     */
+    protected void configureMBeans() {
+    }
 
     protected AnnotatedExportBuilder export(Class<?> clazz)
     {

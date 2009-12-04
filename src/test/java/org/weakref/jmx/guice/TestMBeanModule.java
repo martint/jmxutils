@@ -217,11 +217,7 @@ public class TestMBeanModule
     	final ObjectName objectName1 = Util.getUniqueObjectName();
         final ObjectName objectName2 = Util.getUniqueObjectName();
 
-        Injector injector = Guice.createInjector(PRODUCTION, new MBeanModule() {
-			@Override
-			protected void configureMBeans() {
-				
-			}}, new AbstractModule()
+        Injector injector = Guice.createInjector(PRODUCTION, new MBeanModule(), new AbstractModule()
         {
 			@Override
 			protected void configure() {
