@@ -15,10 +15,14 @@
  */
 package org.weakref.jmx.guice;
 
+import static org.weakref.jmx.ObjectNames.singletonNameOf;
+
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.Key;
 
 import java.lang.annotation.Annotation;
+
+import org.weakref.jmx.ObjectNames;
 
 public class NamedBindingBuilder
 {
@@ -49,6 +53,13 @@ public class NamedBindingBuilder
         this.clazz = clazz;
         this.annotation = null;
         this.annotationClass = annotationClass;
+    }
+    
+    /**
+     * Names the MBean according to {@link ObjectNames#singletonNameOf(Class)}.
+     */
+    public void asStandardSingletonName() {
+        as(singletonNameOf(clazz));
     }
 
     public void as(String name)

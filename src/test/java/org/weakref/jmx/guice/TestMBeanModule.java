@@ -16,6 +16,7 @@
 package org.weakref.jmx.guice;
 
 import static com.google.inject.Stage.PRODUCTION;
+import static org.weakref.jmx.ObjectNames.singletonNameOf;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -25,6 +26,8 @@ import com.google.inject.Stage;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
+
+import org.weakref.jmx.ObjectNames;
 import org.weakref.jmx.SimpleObject;
 import org.weakref.jmx.Util;
 import org.testng.Assert;
@@ -101,6 +104,37 @@ public class TestMBeanModule
         server.unregisterMBean(name);
     }
 
+    @Test
+    public void testStandardizedNaming()
+            throws IOException, IntrospectionException, InstanceNotFoundException, ReflectionException, MalformedObjectNameException, MBeanRegistrationException
+    {
+        final ObjectName name = new ObjectName(singletonNameOf(SimpleObject.class));
+
+        Injector injector = Guice.createInjector(PRODUCTION, new AbstractModule()
+        {
+            @Override
+            protected void configure()
+            {
+                bind(SimpleObject.class).asEagerSingleton();
+                bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
+            }
+        },
+                new MBeanModule()
+                {
+                    @Override
+                    protected void configureMBeans()
+                    {
+                        export(SimpleObject.class).asStandardSingletonName();
+                    }
+                });
+
+        MBeanServer server = injector.getInstance(MBeanServer.class);
+
+        Assert.assertNotNull(server.getMBeanInfo(name));
+        server.unregisterMBean(name);
+    }
+
+    
     @Test
     public void testMultipleModules()
             throws IOException, IntrospectionException, InstanceNotFoundException, ReflectionException, MalformedObjectNameException, MBeanRegistrationException
