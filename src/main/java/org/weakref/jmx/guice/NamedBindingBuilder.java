@@ -15,14 +15,14 @@
  */
 package org.weakref.jmx.guice;
 
-import static org.weakref.jmx.ObjectNames.singletonNameOf;
-
-import com.google.inject.multibindings.Multibinder;
-import com.google.inject.Key;
+import static org.weakref.jmx.ObjectNames.generatedNameOf;
 
 import java.lang.annotation.Annotation;
 
 import org.weakref.jmx.ObjectNames;
+
+import com.google.inject.Key;
+import com.google.inject.multibindings.Multibinder;
 
 public class NamedBindingBuilder
 {
@@ -56,10 +56,22 @@ public class NamedBindingBuilder
     }
     
     /**
-     * Names the MBean according to {@link ObjectNames#singletonNameOf(Class)}.
+     * Names the MBean according to {@link ObjectNames} name generator methods.
      */
-    public void asStandardSingletonName() {
-        as(singletonNameOf(clazz));
+    public void withGeneratedName() 
+    {
+        String name;
+        if (annotation != null) {
+            name = generatedNameOf(clazz, annotation);
+        }
+        else if (annotationClass != null) {
+            name = generatedNameOf(clazz, annotationClass);
+        }
+        else {
+            name = generatedNameOf(clazz);
+        }
+
+        as(name);
     }
 
     public void as(String name)

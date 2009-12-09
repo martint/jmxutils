@@ -16,23 +16,10 @@
 package org.weakref.jmx.guice;
 
 import static com.google.inject.Stage.PRODUCTION;
-import static org.weakref.jmx.ObjectNames.singletonNameOf;
+import static org.weakref.jmx.ObjectNames.generatedNameOf;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Stage;
-import com.google.inject.binder.LinkedBindingBuilder;
-import com.google.inject.multibindings.Multibinder;
-import com.google.inject.name.Names;
-
-import org.weakref.jmx.ObjectNames;
-import org.weakref.jmx.SimpleObject;
-import org.weakref.jmx.Util;
-import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
@@ -41,8 +28,16 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
+
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import org.weakref.jmx.SimpleObject;
+import org.weakref.jmx.Util;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.name.Names;
 
 public class TestMBeanModule
 {
@@ -105,10 +100,10 @@ public class TestMBeanModule
     }
 
     @Test
-    public void testStandardizedNaming()
+    public void testGeneratedNames()
             throws IOException, IntrospectionException, InstanceNotFoundException, ReflectionException, MalformedObjectNameException, MBeanRegistrationException
     {
-        final ObjectName name = new ObjectName(singletonNameOf(SimpleObject.class));
+        final ObjectName name = new ObjectName(generatedNameOf(SimpleObject.class));
 
         Injector injector = Guice.createInjector(PRODUCTION, new AbstractModule()
         {
@@ -124,7 +119,7 @@ public class TestMBeanModule
                     @Override
                     protected void configureMBeans()
                     {
-                        export(SimpleObject.class).asStandardSingletonName();
+                        export(SimpleObject.class).withGeneratedName();
                     }
                 });
 
