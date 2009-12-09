@@ -55,6 +55,10 @@
 
                    ExportBuilder builder = MBeanModule.newExporter(binder());
                    builder.export(AnotherManagedObject.class).as("test:name="Z");
+                   
+                   // You can use a standardized naming scheme for singletons if you wish.
+                   // See ObjectNames.singletonNameOf(Class<?>) for the naming scheme.
+                   builder.export(ManagedSingleton.class).asStandardSingletonName();
                 }
         }, ...);
 
