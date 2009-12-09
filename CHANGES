@@ -1,0 +1,3 @@
+# Version 1.4
+
+- Automatic name generation for mbeans with withGeneratedName()
