@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
 
 class MBeanInfoBuilder
 {
-    private final static Pattern getterOrSetterPattern = Pattern.compile("(get|set|is)(.)(.*)");
+    private final static Pattern getterOrSetterPattern = Pattern.compile("(get|set|is)(.+)");
 
     private final static String DESCRIPTION = "org.weakref.jmx.descriptor.description";
     private final static String METHOD_INSTANCE = "org.weakref.jmx.descriptor.methodInstance";
@@ -71,10 +71,7 @@ class MBeanInfoBuilder
             Matcher matcher = getterOrSetterPattern.matcher(method.getName());
             if (matcher.matches()) {
                 String type = matcher.group(1);
-                String first = matcher.group(2);
-                String rest = matcher.group(3);
-
-                String attributeName = first + (rest != null ? rest : "");
+                String attributeName = matcher.group(2);
 
                 DescriptorSupport descriptor = attributes.get(attributeName);
                 if (descriptor == null) {
