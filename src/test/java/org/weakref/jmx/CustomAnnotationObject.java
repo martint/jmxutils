@@ -296,7 +296,6 @@ public class CustomAnnotationObject extends SimpleObject {
   @Override
   @Managed1(description = "epic description")
   public int getDescribedInt() {
-    // TODO Auto-generated method stub
     return super.getDescribedInt();
   }
 
