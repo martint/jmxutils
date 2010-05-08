@@ -267,4 +267,9 @@ public class SimpleObject
     {
         this.readOnly = readOnly;
     }
+    
+    @Managed(description = "epic description")
+    public int getDescribedInt() {
+      return 1;
+    }
 }

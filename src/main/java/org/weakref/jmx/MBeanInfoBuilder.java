@@ -15,8 +15,14 @@
  */
 package org.weakref.jmx;
 
-import com.thoughtworks.paranamer.BytecodeReadingParanamer;
-import com.thoughtworks.paranamer.Paranamer;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.management.Descriptor;
 import javax.management.IntrospectionException;
@@ -29,13 +35,9 @@ import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.ModelMBeanInfoSupport;
 import javax.management.modelmbean.ModelMBeanNotificationInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import com.thoughtworks.paranamer.BytecodeReadingParanamer;
+import com.thoughtworks.paranamer.Paranamer;
 
 class MBeanInfoBuilder
 {
@@ -54,16 +56,23 @@ class MBeanInfoBuilder
 
         AnnotationFinder resolver = new AnnotationFinder();
 
-        Map<Method, Managed> methods = resolver.findAnnotatedMethods(clazz);
-        for (Map.Entry<Method, Managed> entry : methods.entrySet()) {
+        Map<Method, Annotation> methods = resolver.findAnnotatedMethods(clazz);
+        for (Map.Entry<Method, Annotation> entry : methods.entrySet()) {
             Method method = entry.getKey();
-            Managed annotation = entry.getValue();
+            Annotation annotation = entry.getValue();
 
             DescriptorSupport operationDescriptor = new DescriptorSupport();
             operationDescriptor.setField("name", method.getName());
             operationDescriptor.setField("class", clazz.getName());
             operationDescriptor.setField("descriptorType", "operation");
-            operationDescriptor.setField(DESCRIPTION, annotation.description());
+            String description = "";
+            try {
+              Method descriptionMethod = annotation.annotationType().getMethod("description");
+              description = descriptionMethod.invoke(annotation).toString();
+              operationDescriptor.setField(DESCRIPTION, description);
+            } catch (Throwable t) {
+              // eat it
+            }
             operationDescriptor.setField(METHOD_INSTANCE, method);
 
             operations.add(operationDescriptor);
@@ -78,7 +87,7 @@ class MBeanInfoBuilder
                     descriptor = new DescriptorSupport();
                     descriptor.setField("name", attributeName);
                     descriptor.setField("descriptorType", "attribute");
-                    descriptor.setField(DESCRIPTION, annotation.description());
+                    descriptor.setField(DESCRIPTION, description);
 
                     attributes.put(attributeName, descriptor);
                 }

@@ -22,6 +22,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD})
+@ManagedAnnotation
 public @interface Managed
 {
 	String description() default "";

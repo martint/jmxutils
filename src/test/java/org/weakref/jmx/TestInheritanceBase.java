@@ -15,11 +15,12 @@
  */
 package org.weakref.jmx;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
+
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 public abstract class TestInheritanceBase
 {
@@ -55,8 +56,8 @@ public abstract class TestInheritanceBase
     public void testResolver() throws NoSuchMethodException
     {
         AnnotationFinder resolver = new AnnotationFinder();
-        Map<Method, Managed> map = resolver.findAnnotatedMethods(getTargetClass());
-        Managed annotation = map.get(getTargetMethod());
+        Map<Method, Annotation> map = resolver.findAnnotatedMethods(getTargetClass());
+        Annotation annotation = map.get(getTargetMethod());
         Assert.assertEquals(annotation, expected());
     }
 }

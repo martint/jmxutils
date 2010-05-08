@@ -15,15 +15,16 @@
  */
 package org.weakref.jmx;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 class AnnotationFinder
 {
-    public Map<Method, Managed> findAnnotatedMethods(Class<?> clazz)
+    public Map<Method, Annotation> findAnnotatedMethods(Class<?> clazz)
     {
-        Map<Method, Managed> result = new HashMap<Method, Managed>();
+        Map<Method, Annotation> result = new HashMap<Method, Annotation>();
 
         // gather all publicly available methods
         // this returns everything, even if it's declared in a parent
@@ -33,7 +34,7 @@ class AnnotationFinder
             }
 
             // look for annotations recursively in superclasses or interfaces
-            Managed annotation = findAnnotation(clazz, method.getName(), method.getParameterTypes());
+            Annotation annotation = findAnnotation(clazz, method.getName(), method.getParameterTypes());
             if (annotation != null) {
                 result.put(method, annotation);
             }
@@ -42,13 +43,18 @@ class AnnotationFinder
         return result;
     }
 
-    private Managed findAnnotation(Class<?> clazz, String methodName, Class<?>[] paramTypes)
+    private Annotation findAnnotation(Class<?> clazz, String methodName, Class<?>[] paramTypes)
     {
-        Managed annotation = null;
+        Annotation annotation = null;
         Method method;
         try {
             method = clazz.getDeclaredMethod(methodName, paramTypes);
-            annotation = method.getAnnotation(Managed.class);
+            for (Annotation candidate : method.getAnnotations()) {
+              if (candidate.annotationType().isAnnotationPresent(ManagedAnnotation.class)) {
+                annotation = candidate;
+                break;
+              }
+            }
         }
         catch (NoSuchMethodException e) {
         }
