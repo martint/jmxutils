@@ -186,18 +186,18 @@ public class TestExporter
     @Test
     public void testDescription() throws IntrospectionException, InstanceNotFoundException, ReflectionException
     {
-      for (Pair<ObjectName, SimpleObject> pair : objects) {
-        boolean described = false;
-        for (MBeanAttributeInfo info : server.getMBeanInfo(pair.left).getAttributes()) {
-          if (info.getName().equals("DescribedInt")) {
-            Assert.assertEquals("epic description", info.getDescription());
-            described = true;
-          } else {
-            Assert.assertEquals("", info.getDescription());
-          }
+        for (Pair<ObjectName, SimpleObject> pair : objects) {
+            boolean described = false;
+            for (MBeanAttributeInfo info : server.getMBeanInfo(pair.left).getAttributes()) {
+                if (info.getName().equals("DescribedInt")) {
+                    Assert.assertEquals("epic description", info.getDescription());
+                    described = true;
+                } else {
+                    Assert.assertEquals("", info.getDescription());
+                }
+            }
+            Assert.assertTrue(described);
         }
-        Assert.assertTrue(described);
-      }
     }
 
     @Test(dataProvider = "fixtures")
