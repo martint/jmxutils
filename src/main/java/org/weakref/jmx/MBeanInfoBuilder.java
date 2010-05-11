@@ -16,6 +16,7 @@
 package org.weakref.jmx;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,11 +68,18 @@ class MBeanInfoBuilder
             operationDescriptor.setField("descriptorType", "operation");
             String description = "";
             try {
-              Method descriptionMethod = annotation.annotationType().getMethod("description");
-              description = descriptionMethod.invoke(annotation).toString();
-              operationDescriptor.setField(DESCRIPTION, description);
-            } catch (Throwable t) {
-              // eat it
+                Method descriptionMethod = annotation.annotationType().getMethod("description");
+                description = descriptionMethod.invoke(annotation).toString();
+                operationDescriptor.setField(DESCRIPTION, description);
+            }
+            catch (InvocationTargetException e) {
+                // ignore
+            }
+            catch (NoSuchMethodException e) {
+                // ignore
+            }
+            catch (IllegalAccessException e) {
+                // ignore
             }
             operationDescriptor.setField(METHOD_INSTANCE, method);
 
@@ -120,10 +128,10 @@ class MBeanInfoBuilder
             strip(attribute);
 
             attributeInfos.add(new ModelMBeanAttributeInfo(attribute.getFieldValue("name").toString(),
-                    description,
-                    getter,
-                    setter,
-                    attribute));
+                                                           description,
+                                                           getter,
+                                                           setter,
+                                                           attribute));
         }
 
         List<ModelMBeanOperationInfo> operationInfos = new ArrayList<ModelMBeanOperationInfo>();
@@ -147,14 +155,15 @@ class MBeanInfoBuilder
             }
 
             operationInfos.add(new ModelMBeanOperationInfo(method.getName(), description, params,
-                    method.getReturnType().toString(), MBeanOperationInfo.UNKNOWN, operation));
+                                                           method.getReturnType().toString(),
+                                                           MBeanOperationInfo.UNKNOWN, operation));
         }
 
         return new ModelMBeanInfoSupport(clazz.getName(), null,
-                attributeInfos.toArray(new ModelMBeanAttributeInfo[0]),
-                new ModelMBeanConstructorInfo[0],
-                operationInfos.toArray(new ModelMBeanOperationInfo[0]),
-                new ModelMBeanNotificationInfo[0]);
+                                         attributeInfos.toArray(new ModelMBeanAttributeInfo[0]),
+                                         new ModelMBeanConstructorInfo[0],
+                                         operationInfos.toArray(new ModelMBeanOperationInfo[0]),
+                                         new ModelMBeanNotificationInfo[0]);
     }
 
     private void strip(Descriptor descriptor)

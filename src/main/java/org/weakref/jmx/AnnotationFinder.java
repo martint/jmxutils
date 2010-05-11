@@ -50,13 +50,14 @@ class AnnotationFinder
         try {
             method = clazz.getDeclaredMethod(methodName, paramTypes);
             for (Annotation candidate : method.getAnnotations()) {
-              if (candidate.annotationType().isAnnotationPresent(ManagedAnnotation.class)) {
-                annotation = candidate;
-                break;
-              }
+                if (candidate.annotationType().isAnnotationPresent(ManagedAnnotation.class)) {
+                    annotation = candidate;
+                    break;
+                }
             }
         }
         catch (NoSuchMethodException e) {
+            // ignore
         }
 
         if (annotation == null && clazz.getSuperclass() != null) {

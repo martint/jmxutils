@@ -45,35 +45,39 @@ import org.testng.annotations.Test;
 public class TestExporter
 {
     private MBeanServer server;
-    
+
     private List<Pair<ObjectName, SimpleObject>> objects;
 
-    static class Pair<L, R> {
-      final L left;
-      final R right;
-      
-      Pair(L left, R right) {
-        this.left = left;
-        this.right = right;
-      }
-      static <L, R> Pair<L, R> of (L left, R right) {
-        return new Pair<L, R>(left, right);
-      }
+    static class Pair<L, R>
+    {
+        final L left;
+        final R right;
+
+        Pair(L left, R right)
+        {
+            this.left = left;
+            this.right = right;
+        }
+
+        static <L, R> Pair<L, R> of(L left, R right)
+        {
+            return new Pair<L, R>(left, right);
+        }
     }
-    
+
     @BeforeTest
     private void setup()
             throws IOException, MalformedObjectNameException, NotBoundException
     {
         server = ManagementFactory.getPlatformMBeanServer();
 
-        objects = new ArrayList<Pair<ObjectName,SimpleObject>>(2);
+        objects = new ArrayList<Pair<ObjectName, SimpleObject>>(2);
         objects.add(new Pair<ObjectName, SimpleObject>(Util.getUniqueObjectName(), new SimpleObject()));
         objects.add(new Pair<ObjectName, SimpleObject>(Util.getUniqueObjectName(), new CustomAnnotationObject()));
 
         MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
         for (Pair<ObjectName, SimpleObject> pair : objects) {
-          exporter.export(pair.left.getCanonicalName(), pair.right);
+            exporter.export(pair.left.getCanonicalName(), pair.right);
         }
     }
 
@@ -82,13 +86,15 @@ public class TestExporter
             throws IOException, InstanceNotFoundException, MBeanRegistrationException
     {
         for (Pair<ObjectName, SimpleObject> pair : objects) {
-          server.unregisterMBean(pair.left);
+            server.unregisterMBean(pair.left);
         }
     }
 
     @Test(dataProvider = "fixtures")
     public void testGet(String attribute, boolean isIs, Object[] values, Class clazz)
-            throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NoSuchMethodException, InvocationTargetException, IllegalAccessException
+            throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException,
+            AttributeNotFoundException, MBeanException, NoSuchMethodException, InvocationTargetException,
+            IllegalAccessException
     {
         String methodName = "set" + attribute;
         for (Pair<ObjectName, SimpleObject> pair : objects) {
@@ -105,23 +111,27 @@ public class TestExporter
 
     @Test(dataProvider = "fixtures")
     public void testSet(String attribute, boolean isIs, Object[] values, Class clazz)
-            throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InvalidAttributeValueException
+            throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException,
+            AttributeNotFoundException, MBeanException, NoSuchMethodException, InvocationTargetException,
+            IllegalAccessException, InvalidAttributeValueException
     {
         String methodName = (isIs ? "is" : "get") + attribute;
 
         for (Pair<ObjectName, SimpleObject> pair : objects) {
-          Method getter = pair.right.getClass().getMethod(methodName);
+            Method getter = pair.right.getClass().getMethod(methodName);
 
-          for (Object value : values) {
-            server.setAttribute(pair.left, new javax.management.Attribute(attribute, value));
+            for (Object value : values) {
+                server.setAttribute(pair.left, new javax.management.Attribute(attribute, value));
 
-            Assert.assertEquals(getter.invoke(pair.right), value);
-          }
+                Assert.assertEquals(getter.invoke(pair.right), value);
+            }
         }
     }
 
     @Test
-    public void testSetFailsOnNotManaged() throws InstanceNotFoundException, IOException, InvalidAttributeValueException, ReflectionException, AttributeNotFoundException, MBeanException
+    public void testSetFailsOnNotManaged()
+            throws InstanceNotFoundException, IOException, InvalidAttributeValueException, ReflectionException,
+            AttributeNotFoundException, MBeanException
     {
         for (Pair<ObjectName, SimpleObject> pair : objects) {
             pair.right.setNotManaged(1);
@@ -138,7 +148,9 @@ public class TestExporter
     }
 
     @Test
-    public void testGetFailsOnNotManaged() throws InstanceNotFoundException, IOException, InvalidAttributeValueException, ReflectionException, AttributeNotFoundException, MBeanException
+    public void testGetFailsOnNotManaged()
+            throws InstanceNotFoundException, IOException, InvalidAttributeValueException, ReflectionException,
+            AttributeNotFoundException, MBeanException
     {
 
         for (Pair<ObjectName, SimpleObject> pair : objects) {
@@ -153,7 +165,8 @@ public class TestExporter
     }
 
     @Test
-    public void testGetFailsOnWriteOnly() throws InstanceNotFoundException, IOException, ReflectionException, MBeanException
+    public void testGetFailsOnWriteOnly()
+            throws InstanceNotFoundException, IOException, ReflectionException, MBeanException
     {
         for (Pair<ObjectName, SimpleObject> pair : objects) {
             try {
@@ -167,7 +180,9 @@ public class TestExporter
     }
 
     @Test
-    public void testSetFailsOnReadOnly() throws InstanceNotFoundException, IOException, ReflectionException, MBeanException, InvalidAttributeValueException
+    public void testSetFailsOnReadOnly()
+            throws InstanceNotFoundException, IOException, ReflectionException, MBeanException,
+            InvalidAttributeValueException
     {
         for (Pair<ObjectName, SimpleObject> pair : objects) {
             pair.right.setReadOnly(1);
@@ -184,7 +199,8 @@ public class TestExporter
     }
 
     @Test
-    public void testDescription() throws IntrospectionException, InstanceNotFoundException, ReflectionException
+    public void testDescription()
+            throws IntrospectionException, InstanceNotFoundException, ReflectionException
     {
         for (Pair<ObjectName, SimpleObject> pair : objects) {
             boolean described = false;
@@ -192,7 +208,8 @@ public class TestExporter
                 if (info.getName().equals("DescribedInt")) {
                     Assert.assertEquals("epic description", info.getDescription());
                     described = true;
-                } else {
+                }
+                else {
                     Assert.assertEquals("", info.getDescription());
                 }
             }
@@ -206,8 +223,8 @@ public class TestExporter
     {
         for (Pair<ObjectName, SimpleObject> pair : objects) {
             for (Object value : values) {
-                Assert.assertEquals(server.invoke(pair.left, "echo", new Object[]{value},
-                      new String[]{Object.class.getName()}), value);
+                Assert.assertEquals(server.invoke(pair.left, "echo", new Object[] { value },
+                                                  new String[] { Object.class.getName() }), value);
             }
         }
     }
@@ -215,31 +232,46 @@ public class TestExporter
     @DataProvider(name = "fixtures")
     private Object[][] getFixtures()
     {
-        return new Object[][]{
+        return new Object[][] {
 
-                new Object[]{"BooleanValue", true, new Object[]{true, false}, Boolean.TYPE},
-                new Object[]{"BooleanBoxedValue", true, new Object[]{true, false, null}, Boolean.class},
-                new Object[]{"ByteValue", false, new Object[]{Byte.MAX_VALUE, Byte.MIN_VALUE, (byte) 0}, Byte.TYPE},
-                new Object[]{"ByteBoxedValue", false, new Object[]{Byte.MAX_VALUE, Byte.MIN_VALUE, (byte) 0, null}, Byte.class},
+                new Object[] { "BooleanValue", true, new Object[] { true, false }, Boolean.TYPE },
+                new Object[] { "BooleanBoxedValue", true, new Object[] { true, false, null }, Boolean.class },
+                new Object[] { "ByteValue", false, new Object[] { Byte.MAX_VALUE, Byte.MIN_VALUE, (byte) 0 },
+                               Byte.TYPE },
+                new Object[] { "ByteBoxedValue", false, new Object[] { Byte.MAX_VALUE, Byte.MIN_VALUE, (byte) 0, null },
+                               Byte.class },
 
-                new Object[]{"ShortValue", false, new Object[]{Short.MAX_VALUE, Short.MIN_VALUE, (short) 0}, Short.TYPE},
-                new Object[]{"ShortBoxedValue", false, new Object[]{Short.MAX_VALUE, Short.MIN_VALUE, (short) 0, null}, Short.class},
+                new Object[] { "ShortValue", false, new Object[] { Short.MAX_VALUE, Short.MIN_VALUE, (short) 0 },
+                               Short.TYPE },
+                new Object[] { "ShortBoxedValue", false,
+                               new Object[] { Short.MAX_VALUE, Short.MIN_VALUE, (short) 0, null }, Short.class },
 
-                new Object[]{"IntegerValue", false, new Object[]{Integer.MAX_VALUE, Integer.MIN_VALUE, 0}, Integer.TYPE},
-                new Object[]{"IntegerBoxedValue", false, new Object[]{Integer.MAX_VALUE, Integer.MIN_VALUE, 0, null}, Integer.class},
+                new Object[] { "IntegerValue", false, new Object[] { Integer.MAX_VALUE, Integer.MIN_VALUE, 0 },
+                               Integer.TYPE },
+                new Object[] { "IntegerBoxedValue", false,
+                               new Object[] { Integer.MAX_VALUE, Integer.MIN_VALUE, 0, null }, Integer.class },
 
-                new Object[]{"LongValue", false, new Object[]{Long.MAX_VALUE, Long.MIN_VALUE, 0L}, Long.TYPE},
-                new Object[]{"LongBoxedValue", false, new Object[]{Long.MAX_VALUE, Long.MIN_VALUE, 0L, null}, Long.class},
+                new Object[] { "LongValue", false, new Object[] { Long.MAX_VALUE, Long.MIN_VALUE, 0L }, Long.TYPE },
+                new Object[] { "LongBoxedValue", false, new Object[] { Long.MAX_VALUE, Long.MIN_VALUE, 0L, null },
+                               Long.class },
 
-                new Object[]{"FloatValue", false, new Object[]{-Float.MIN_VALUE, -Float.MAX_VALUE, Float.MAX_VALUE, Float.MIN_VALUE, 0f, Float.NaN}, Float.TYPE},
-                new Object[]{"FloatBoxedValue", false, new Object[]{-Float.MIN_VALUE, -Float.MAX_VALUE, Float.MAX_VALUE, Float.MIN_VALUE, 0f, Float.NaN, null}, Float.class},
+                new Object[] { "FloatValue", false,
+                               new Object[] { -Float.MIN_VALUE, -Float.MAX_VALUE, Float.MAX_VALUE, Float.MIN_VALUE, 0f,
+                                              Float.NaN }, Float.TYPE },
+                new Object[] { "FloatBoxedValue", false,
+                               new Object[] { -Float.MIN_VALUE, -Float.MAX_VALUE, Float.MAX_VALUE, Float.MIN_VALUE, 0f,
+                                              Float.NaN, null }, Float.class },
 
-                new Object[]{"DoubleValue", false, new Object[]{-Double.MIN_VALUE, -Double.MAX_VALUE, Double.MAX_VALUE, Double.MIN_VALUE, 0.0, Double.NaN}, Double.TYPE},
-                new Object[]{"DoubleBoxedValue", false, new Object[]{-Double.MIN_VALUE, -Double.MAX_VALUE, Double.MAX_VALUE, Double.MIN_VALUE, 0.0, Double.NaN}, Double.class},
+                new Object[] { "DoubleValue", false,
+                               new Object[] { -Double.MIN_VALUE, -Double.MAX_VALUE, Double.MAX_VALUE, Double.MIN_VALUE,
+                                              0.0, Double.NaN }, Double.TYPE },
+                new Object[] { "DoubleBoxedValue", false,
+                               new Object[] { -Double.MIN_VALUE, -Double.MAX_VALUE, Double.MAX_VALUE, Double.MIN_VALUE,
+                                              0.0, Double.NaN }, Double.class },
 
-                new Object[]{"StringValue", false, new Object[]{null, "hello there"}, String.class},
+                new Object[] { "StringValue", false, new Object[] { null, "hello there" }, String.class },
 
-                new Object[]{"ObjectValue", false, new Object[]{"random object", 1, true}, Object.class}
+                new Object[] { "ObjectValue", false, new Object[] { "random object", 1, true }, Object.class }
 
         };
     }
