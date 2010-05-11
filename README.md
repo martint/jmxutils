@@ -62,6 +62,35 @@
                 }
         }, ...);
 
+
+# Custom annotations
+
+*Only available in master -- not part of a release, yet*
+
+You can use your own annotations instead of @Managed to tag methods. To do so, you need to tag the annotation with
+the org.jmx.weakreaf.ManagedAnnotation meta annotation.
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ ElementType.METHOD })
+    @ManagedAnnotation
+    public @interface CustomAnnotation
+    {
+        String description() default "";
+        String type() default "";
+    }
+
+    class ManagedObject
+    {
+        @CustomAnnotation(description="foo", type="counter")
+        public int getValue()
+        {
+           ...
+        }
+    }
+
+If the custom annotation has an attribute "description" of type String, it will be used as the description of the
+jmx method or attribute.
+
 # Maven dependency
 
 To use jmxutils in maven projects:
