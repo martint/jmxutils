@@ -19,6 +19,7 @@ import static org.weakref.jmx.ObjectNames.generatedNameOf;
 
 import java.lang.annotation.Annotation;
 
+import com.google.inject.name.Named;
 import org.weakref.jmx.ObjectNames;
 
 import com.google.inject.Key;
@@ -27,66 +28,37 @@ import com.google.inject.multibindings.Multibinder;
 public class NamedBindingBuilder
 {
     protected final Multibinder<Mapping> binder;
-    protected final Class<?> clazz;
-    protected final Annotation annotation;
-    protected final Class<? extends Annotation> annotationClass;
+    protected final Key<?> key;
 
-    NamedBindingBuilder(Multibinder<Mapping> binder, Class<?> clazz)
+    NamedBindingBuilder(Multibinder<Mapping> binder, Key<?> key)
     {
         this.binder = binder;
-        this.clazz = clazz;
-        this.annotation = null;
-        this.annotationClass = null;
+        this.key = key;
     }
 
-    NamedBindingBuilder(Multibinder<Mapping> binder, Class<?> clazz, Annotation annotation)
-    {
-        this.binder = binder;
-        this.clazz = clazz;
-        this.annotation = annotation;
-        this.annotationClass = null;
-    }
-
-    NamedBindingBuilder(Multibinder<Mapping> binder, Class<?> clazz, Class<? extends Annotation> annotationClass)
-    {
-        this.binder = binder;
-        this.clazz = clazz;
-        this.annotation = null;
-        this.annotationClass = annotationClass;
-    }
-    
     /**
      * Names the MBean according to {@link ObjectNames} name generator methods.
      */
     public void withGeneratedName() 
     {
-        String name;
-        if (annotation != null) {
-            name = generatedNameOf(clazz, annotation);
+        if (key.getAnnotation() != null) {
+            if (key.getAnnotation() instanceof Named) {
+                as(generatedNameOf(key.getTypeLiteral().getRawType(), (Named) key.getAnnotation()));
+            }
+            else {
+                as(generatedNameOf(key.getTypeLiteral().getRawType(), key.getAnnotation()));
+            }
         }
-        else if (annotationClass != null) {
-            name = generatedNameOf(clazz, annotationClass);
+        else if (key.getAnnotationType() != null) {
+            as(generatedNameOf(key.getTypeLiteral().getRawType(), key.getAnnotationType()));
         }
         else {
-            name = generatedNameOf(clazz);
+            as(generatedNameOf(key.getTypeLiteral().getRawType()));
         }
-
-        as(name);
     }
 
     public void as(String name)
     {
-        Key<?> key;
-        if (annotation != null) {
-            key = Key.get(clazz, annotation);
-        }
-        else if (annotationClass != null) {
-            key = Key.get(clazz, annotationClass);
-        }
-        else {
-            key = Key.get(clazz);
-        }
-
         binder.addBinding().toInstance(new Mapping(name, key));
     }
 }

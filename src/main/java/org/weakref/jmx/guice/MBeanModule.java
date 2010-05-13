@@ -19,6 +19,7 @@ import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
+import com.google.inject.Key;
 
 public class MBeanModule
         extends AbstractModule
@@ -57,6 +58,11 @@ public class MBeanModule
     protected void configureMBeans() {
     }
 
+    protected NamedBindingBuilder export(Key<?> key)
+    {
+        return builder.export(key);
+    }
+    
     protected AnnotatedExportBuilder export(Class<?> clazz)
     {
         return builder.export(clazz);

@@ -15,6 +15,7 @@
  */
 package org.weakref.jmx.guice;
 
+import com.google.inject.Key;
 import com.google.inject.multibindings.Multibinder;
 
 import java.lang.annotation.Annotation;
@@ -22,18 +23,18 @@ import java.lang.annotation.Annotation;
 public class AnnotatedExportBuilder
         extends NamedBindingBuilder
 {
-    AnnotatedExportBuilder(Multibinder<Mapping> binder, Class<?> clazz)
+    AnnotatedExportBuilder(Multibinder<Mapping> binder, Key<?> key)
     {
-        super(binder, clazz);
+        super(binder, key);
     }
 
     public NamedBindingBuilder annotatedWith(Annotation annotation)
     {
-        return new NamedBindingBuilder(binder, clazz, annotation);
+        return new NamedBindingBuilder(binder, Key.get(key.getTypeLiteral(), annotation));
     }
 
     public NamedBindingBuilder annotatedWith(Class<? extends Annotation> annotationClass)
     {
-        return new NamedBindingBuilder(binder, clazz, annotationClass);
+        return new NamedBindingBuilder(binder, Key.get(key.getTypeLiteral(), annotationClass));
     }
 }

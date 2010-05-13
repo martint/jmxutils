@@ -16,6 +16,7 @@
 package org.weakref.jmx.guice;
 
 import static com.google.inject.Stage.PRODUCTION;
+import static com.google.inject.name.Names.named;
 import static org.weakref.jmx.ObjectNames.generatedNameOf;
 
 import java.io.IOException;
@@ -29,6 +30,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
+import com.google.inject.Key;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.weakref.jmx.SimpleObject;
@@ -129,6 +131,36 @@ public class TestMBeanModule
         server.unregisterMBean(name);
     }
 
+    @Test
+    public void testGeneratedNameOnNamedAnnotation()
+            throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, ReflectionException,
+            MBeanRegistrationException
+    {
+        final ObjectName name = new ObjectName(generatedNameOf(SimpleObject.class, named("hello")));
+
+        Injector injector = Guice.createInjector(PRODUCTION, new AbstractModule()
+        {
+            @Override
+            protected void configure()
+            {
+                bind(SimpleObject.class).annotatedWith(named("hello")).toInstance(new SimpleObject());
+                bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
+            }
+        },
+                new MBeanModule()
+                {
+                    @Override
+                    protected void configureMBeans()
+                    {
+                        export(SimpleObject.class).annotatedWith(named("hello")).withGeneratedName();
+                    }
+                });
+
+        MBeanServer server = injector.getInstance(MBeanServer.class);
+
+        Assert.assertNotNull(server.getMBeanInfo(name));
+        server.unregisterMBean(name);
+    }
     
     @Test
     public void testMultipleModules()
@@ -262,6 +294,69 @@ public class TestMBeanModule
 					.annotatedWith(Names.named("2"))
 					.as(objectName2.getCanonicalName());
 			}
+        });
+
+        MBeanServer server = injector.getInstance(MBeanServer.class);
+
+        Assert.assertNotNull(server.getMBeanInfo(objectName1));
+        Assert.assertNotNull(server.getMBeanInfo(objectName2));
+
+        server.unregisterMBean(objectName1);
+        server.unregisterMBean(objectName2);
+    }
+
+    @Test
+    public void testExportKey()
+            throws IntrospectionException, InstanceNotFoundException, ReflectionException, MBeanRegistrationException
+    {
+        final ObjectName objectName1 = Util.getUniqueObjectName();
+        final ObjectName objectName2 = Util.getUniqueObjectName();
+
+        Injector injector = Guice.createInjector(PRODUCTION, new MBeanModule(), new AbstractModule()
+        {
+            @Override
+            protected void configure()
+            {
+                bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
+                bind(SimpleObject.class).toInstance(new SimpleObject());
+                bind(SimpleObject.class).annotatedWith(Names.named("1")).toInstance(new SimpleObject());
+
+                ExportBuilder exporter = MBeanModule.newExporter(binder());
+                exporter.export(Key.get(SimpleObject.class))
+                        .as(objectName1.getCanonicalName());
+                exporter.export(Key.get(SimpleObject.class, named("1")))
+                        .as(objectName2.getCanonicalName());
+            }
+        });
+
+        MBeanServer server = injector.getInstance(MBeanServer.class);
+
+        Assert.assertNotNull(server.getMBeanInfo(objectName1));
+        Assert.assertNotNull(server.getMBeanInfo(objectName2));
+
+        server.unregisterMBean(objectName1);
+        server.unregisterMBean(objectName2);
+    }
+
+    @Test
+    public void testExportKeyWithMBeanModuleSubclass()
+            throws IntrospectionException, InstanceNotFoundException, ReflectionException, MBeanRegistrationException
+    {
+        final ObjectName objectName1 = Util.getUniqueObjectName();
+        final ObjectName objectName2 = Util.getUniqueObjectName();
+
+        Injector injector = Guice.createInjector(PRODUCTION, new MBeanModule()
+        {
+            @Override
+            protected void configureMBeans()
+            {
+                bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
+                bind(SimpleObject.class).toInstance(new SimpleObject());
+                bind(SimpleObject.class).annotatedWith(Names.named("1")).toInstance(new SimpleObject());
+
+                export(Key.get(SimpleObject.class)).as(objectName1.getCanonicalName());
+                export(Key.get(SimpleObject.class, named("1"))).as(objectName2.getCanonicalName());
+            }
         });
 
         MBeanServer server = injector.getInstance(MBeanServer.class);
