@@ -96,7 +96,7 @@ To use jmxutils in maven projects:
     <dependency>
         <groupId>org.weakref</groupId>
         <artifactId>jmxutils</artifactId>
-        <version>1.4</version>
+        <version>1.5</version>
     </dependency>
 
 # License
