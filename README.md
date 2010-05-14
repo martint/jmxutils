@@ -65,8 +65,6 @@
 
 # Custom annotations
 
-*Only available in master -- not part of a release, yet*
-
 You can use your own annotations instead of @Managed to tag methods. To do so, you need to tag the annotation with
 the org.jmx.weakreaf.ManagedAnnotation meta annotation.
 
