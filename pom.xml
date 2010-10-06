@@ -23,7 +23,7 @@
 
     <scm>
         <connection>scm:git:git://github.com/martint/jmxutils.git</connection>
-        <developerConnection>scm:git:git://github.com/martint/jmxutils.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:martint/jmxutils.git</developerConnection>
         <url>http://github.com/martint/jmxutils/tree/master</url>
     </scm>
 
