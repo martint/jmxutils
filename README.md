@@ -24,6 +24,7 @@
     ...
     MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
     exporter.export("test:name=X", new ManagedObject());
+    exporter.unexport("test:name=X");
 
 # Guice support
 
