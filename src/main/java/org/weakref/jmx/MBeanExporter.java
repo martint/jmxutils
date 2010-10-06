@@ -67,6 +67,11 @@ public class MBeanExporter
     	}
     }
 
+    /**
+     * Get an MBeanExporter that uses the default platform mbean server
+     *
+     * @return an exporter
+     */
     public static MBeanExporter withPlatformMBeanServer()
     {
         return new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
