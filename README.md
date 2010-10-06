@@ -67,7 +67,7 @@
 # Custom annotations
 
 You can use your own annotations instead of @Managed to tag methods. To do so, you need to tag the annotation with
-the org.jmx.weakreaf.ManagedAnnotation meta annotation.
+the org.weakref.jmx.ManagedAnnotation meta annotation.
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ ElementType.METHOD })
