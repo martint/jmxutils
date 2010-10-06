@@ -19,6 +19,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.RequiredModelMBean;
+import java.lang.management.ManagementFactory;
 
 public class MBeanExporter
 {
@@ -64,5 +65,10 @@ public class MBeanExporter
     	catch (Exception e) {
     		throw new RuntimeException(e);
     	}
+    }
+
+    public static MBeanExporter withPlatformMBeanServer()
+    {
+        return new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
     }
 }
