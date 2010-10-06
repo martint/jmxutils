@@ -15,6 +15,8 @@
  */
 package org.weakref.jmx;
 
+import java.lang.management.ManagementFactory;
+
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.modelmbean.ModelMBeanInfo;
@@ -23,6 +25,11 @@ import javax.management.modelmbean.RequiredModelMBean;
 public class MBeanExporter
 {
     private final MBeanServer server;
+
+    public MBeanExporter()
+    {
+    	this(ManagementFactory.getPlatformMBeanServer());
+    }
 
     public MBeanExporter(MBeanServer server)
     {
@@ -55,9 +62,9 @@ public class MBeanExporter
     {
     	try {
     		ObjectName objectName = new ObjectName(name);
-    		
+
     		server.unregisterMBean(objectName);
-    	} 
+    	}
     	catch (RuntimeException e) {
     		throw e;
     	}
