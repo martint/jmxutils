@@ -67,7 +67,7 @@
 # Custom annotations
 
 You can use your own annotations instead of @Managed to tag methods. To do so, you need to tag the annotation with
-the org.jmx.weakreaf.ManagedAnnotation meta annotation.
+the org.weakref.jmx.ManagedAnnotation meta annotation.
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ ElementType.METHOD })
@@ -97,7 +97,7 @@ To use jmxutils in maven projects:
     <dependency>
         <groupId>org.weakref</groupId>
         <artifactId>jmxutils</artifactId>
-        <version>1.5</version>
+        <version>1.6</version>
     </dependency>
 
 # License
