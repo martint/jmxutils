@@ -1,3 +1,8 @@
+# Version 1.7
+
+- Add convenience method to get MBeanExporter configured with platform mbean server
+- Make guice optional
+
 # Version 1.6
 
 - Add method to un-export mbeans
