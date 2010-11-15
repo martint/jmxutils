@@ -17,8 +17,6 @@ package org.weakref.jmx;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.management.modelmbean.ModelMBeanInfo;
-import javax.management.modelmbean.RequiredModelMBean;
 import java.lang.management.ManagementFactory;
 
 public class MBeanExporter
@@ -35,12 +33,8 @@ public class MBeanExporter
         try {
             ObjectName objectName = new ObjectName(name);
 
-            MBeanInfoBuilder builder = new MBeanInfoBuilder();
-            ModelMBeanInfo info = builder.buildInfo(object.getClass());
-
-            // Use the GetterStrippingMBeanInfo to work around http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6339571.
-            RequiredModelMBean mbean = new RequiredModelMBean(new GetterStrippingMBeanInfo(info));
-            mbean.setManagedResource(object, "objectReference");
+            MBeanBuilder builder = new MBeanBuilder(object);
+            MBean mbean = builder.build();
 
             server.registerMBean(mbean, objectName);
         }

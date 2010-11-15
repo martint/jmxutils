@@ -1,5 +1,5 @@
 /**
- *  Copyright 2009 Martin Traverso
+ *  Copyright 2010 Dain Sundstrom
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,22 +15,13 @@
  */
 package org.weakref.jmx;
 
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
 
-public class Util
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+public @interface Nested
 {
-    private final static AtomicInteger id = new AtomicInteger(0);
-    
-    public static ObjectName getUniqueObjectName()
-    {
-        try {
-            return new ObjectName(Util.class.getName() + ":name=instance_" + id.incrementAndGet());
-        }
-        catch (MalformedObjectNameException e) {
-            throw new AssertionError(e);
-        }
-    }
-
 }

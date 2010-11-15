@@ -60,8 +60,8 @@ public class TestInheritance14
         return target.getMethod("method", String.class);
     }
 
-    public Managed expected() throws NoSuchMethodException
+    public Method expected() throws NoSuchMethodException
     {
-        return source.getDeclaredMethod("method", String.class).getAnnotation(Managed.class);
+        return source.getDeclaredMethod("method", String.class);
     }
 }

@@ -24,20 +24,20 @@ import org.testng.annotations.Test;
 
 public abstract class TestInheritanceBase
 {
-    protected final Class target;
-    protected final Class source;
+    protected final Class<?> target;
+    protected final Class<?> source;
 
     /**
      * @param target class to resolve
      * @param source class providing the annotation
      */
-    TestInheritanceBase(Class target, Class source)
+    TestInheritanceBase(Class<?> target, Class<?> source)
     {
         this.target = target;
         this.source = source;
     }
 
-    public Class getTargetClass()
+    public Class<?> getTargetClass()
     {
         return target;
     }
@@ -47,17 +47,16 @@ public abstract class TestInheritanceBase
         return target.getMethod("method");
     }
 
-    public Managed expected() throws NoSuchMethodException
+    public Method expected() throws NoSuchMethodException
     {
-        return source.getDeclaredMethod("method").getAnnotation(Managed.class);
+        return source.getDeclaredMethod("method");
     }
 
     @Test
     public void testResolver() throws NoSuchMethodException
     {
-        AnnotationFinder resolver = new AnnotationFinder();
-        Map<Method, Annotation> map = resolver.findAnnotatedMethods(getTargetClass());
-        Annotation annotation = map.get(getTargetMethod());
-        Assert.assertEquals(annotation, expected());
+        Map<Method, Method> map = AnnotationUtils.findManagedMethods(getTargetClass());
+        Method annotatedMethod = map.get(getTargetMethod());
+        Assert.assertEquals(annotatedMethod, expected());
     }
 }
