@@ -1,5 +1,5 @@
 /**
- *  Copyright 2009 Martin Traverso
+ *  Copyright 2010 Dain Sundstrom
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,22 +15,16 @@
  */
 package org.weakref.jmx;
 
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import java.util.concurrent.atomic.AtomicInteger;
+import javax.management.MBeanOperationInfo;
+import javax.management.MBeanException;
+import javax.management.ReflectionException;
 
-public class Util
+public interface MBeanOperation extends MBeanFeature
 {
-    private final static AtomicInteger id = new AtomicInteger(0);
-    
-    public static ObjectName getUniqueObjectName()
-    {
-        try {
-            return new ObjectName(Util.class.getName() + ":name=instance_" + id.incrementAndGet());
-        }
-        catch (MalformedObjectNameException e) {
-            throw new AssertionError(e);
-        }
-    }
+    MBeanOperationInfo getInfo();
 
+    Signature getSignature();
+
+    Object invoke(Object[] params)
+            throws MBeanException, ReflectionException;
 }
