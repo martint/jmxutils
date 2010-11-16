@@ -24,7 +24,7 @@ import javax.management.MBeanParameterInfo;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-public class MBeanOperationBuilder
+class MBeanOperationBuilder
 {
     private Object target;
     private String name;

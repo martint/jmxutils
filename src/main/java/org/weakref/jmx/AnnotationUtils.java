@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-public final class AnnotationUtils
+final class AnnotationUtils
 {
     private AnnotationUtils()
     {
