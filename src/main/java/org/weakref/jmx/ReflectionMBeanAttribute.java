@@ -24,7 +24,7 @@ import javax.management.MBeanException;
 import javax.management.ReflectionException;
 import java.lang.reflect.Method;
 
-public class ReflectionMBeanAttribute implements MBeanAttribute
+class ReflectionMBeanAttribute implements MBeanAttribute
 {
     private final MBeanAttributeInfo info;
     private final Object target;

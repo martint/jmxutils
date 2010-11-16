@@ -20,7 +20,7 @@ import javax.management.MBeanOperationInfo;
 import javax.management.ReflectionException;
 import java.lang.reflect.Method;
 
-public class ReflectionMBeanOperation implements MBeanOperation
+class ReflectionMBeanOperation implements MBeanOperation
 {
     private final MBeanOperationInfo info;
     private final Object target;

@@ -19,7 +19,7 @@ import javax.management.MBeanOperationInfo;
 import javax.management.MBeanException;
 import javax.management.ReflectionException;
 
-public class NestedMBeanOperation implements MBeanOperation
+class NestedMBeanOperation implements MBeanOperation
 {
     private final MBeanOperation delegate;
     private final MBeanOperationInfo info;

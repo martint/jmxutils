@@ -23,7 +23,7 @@ import java.util.Arrays;
 import static java.util.Collections.unmodifiableList;
 import java.util.List;
 
-public final class Signature
+final class Signature
 {
     private final String actionName;
     private final List<String> parameterTypes;

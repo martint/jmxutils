@@ -21,7 +21,7 @@ import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
 import javax.management.ReflectionException;
 
-public class NestedMBeanAttribute implements MBeanAttribute
+class NestedMBeanAttribute implements MBeanAttribute
 {
     private final MBeanAttribute delegate;
     private final MBeanAttributeInfo info;

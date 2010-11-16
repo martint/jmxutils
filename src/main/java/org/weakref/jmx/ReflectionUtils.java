@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.Collections;
 
-public final class ReflectionUtils
+final class ReflectionUtils
 {
     private ReflectionUtils()
     {

@@ -19,7 +19,7 @@ import javax.management.MBeanOperationInfo;
 import javax.management.MBeanException;
 import javax.management.ReflectionException;
 
-public interface MBeanOperation extends MBeanFeature
+interface MBeanOperation extends MBeanFeature
 {
     MBeanOperationInfo getInfo();
 

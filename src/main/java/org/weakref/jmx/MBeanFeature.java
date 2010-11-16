@@ -17,7 +17,7 @@ package org.weakref.jmx;
 
 import javax.management.MBeanFeatureInfo;
 
-public interface MBeanFeature
+interface MBeanFeature
 {
     public MBeanFeatureInfo getInfo();
 

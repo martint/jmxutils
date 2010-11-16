@@ -37,7 +37,7 @@ import java.util.TreeMap;
 import java.util.Collections;
 import java.util.HashMap;
 
-public class MBean implements DynamicMBean
+class MBean implements DynamicMBean
 {
     private static final Object[] NO_PARAMS = new Object[0];
     private static final String[] NO_ARGS = new String[0];
