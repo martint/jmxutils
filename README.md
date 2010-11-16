@@ -28,6 +28,7 @@
 
 # Guice support
 
+## Subclassing MBeanModule
     Injector injector = Guice.createInjector(
         new AbstractModule() {
             @Override
@@ -45,7 +46,7 @@
             }
         }, ...); 
 
-
+## Exporting from custom modules
     Injector injector = Guice.createInjector(
         new MBeanModule(), // used to trigger registration of mbeans exported via ExportBuilder
 	    new AbstractModule() {
