@@ -49,7 +49,6 @@ final class ReflectionUtils
         primitiveToWrapper = Collections.unmodifiableMap(map);
     }
 
-
     public static Object invoke(Object target, Method method, Object... params)
             throws MBeanException, ReflectionException
     {
@@ -131,7 +130,6 @@ final class ReflectionUtils
         }
         return matcher.group(2);
     }
-
 
     public static boolean isValidGetter(Method getter)
     {
