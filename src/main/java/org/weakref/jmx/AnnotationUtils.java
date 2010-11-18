@@ -249,11 +249,6 @@ final class AnnotationUtils
             if (annotation.annotationType().isAnnotationPresent(ManagedAnnotation.class)) {
                 return true;
             }
-            for (Method field : annotation.annotationType().getMethods()) {
-                if (field.isAnnotationPresent(DescriptorKey.class)) {
-                    return true;
-                }
-            }
         }
         return false;
     }
