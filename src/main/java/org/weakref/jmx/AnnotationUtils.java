@@ -182,6 +182,13 @@ final class AnnotationUtils
         return description;
     }
 
+    /**
+     * Find methods that are tagged as managed somewhere in the hierarchy
+     *
+     * @param clazz the class to analyze
+     * @return a map that associates a concrete method to the actual method tagged as managed
+     *         (which may belong to a different class in clazz's hierarchy)
+     */
     public static Map<Method, Method> findManagedMethods(Class<?> clazz)
     {
         Map<Method, Method> result = new HashMap<Method, Method>();
@@ -189,6 +196,7 @@ final class AnnotationUtils
         // gather all publicly available methods
         // this returns everything, even if it's declared in a parent
         for (Method method : clazz.getMethods()) {
+            // skip methods that are used internally by the vm for implementing covariance, etc
             if (method.isSynthetic() || method.isBridge()) {
                 continue;
             }
