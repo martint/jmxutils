@@ -106,9 +106,9 @@ final class ReflectionUtils
         }
     }
 
-    private static Signature toSimpleName(Method method)
+    private static String toSimpleName(Method method)
     {
-        return new Signature(method);
+        return new Signature(method).toString();
     }
 
     public static boolean isGetter(Method method)
