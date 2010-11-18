@@ -49,31 +49,30 @@ class MBeanBuilder
             Method concreteMethod = entry.getKey();
             Method annotatedMethod = entry.getValue();
 
-            if (isGetter(concreteMethod)) {
+            if (isGetter(concreteMethod) || isSetter(concreteMethod)) { // is it an attribute?
                 String attributeName = getAttributeName(concreteMethod);
 
                 MBeanAttributeBuilder attributeBuilder = attributeBuilders.get(attributeName);
                 if (attributeBuilder == null) {
                     attributeBuilder = new MBeanAttributeBuilder().named(attributeName).onInstance(target);
-                    attributeBuilders.put(attributeName, attributeBuilder);
+                }
+                
+                if (isGetter(concreteMethod)) {
+                    attributeBuilder = attributeBuilder
+                            .withConcreteGetter(concreteMethod)
+                            .withAnnotatedGetter(annotatedMethod);
+                }
+                else if (isSetter(concreteMethod)) {
+                    attributeBuilder = attributeBuilder
+                            .withConcreteSetter(concreteMethod)
+                            .withAnnotatedSetter(annotatedMethod);
                 }
 
-                attributeBuilder
-                        .withConcreteGetter(concreteMethod)
-                        .withAnnotatedGetter(annotatedMethod);
-            } else if (isSetter(concreteMethod)) {
-                String attributeName = getAttributeName(concreteMethod);
-
-                MBeanAttributeBuilder attributeBuilder = attributeBuilders.get(attributeName);
-                if (attributeBuilder == null) {
-                    attributeBuilder = new MBeanAttributeBuilder().named(attributeName).onInstance(target);
-                    attributeBuilders.put(attributeName, attributeBuilder);
-                }
-
-                attributeBuilder
-                        .withConcreteSetter(concreteMethod)
-                        .withAnnotatedSetter(annotatedMethod);
-            } else {
+                attributeBuilders.put(attributeName, attributeBuilder);
+            }
+            else {
+                // TODO: change this so that we are not making assumptions about mutability or side effects
+                //       in the builder
                 addOperation()
                         .onInstance(target)
                         .withConcreteMethod(concreteMethod)
