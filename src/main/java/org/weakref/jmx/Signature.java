@@ -59,6 +59,7 @@ final class Signature
         }
         this.parameterTypes = unmodifiableList(parameterTypes);
     }
+
     public String getActionName()
     {
         return actionName;
