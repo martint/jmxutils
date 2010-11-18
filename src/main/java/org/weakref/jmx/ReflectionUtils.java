@@ -126,7 +126,7 @@ final class ReflectionUtils
     {
         Matcher matcher = getterOrSetterPattern.matcher(method.getName());
         if (!matcher.matches()) {
-            return null;
+            throw new IllegalArgumentException("method does not represent a getter or setter");
         }
         return matcher.group(2);
     }
@@ -134,7 +134,7 @@ final class ReflectionUtils
     public static boolean isValidGetter(Method getter)
     {
         if (getter == null) {
-            return false;
+            throw new NullPointerException("getter is null");
         }
         if (getter.getParameterTypes().length != 0) {
             return false;
@@ -148,7 +148,7 @@ final class ReflectionUtils
     public static boolean isValidSetter(Method setter)
     {
         if (setter == null) {
-            return false;
+            throw new NullPointerException("setter is null");
         }
         if (setter.getParameterTypes().length != 1) {
             return false;
