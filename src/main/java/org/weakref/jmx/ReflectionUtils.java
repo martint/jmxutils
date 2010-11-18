@@ -53,15 +53,9 @@ final class ReflectionUtils
     public static Object invoke(Object target, Method method, Object... params)
             throws MBeanException, ReflectionException
     {
-        if (target == null) {
-            throw new NullPointerException("target is null");
-        }
-        if (method == null) {
-            throw new NullPointerException("method is null");
-        }
-        if (params == null) {
-            throw new RuntimeOperationsException(new NullPointerException("params is null"));
-        }
+        assertNotNull(target, "target");
+        assertNotNull(target, "method");
+        assertNotNull(target, "params");
 
         try {
             Object result = method.invoke(target, params);
@@ -171,6 +165,13 @@ final class ReflectionUtils
         }
         else {
             return value == null || type.isInstance(value);
+        }
+    }
+
+    private static void assertNotNull(Object param, String name)
+    {
+        if (param == null) {
+            throw new RuntimeOperationsException(new NullPointerException(name + " is null"));
         }
     }
 }
