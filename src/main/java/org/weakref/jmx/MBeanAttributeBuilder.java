@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class MBeanAttributeBuilder
+public class MBeanAttributeBuilder
 {
     private final static Pattern getterOrSetterPattern = Pattern.compile("(get|set|is)(.+)");
     private Object target;
