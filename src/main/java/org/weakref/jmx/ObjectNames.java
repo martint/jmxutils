@@ -4,7 +4,6 @@ import static java.lang.String.format;
 
 import java.lang.annotation.Annotation;
 
-import com.google.inject.Key;
 import com.google.inject.name.Named;
 
 /**

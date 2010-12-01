@@ -91,6 +91,57 @@ the org.weakref.jmx.ManagedAnnotation meta annotation.
 If the custom annotation has an attribute "description" of type String, it will be used as the description of the
 jmx method or attribute.
 
+# Advanced Usage
+
+jmxutils has advanced support for nested managed objects.  This first example demonstrates the @Nested annotation:
+
+    public class NestedExample
+    {
+       private final NestedObject nestedObject = new NestedObject();
+
+       @Managed @Nested
+       public NestedObject getNestedObject()
+       {
+           return nestedObject;
+       }
+
+       public static final class NestedObject {
+           @Managed
+           public String getValue() {
+               return "someValue";
+           }
+       }
+    }
+
+When the @Nested annotation is applied to a managed getter, jmxutils simply retrieves the value from the getter and exposes all managed attributes and operations prefixed with the getter name.  In the example above, the exposed MBean will have an attribute named "NestedObject.Value" and an operation named "NestedObject.doSomething". 
+
+Next the example demonstrates the @Flatten annotation.
+
+    public class FlattenedExample
+    {
+       private final FlattenedObject flattenedObject = new FlattenedObject();
+
+       @Managed @Flatten
+       public FlattenedObject getFlattenedObject()
+       {
+           return flattenedObject;
+       }
+
+       public static final class FlattenedObject {
+           @Managed
+           public String getValue() {
+               return "someValue";
+           }
+           @Managed
+           public void doSomething() {
+               System.out.println("something");
+           }
+       }
+    }
+
+The @Flatten annotation works like the @Nested annotation except the exposed attributes and operation are not prefixed with the getter name.  In the example above, the exposed MBean will simply have an attribute named "Value" and an operation named "doSomething" without any prefix.
+
+
 # Maven dependency
 
 To use jmxutils in maven projects:

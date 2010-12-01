@@ -16,6 +16,27 @@
 
 package org.weakref.jmx;
 
+import org.testng.Assert;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+import static org.weakref.jmx.Util.getUniqueObjectName;
+
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
+import javax.management.InvalidAttributeValueException;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanException;
+import javax.management.MBeanInfo;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
+import javax.management.MBeanOperationInfo;
+import javax.management.MBeanParameterInfo;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
@@ -24,29 +45,11 @@ import java.rmi.NotBoundException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.management.AttributeNotFoundException;
-import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
-import javax.management.InvalidAttributeValueException;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
-
-import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
 public class TestExporter
 {
     private MBeanServer server;
 
-    private List<Pair<ObjectName, SimpleObject>> objects;
+    private List<Pair<ObjectName, ?>> objects;
 
     static class Pair<L, R>
     {
@@ -71,12 +74,16 @@ public class TestExporter
     {
         server = ManagementFactory.getPlatformMBeanServer();
 
-        objects = new ArrayList<Pair<ObjectName, SimpleObject>>(2);
-        objects.add(new Pair<ObjectName, SimpleObject>(Util.getUniqueObjectName(), new SimpleObject()));
-        objects.add(new Pair<ObjectName, SimpleObject>(Util.getUniqueObjectName(), new CustomAnnotationObject()));
+        objects = new ArrayList<Pair<ObjectName, ?>>(2);
+        objects.add(Pair.of(getUniqueObjectName(), new SimpleObject()));
+        objects.add(Pair.of(getUniqueObjectName(), new CustomAnnotationObject()));
+        objects.add(Pair.of(getUniqueObjectName(), new FlattenObject()));
+        objects.add(Pair.of(getUniqueObjectName(), new CustomFlattenAnnotationObject()));
+        objects.add(Pair.of(getUniqueObjectName(), new NestedObject()));
+        objects.add(Pair.of(getUniqueObjectName(), new CustomNestedAnnotationObject()));
 
         MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
-        for (Pair<ObjectName, SimpleObject> pair : objects) {
+        for (Pair<ObjectName, ?> pair : objects) {
             exporter.export(pair.left.getCanonicalName(), pair.right);
         }
     }
@@ -85,45 +92,178 @@ public class TestExporter
     public void teardown()
             throws IOException, InstanceNotFoundException, MBeanRegistrationException
     {
-        for (Pair<ObjectName, SimpleObject> pair : objects) {
+        for (Pair<ObjectName, ?> pair : objects) {
             server.unregisterMBean(pair.left);
         }
     }
 
+//    @Test
+//    public void testMBeanInfo()
+//            throws IntrospectionException, InstanceNotFoundException, ReflectionException
+//    {
+//        for (Pair<ObjectName, ?> pair : objects) {
+//            info.get
+//        }
+//    }
+
     @Test(dataProvider = "fixtures")
-    public void testGet(String attribute, boolean isIs, Object[] values, Class clazz)
+    public void testGetterAttributeInfo(String attribute, boolean isIs, Object[] values, Class<?> clazz)
+            throws Exception
+    {
+        String methodName = "set" + attribute;
+        for (Pair<ObjectName, ?> pair : objects) {
+            String attributeName = toFeatureName(attribute, pair);
+            SimpleObject simpleObject = toSimpleObject(pair);
+            Method setter = simpleObject.getClass().getMethod(methodName, clazz);
+
+            MBeanInfo info = server.getMBeanInfo(pair.left);
+            MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
+            Assert.assertNotNull(attributeInfo, "AttributeInfo for " + attributeName);
+            Assert.assertEquals(attributeInfo.getName(), attributeName, "Attribute Name for " + attributeName);
+            Assert.assertEquals(attributeInfo.getType(), setter.getParameterTypes()[0].getName(), "Attribute type for " + attributeName);
+            Assert.assertEquals(attributeInfo.isIs(), isIs, "Attribute isIs for " + attributeName);
+            Assert.assertTrue(attributeInfo.isReadable(), "Attribute Readable for " + attributeName);
+        }
+    }
+
+    @Test(dataProvider = "fixtures")
+    public void testSetterAttributeInfo(String attribute, boolean isIs, Object[] values, Class<?> clazz)
+            throws Exception
+    {
+        String methodName = (isIs ? "is" : "get") + attribute;
+
+        for (Pair<ObjectName, ?> pair : objects) {
+            String attributeName = toFeatureName(attribute, pair);
+            SimpleObject simpleObject = toSimpleObject(pair);
+            Method getter = simpleObject.getClass().getMethod(methodName);
+
+            MBeanInfo info = server.getMBeanInfo(pair.left);
+            MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
+            Assert.assertNotNull(attributeInfo, "AttributeInfo for " + attributeName);
+            Assert.assertEquals(attributeInfo.getName(), attributeName, "Attribute Name for " + attributeName);
+            Assert.assertEquals(attributeInfo.getType(), getter.getReturnType().getName(), "Attribute Type for " + attributeName);
+            Assert.assertTrue(attributeInfo.isWritable(), "Attribute Writable for " + attributeName);
+        }
+    }
+
+    @Test
+    public void testNotManagedAttributeInfo()
+            throws Exception
+    {
+
+        for (Pair<ObjectName, ?> pair : objects) {
+            MBeanInfo info = server.getMBeanInfo(pair.left);
+            String attributeName = toFeatureName("NotManaged", pair);
+            MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
+            Assert.assertNull(attributeInfo, "AttributeInfo for " + attributeName);
+        }
+    }
+
+    @Test
+    public void testReadOnlyAttributeInfo()
+            throws Exception
+    {
+        for (Pair<ObjectName, ?> pair : objects) {
+            MBeanInfo info = server.getMBeanInfo(pair.left);
+            String attributeName = toFeatureName("ReadOnly", pair);
+            MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
+            Assert.assertNotNull(attributeInfo, "AttributeInfo for " + attributeName);
+            Assert.assertEquals(attributeInfo.getName(), attributeName, "Attribute Name for " + attributeName);
+            Assert.assertEquals(attributeInfo.getType(), "int", "Attribute Type for " + attributeName);
+            Assert.assertTrue(attributeInfo.isReadable(), "Attribute Readable for " + attributeName);
+            Assert.assertFalse(attributeInfo.isWritable(), "Attribute Writable for " + attributeName);
+        }
+    }
+
+    @Test
+    public void testWriteOnlyAttributeInfo()
+            throws Exception
+    {
+        for (Pair<ObjectName, ?> pair : objects) {
+            MBeanInfo info = server.getMBeanInfo(pair.left);
+            String attributeName = toFeatureName("WriteOnly", pair);
+            MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
+            Assert.assertNotNull(attributeInfo, "AttributeInfo for " + attributeName);
+            Assert.assertEquals(attributeInfo.getName(), attributeName, "Attribute Name for " + attributeName);
+            Assert.assertEquals(attributeInfo.getType(), "int", "Attribute Type for " + attributeName);
+            Assert.assertFalse(attributeInfo.isReadable(), "Attribute Readable for " + attributeName);
+            Assert.assertTrue(attributeInfo.isWritable(), "Attribute Writable for " + attributeName);
+        }
+    }
+
+    private MBeanAttributeInfo getAttributeInfo(MBeanInfo info, String attributeName)
+    {
+        for (MBeanAttributeInfo attributeInfo : info.getAttributes()) {
+            if (attributeInfo.getName().equals(attributeName)) {
+                return attributeInfo;
+            }
+        }
+        return null;
+    }
+
+    @Test(dataProvider = "fixtures")
+    public void testOperationInfo(String attribute, boolean isIs, Object[] values, Class<?> clazz)
+            throws Exception
+    {
+        for (Pair<ObjectName, ?> pair : objects) {
+            String operationName = toFeatureName("echo", pair);
+
+            MBeanInfo beanInfo = server.getMBeanInfo(pair.left);
+            MBeanOperationInfo operationInfo = null;
+            for (MBeanOperationInfo info : beanInfo.getOperations()) {
+                if (info.getName().equals(operationName)) {
+                    operationInfo = info;
+                }
+            }
+
+            Assert.assertNotNull(operationInfo, "OperationInfo for " + operationName);
+            Assert.assertEquals(operationInfo.getName(), operationName, "Operation Name for " + operationName);
+            Assert.assertEquals(operationInfo.getImpact(), MBeanOperationInfo.UNKNOWN, "Operation Impact for " + operationName);
+            Assert.assertEquals(operationInfo.getReturnType(), Object.class.getName(), "Operation Return Type for " + operationName);
+            Assert.assertEquals(operationInfo.getSignature().length, 1, "Operation Parameter Length for " + operationName);
+            MBeanParameterInfo parameterInfo = operationInfo.getSignature()[0];
+            Assert.assertEquals(parameterInfo.getName(), "value", "Operation Parameter[0] Name for " + operationName);
+            Assert.assertEquals(parameterInfo.getType(), Object.class.getName(), "Operation Parameter[0] Type for " + operationName);
+        }
+    }
+
+    @Test(dataProvider = "fixtures")
+    public void testGet(String attribute, boolean isIs, Object[] values, Class<?> clazz)
             throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException,
             AttributeNotFoundException, MBeanException, NoSuchMethodException, InvocationTargetException,
             IllegalAccessException
     {
         String methodName = "set" + attribute;
-        for (Pair<ObjectName, SimpleObject> pair : objects) {
-            Method setter = pair.right.getClass().getMethod(methodName, clazz);
+        for (Pair<ObjectName, ?> pair : objects) {
+            String attributeName = toFeatureName(attribute, pair);
+            SimpleObject simpleObject = toSimpleObject(pair);
+            Method setter = simpleObject.getClass().getMethod(methodName, clazz);
 
             for (Object value : values) {
-                setter.invoke(pair.right, value);
+                setter.invoke(simpleObject, value);
 
-                Assert.assertEquals(server.getAttribute(pair.left, attribute), value);
+                Assert.assertEquals(server.getAttribute(pair.left, attributeName), value);
             }
         }
     }
 
-
     @Test(dataProvider = "fixtures")
-    public void testSet(String attribute, boolean isIs, Object[] values, Class clazz)
+    public void testSet(String attribute, boolean isIs, Object[] values, Class<?> clazz)
             throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException,
             AttributeNotFoundException, MBeanException, NoSuchMethodException, InvocationTargetException,
             IllegalAccessException, InvalidAttributeValueException
     {
         String methodName = (isIs ? "is" : "get") + attribute;
 
-        for (Pair<ObjectName, SimpleObject> pair : objects) {
-            Method getter = pair.right.getClass().getMethod(methodName);
+        for (Pair<ObjectName, ?> pair : objects) {
+            String attributeName = toFeatureName(attribute, pair);
+            SimpleObject simpleObject = toSimpleObject(pair);
+            Method getter = simpleObject.getClass().getMethod(methodName);
 
             for (Object value : values) {
-                server.setAttribute(pair.left, new javax.management.Attribute(attribute, value));
+                server.setAttribute(pair.left, new javax.management.Attribute(attributeName, value));
 
-                Assert.assertEquals(getter.invoke(pair.right), value);
+                Assert.assertEquals(getter.invoke(simpleObject), value);
             }
         }
     }
@@ -133,8 +273,10 @@ public class TestExporter
             throws InstanceNotFoundException, IOException, InvalidAttributeValueException, ReflectionException,
             AttributeNotFoundException, MBeanException
     {
-        for (Pair<ObjectName, SimpleObject> pair : objects) {
-            pair.right.setNotManaged(1);
+        for (Pair<ObjectName, ?> pair : objects) {
+            SimpleObject simpleObject = toSimpleObject(pair);
+
+            simpleObject.setNotManaged(1);
             try {
                 server.setAttribute(pair.left, new javax.management.Attribute("NotManaged", 2));
                 Assert.fail("Should not allow setting unmanaged attribute");
@@ -143,7 +285,7 @@ public class TestExporter
                 // ignore
             }
 
-            Assert.assertEquals(pair.right.getNotManaged(), 1);
+            Assert.assertEquals(simpleObject.getNotManaged(), 1);
         }
     }
 
@@ -153,7 +295,7 @@ public class TestExporter
             AttributeNotFoundException, MBeanException
     {
 
-        for (Pair<ObjectName, SimpleObject> pair : objects) {
+        for (Pair<ObjectName, ?> pair : objects) {
             try {
                 server.getAttribute(pair.left, "NotManaged");
                 Assert.fail("Should not allow getting unmanaged attribute");
@@ -168,7 +310,7 @@ public class TestExporter
     public void testGetFailsOnWriteOnly()
             throws InstanceNotFoundException, IOException, ReflectionException, MBeanException
     {
-        for (Pair<ObjectName, SimpleObject> pair : objects) {
+        for (Pair<ObjectName, ?> pair : objects) {
             try {
                 server.getAttribute(pair.left, "WriteOnly");
                 Assert.fail("Should not allow getting write-only attribute");
@@ -184,8 +326,9 @@ public class TestExporter
             throws InstanceNotFoundException, IOException, ReflectionException, MBeanException,
             InvalidAttributeValueException
     {
-        for (Pair<ObjectName, SimpleObject> pair : objects) {
-            pair.right.setReadOnly(1);
+        for (Pair<ObjectName, ?> pair : objects) {
+            SimpleObject simpleObject = toSimpleObject(pair);
+            simpleObject.setReadOnly(1);
             try {
                 server.setAttribute(pair.left, new javax.management.Attribute("ReadOnly", 2));
                 Assert.fail("Should not allow setting read-only attribute");
@@ -194,7 +337,7 @@ public class TestExporter
                 // ignore
             }
 
-            Assert.assertEquals(pair.right.getReadOnly(), 1);
+            Assert.assertEquals(simpleObject.getReadOnly(), 1);
         }
     }
 
@@ -202,10 +345,11 @@ public class TestExporter
     public void testDescription()
             throws IntrospectionException, InstanceNotFoundException, ReflectionException
     {
-        for (Pair<ObjectName, SimpleObject> pair : objects) {
+        for (Pair<ObjectName, ?> pair : objects) {
             boolean described = false;
             for (MBeanAttributeInfo info : server.getMBeanInfo(pair.left).getAttributes()) {
-                if (info.getName().equals("DescribedInt")) {
+                String attributeName = toFeatureName("DescribedInt", pair);
+                if (info.getName().equals(attributeName)) {
                     Assert.assertEquals("epic description", info.getDescription());
                     described = true;
                 }
@@ -218,12 +362,13 @@ public class TestExporter
     }
 
     @Test(dataProvider = "fixtures")
-    public void testOperation(String attribute, boolean isIs, Object[] values, Class clazz)
+    public void testOperation(String attribute, boolean isIs, Object[] values, Class<?> clazz)
             throws InstanceNotFoundException, IOException, ReflectionException, MBeanException
     {
-        for (Pair<ObjectName, SimpleObject> pair : objects) {
+        for (Pair<ObjectName, ?> pair : objects) {
             for (Object value : values) {
-                Assert.assertEquals(server.invoke(pair.left, "echo", new Object[] { value },
+                String operationName = toFeatureName("echo", pair);
+                Assert.assertEquals(server.invoke(pair.left, operationName, new Object[] { value },
                                                   new String[] { Object.class.getName() }), value);
             }
         }
@@ -256,10 +401,10 @@ public class TestExporter
                                Long.class },
 
                 new Object[] { "FloatValue", false,
-                               new Object[] { -Float.MIN_VALUE, -Float.MAX_VALUE, Float.MAX_VALUE, Float.MIN_VALUE, 0f,
+                               new Object[] { -Float.MIN_VALUE, -Float.MAX_VALUE, Float.MAX_VALUE, Float.MIN_VALUE, 0.0f,
                                               Float.NaN }, Float.TYPE },
                 new Object[] { "FloatBoxedValue", false,
-                               new Object[] { -Float.MIN_VALUE, -Float.MAX_VALUE, Float.MAX_VALUE, Float.MIN_VALUE, 0f,
+                               new Object[] { -Float.MIN_VALUE, -Float.MAX_VALUE, Float.MAX_VALUE, Float.MIN_VALUE, 0.0f,
                                               Float.NaN, null }, Float.class },
 
                 new Object[] { "DoubleValue", false,
@@ -274,6 +419,37 @@ public class TestExporter
                 new Object[] { "ObjectValue", false, new Object[] { "random object", 1, true }, Object.class }
 
         };
+    }
+
+    private String toFeatureName(String attribute, Pair<ObjectName, ?> pair)
+    {
+        String attributeName;
+        if (pair.right instanceof NestedObject) {
+            attributeName = "SimpleObject." + attribute;
+        }
+        else {
+            attributeName = attribute;
+        }
+        return attributeName;
+    }
+
+    private SimpleObject toSimpleObject(Pair<ObjectName, ?> pair)
+    {
+        Object object = pair.right;
+        SimpleObject simpleObject;
+        if (object instanceof SimpleObject) {
+            simpleObject = (SimpleObject) object;
+        }
+        else if (object instanceof FlattenObject) {
+            simpleObject = ((FlattenObject) object).getSimpleObject();
+        }
+        else if (object instanceof NestedObject) {
+            simpleObject = ((NestedObject) object).getSimpleObject();
+        }
+        else {
+            throw new IllegalArgumentException("Expected objects of type SimpleObject or FlattenObject but got " + object.getClass().getName());
+        }
+        return simpleObject;
     }
 }
 
