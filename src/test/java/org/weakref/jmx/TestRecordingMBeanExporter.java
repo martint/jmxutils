@@ -70,11 +70,7 @@ public class TestRecordingMBeanExporter
         }
     }
 
-<<<<<<< variant A
     @Test
->>>>>>> variant B
-    @Test(expectedExceptions = JmxException.class)
-======= end
     public void testDoubleUnexport() throws Exception
     {
         testUnexportOk();
