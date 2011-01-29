@@ -68,6 +68,14 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+            <!-- Resource plugins should always use UTF-8 (hello, mac universe) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
