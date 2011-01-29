@@ -15,8 +15,16 @@
  */
 package org.weakref.jmx;
 
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
+
+import org.weakref.jmx.JmxException.JmxCause;
+
 import java.lang.management.ManagementFactory;
 
 public class MBeanExporter
@@ -30,35 +38,47 @@ public class MBeanExporter
 
     public void export(String name, Object object)
     {
+        ObjectName objectName;
         try {
-            ObjectName objectName = new ObjectName(name);
-
+            objectName = new ObjectName(name);
             MBeanBuilder builder = new MBeanBuilder(object);
             MBean mbean = builder.build();
 
             server.registerMBean(mbean, objectName);
         }
-        catch (RuntimeException e) {
-        	throw e;
+        catch (MalformedObjectNameException mone) {
+            throw new JmxException(JmxCause.MALFORMED_OBJECT_NAME, mone.getMessage());
         }
-        catch (Exception e) {
-            throw new RuntimeException(e);
+        catch (InstanceAlreadyExistsException iae) {
+            throw new JmxException(JmxCause.INSTANCE_ALREADY_EXISTS, iae.getMessage());
+        }
+        catch (MBeanRegistrationException mre) {
+            throw new JmxException(JmxCause.MBEAN_REGISTRATION, mre.getMessage(), mre.getCause());
+        }
+        catch (NotCompliantMBeanException ncme) {
+            throw new JmxException(JmxCause.NOT_COMPLIANT_MBEAN, ncme.getMessage());
         }
     }
 
     public void unexport(String name)
     {
-    	try {
-    		ObjectName objectName = new ObjectName(name);
-    		
-    		server.unregisterMBean(objectName);
-    	} 
-    	catch (RuntimeException e) {
-    		throw e;
-    	}
-    	catch (Exception e) {
-    		throw new RuntimeException(e);
-    	}
+        ObjectName objectName;
+
+        try {
+            objectName = new ObjectName(name);
+
+            server.unregisterMBean(objectName);
+        }
+        catch (MalformedObjectNameException mone) {
+            throw new JmxException(JmxCause.MALFORMED_OBJECT_NAME, mone.getMessage());
+        }
+        catch (MBeanRegistrationException mre) {
+            throw new JmxException(JmxCause.MBEAN_REGISTRATION, mre.getMessage(), mre.getCause());
+        }
+        catch (InstanceNotFoundException infe) {
+            throw new JmxException(JmxCause.INSTANCE_NOT_FOUND, infe.getMessage());
+        }
+
     }
 
     /**

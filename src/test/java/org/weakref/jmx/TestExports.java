@@ -12,7 +12,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.weakref.jmx.JmxException.JmxCause;
 
-public class TestUnexporter
+public class TestExports
 {
     private MBeanServer server = null;
     private MBeanExporter exporter = null;
@@ -29,8 +29,6 @@ public class TestUnexporter
         server = ManagementFactory.getPlatformMBeanServer();
         exporter = new MBeanExporter(server);
 
-        exporter.export(name, new TestBean());
-
         Assert.assertNotNull(server);
         Assert.assertNotNull(exporter);
         Assert.assertNotNull(objectName);
@@ -40,50 +38,41 @@ public class TestUnexporter
     @AfterMethod
     public void tearDown()
     {
+        Assert.assertNotNull(name);
         Assert.assertNotNull(server);
         Assert.assertNotNull(exporter);
         Assert.assertNotNull(objectName);
 
-        if (name != null) {
-            try {
-                exporter.unexport(name);
-            }
-            catch (JmxException je) {
-                Assert.fail("Could not unexport mbean", je);
-            }
-            name = null;
-        }
+        exporter.unexport(name);
 
+        name = null;
         server = null;
         exporter = null;
         objectName = null;
     }
 
-    @Test(expectedExceptions = InstanceNotFoundException.class)
-    public void testUnexportOk() throws Exception
+    @Test
+    public void testExportOk() throws Exception
     {
+        exporter.export(name, new TestBean());
+
         Assert.assertEquals("Hello!", server.getAttribute(objectName, "Hello"));
-        exporter.unexport(name);
-        name = null;
-        server.getAttribute(objectName, "Hello");
     }
 
     @Test(expectedExceptions = JmxException.class)
-    public void testUnexportDouble() throws Throwable
+    public void testExportDouble() throws Throwable
     {
+        exporter.export(name, new TestBean());
+
         Assert.assertEquals("Hello!", server.getAttribute(objectName, "Hello"));
-        exporter.unexport(name);
 
         try {
-            exporter.unexport(name);
+            exporter.export(name, new TestBean());
         }
         catch (Throwable t) {
             Assert.assertTrue(t instanceof JmxException);
-            Assert.assertEquals(((JmxException) t).getJmxCause(), JmxCause.INSTANCE_NOT_FOUND);
+            Assert.assertEquals(((JmxException) t).getJmxCause(), JmxCause.INSTANCE_ALREADY_EXISTS);
             throw t;
-        }
-        finally {
-            name = null;
         }
     }
 

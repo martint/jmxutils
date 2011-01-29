@@ -15,9 +15,6 @@
  */
 package org.weakref.jmx;
 
-import javax.management.Descriptor;
-import javax.management.DescriptorKey;
-import javax.management.ImmutableDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -26,6 +23,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+
+import javax.management.Descriptor;
+import javax.management.DescriptorKey;
+import javax.management.ImmutableDescriptor;
+
+import org.weakref.jmx.JmxException.JmxCause;
 
 final class AnnotationUtils
 {
@@ -62,13 +65,10 @@ final class AnnotationUtils
                     Throwable cause = e;
                     if (e instanceof InvocationTargetException) {
                         cause = e.getCause();
-
                     }
-                    throw new RuntimeException(String.format(
+                    throw new JmxException(JmxCause.CONFIG, cause,
                             "Unexpected exception getting value from @DescriptorKey field type: annotationClass=%s, field=%s",
-                            annotation.annotationType().getName(),
-                            field.getName()),
-                            cause);
+                            annotation.annotationType().getName(), field.getName());
                 }
 
                 // skip null values, since that is the default
@@ -108,10 +108,10 @@ final class AnnotationUtils
                     }
                 }
                 else if (value instanceof Annotation) {
-                    throw new IllegalArgumentException(String.format(
+                    throw new JmxException(JmxCause.CONFIG,
                             "@DescriptorKey can not be applied to an annotation field type: annotationClass=%s, field=%s",
                             annotation.annotationType().getName(),
-                            field.getName()));
+                            field.getName());
                 }
 
                 fields.put(name, value);
