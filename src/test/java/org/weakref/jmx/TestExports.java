@@ -2,7 +2,6 @@ package org.weakref.jmx;
 
 import java.lang.management.ManagementFactory;
 
-import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
