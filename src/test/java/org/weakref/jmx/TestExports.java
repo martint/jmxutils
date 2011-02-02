@@ -57,7 +57,7 @@ public class TestExports
         Assert.assertEquals("Hello!", server.getAttribute(objectName, "Hello"));
     }
 
-    @Test(expectedExceptions = JmxException.class)
+    @Test
     public void testExportDouble() throws Throwable
     {
         exporter.export(name, new TestBean());
@@ -67,10 +67,8 @@ public class TestExports
         try {
             exporter.export(name, new TestBean());
         }
-        catch (Throwable t) {
-            Assert.assertTrue(t instanceof JmxException);
-            Assert.assertEquals(((JmxException) t).getReason(), JmxException.Reason.INSTANCE_ALREADY_EXISTS);
-            throw t;
+        catch (JmxException e) {
+            Assert.assertEquals(e.getReason(), JmxException.Reason.INSTANCE_ALREADY_EXISTS);
         }
     }
 

@@ -67,7 +67,7 @@ public class TestUnexporter
         server.getAttribute(objectName, "Hello");
     }
 
-    @Test(expectedExceptions = JmxException.class)
+    @Test
     public void testUnexportDouble() throws Throwable
     {
         Assert.assertEquals("Hello!", server.getAttribute(objectName, "Hello"));
@@ -76,12 +76,8 @@ public class TestUnexporter
         try {
             exporter.unexport(name);
         }
-        catch (Throwable t) {
-            Assert.assertTrue(t instanceof JmxException);
-            Assert.assertEquals(((JmxException) t).getReason(), JmxException.Reason.INSTANCE_NOT_FOUND);
-            throw t;
-        }
-        finally {
+        catch (JmxException e) {
+            Assert.assertEquals(e.getReason(), JmxException.Reason.INSTANCE_NOT_FOUND);
             name = null;
         }
     }
