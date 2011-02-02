@@ -46,14 +46,14 @@ public class MBeanExporter
 
             server.registerMBean(mbean, objectName);
         }
-        catch (MalformedObjectNameException mone) {
-            throw new JmxException(Reason.MALFORMED_OBJECT_NAME, mone.getMessage());
+        catch (MalformedObjectNameException e) {
+            throw new JmxException(Reason.MALFORMED_OBJECT_NAME, e.getMessage());
         }
-        catch (InstanceAlreadyExistsException iae) {
-            throw new JmxException(JmxException.Reason.INSTANCE_ALREADY_EXISTS, iae.getMessage());
+        catch (InstanceAlreadyExistsException e) {
+            throw new JmxException(JmxException.Reason.INSTANCE_ALREADY_EXISTS, e.getMessage());
         }
-        catch (MBeanRegistrationException mre) {
-            throw new JmxException(Reason.MBEAN_REGISTRATION, mre.getMessage(), mre.getCause());
+        catch (MBeanRegistrationException e) {
+            throw new JmxException(Reason.MBEAN_REGISTRATION, e.getMessage(), e.getCause());
         }
         catch (NotCompliantMBeanException e) {
             // MBeanBuilder should never construct invalid mbeans
@@ -70,14 +70,14 @@ public class MBeanExporter
 
             server.unregisterMBean(objectName);
         }
-        catch (MalformedObjectNameException mone) {
-            throw new JmxException(Reason.MALFORMED_OBJECT_NAME, mone.getMessage());
+        catch (MalformedObjectNameException e) {
+            throw new JmxException(Reason.MALFORMED_OBJECT_NAME, e.getMessage());
         }
-        catch (MBeanRegistrationException mre) {
-            throw new JmxException(JmxException.Reason.MBEAN_REGISTRATION, mre.getMessage(), mre.getCause());
+        catch (MBeanRegistrationException e) {
+            throw new JmxException(JmxException.Reason.MBEAN_REGISTRATION, e.getMessage(), e.getCause());
         }
-        catch (InstanceNotFoundException infe) {
-            throw new JmxException(JmxException.Reason.INSTANCE_NOT_FOUND, infe.getMessage());
+        catch (InstanceNotFoundException e) {
+            throw new JmxException(JmxException.Reason.INSTANCE_NOT_FOUND, e.getMessage());
         }
 
     }
