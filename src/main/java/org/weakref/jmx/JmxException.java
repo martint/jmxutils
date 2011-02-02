@@ -1,6 +1,7 @@
 package org.weakref.jmx;
 
-public class JmxException extends RuntimeException
+public class JmxException
+        extends RuntimeException
 {
     private static final long serialVersionUID = 1L;
 
