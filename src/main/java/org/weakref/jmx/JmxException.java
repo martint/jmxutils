@@ -4,7 +4,7 @@ public class JmxException extends RuntimeException
 {
     private static final long serialVersionUID = 1L;
 
-    public enum JmxCause
+    public enum Reason
     {
         CONFIG,
         MALFORMED_OBJECT_NAME,
@@ -13,23 +13,22 @@ public class JmxException extends RuntimeException
         MBEAN_REGISTRATION
     }
 
-    private final JmxCause jmxCause;
+    private final Reason reason;
 
-    JmxException(final JmxCause jmxCause, final String message, final Object ... args)
+    JmxException(final Reason reason, final String message, final Object ... args)
     {
         super(String.format(message, args));
-        this.jmxCause = jmxCause;
+        this.reason = reason;
     }
 
-
-    JmxException(final JmxCause jmxCause, final Throwable cause, final String message, final Object ... args)
+    JmxException(final Reason reason, final Throwable cause, final String message, final Object ... args)
     {
         super(String.format(message, args), cause);
-        this.jmxCause = jmxCause;
+        this.reason = reason;
     }
 
-    public JmxCause getJmxCause()
+    public Reason getReason()
     {
-        return jmxCause;
+        return reason;
     }
 }

@@ -28,7 +28,7 @@ import javax.management.Descriptor;
 import javax.management.DescriptorKey;
 import javax.management.ImmutableDescriptor;
 
-import org.weakref.jmx.JmxException.JmxCause;
+import org.weakref.jmx.JmxException.Reason;
 
 final class AnnotationUtils
 {
@@ -66,7 +66,7 @@ final class AnnotationUtils
                     if (e instanceof InvocationTargetException) {
                         cause = e.getCause();
                     }
-                    throw new JmxException(JmxCause.CONFIG, cause,
+                    throw new JmxException(Reason.CONFIG, cause,
                             "Unexpected exception getting value from @DescriptorKey field type: annotationClass=%s, field=%s",
                             annotation.annotationType().getName(), field.getName());
                 }
@@ -108,7 +108,7 @@ final class AnnotationUtils
                     }
                 }
                 else if (value instanceof Annotation) {
-                    throw new JmxException(JmxCause.CONFIG,
+                    throw new JmxException(Reason.CONFIG,
                             "@DescriptorKey can not be applied to an annotation field type: annotationClass=%s, field=%s",
                             annotation.annotationType().getName(),
                             field.getName());

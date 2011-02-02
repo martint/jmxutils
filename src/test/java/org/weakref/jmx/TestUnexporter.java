@@ -10,7 +10,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.weakref.jmx.JmxException.JmxCause;
 
 public class TestUnexporter
 {
@@ -79,7 +78,7 @@ public class TestUnexporter
         }
         catch (Throwable t) {
             Assert.assertTrue(t instanceof JmxException);
-            Assert.assertEquals(((JmxException) t).getJmxCause(), JmxCause.INSTANCE_NOT_FOUND);
+            Assert.assertEquals(((JmxException) t).getReason(), JmxException.Reason.INSTANCE_NOT_FOUND);
             throw t;
         }
         finally {
