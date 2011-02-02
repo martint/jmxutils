@@ -10,8 +10,7 @@ public class JmxException extends RuntimeException
         MALFORMED_OBJECT_NAME,
         INSTANCE_ALREADY_EXISTS,
         INSTANCE_NOT_FOUND,
-        MBEAN_REGISTRATION,
-        NOT_COMPLIANT_MBEAN;
+        MBEAN_REGISTRATION
     }
 
     private final JmxCause jmxCause;

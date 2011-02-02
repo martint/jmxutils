@@ -55,8 +55,9 @@ public class MBeanExporter
         catch (MBeanRegistrationException mre) {
             throw new JmxException(JmxCause.MBEAN_REGISTRATION, mre.getMessage(), mre.getCause());
         }
-        catch (NotCompliantMBeanException ncme) {
-            throw new JmxException(JmxCause.NOT_COMPLIANT_MBEAN, ncme.getMessage());
+        catch (NotCompliantMBeanException e) {
+            // MBeanBuilder should never construct invalid mbeans
+            throw new AssertionError(e);
         }
     }
 
