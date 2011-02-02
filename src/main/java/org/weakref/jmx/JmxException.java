@@ -21,11 +21,6 @@ public class JmxException extends RuntimeException
         this.jmxCause = jmxCause;
     }
 
-    JmxException(final JmxCause jmxCause, final Throwable throwable)
-    {
-        super(throwable);
-        this.jmxCause = jmxCause;
-    }
 
     JmxException(final JmxCause jmxCause, final Throwable cause, final String message, final Object ... args)
     {
