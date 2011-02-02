@@ -6,7 +6,7 @@ public class JmxException extends RuntimeException
 
     public enum Reason
     {
-        CONFIG,
+        INVALID_ANNOTATION,
         MALFORMED_OBJECT_NAME,
         INSTANCE_ALREADY_EXISTS,
         INSTANCE_NOT_FOUND,

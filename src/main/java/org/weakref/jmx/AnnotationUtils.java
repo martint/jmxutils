@@ -66,7 +66,7 @@ final class AnnotationUtils
                     if (e instanceof InvocationTargetException) {
                         cause = e.getCause();
                     }
-                    throw new JmxException(Reason.CONFIG, cause,
+                    throw new JmxException(Reason.INVALID_ANNOTATION, cause,
                             "Unexpected exception getting value from @DescriptorKey field type: annotationClass=%s, field=%s",
                             annotation.annotationType().getName(), field.getName());
                 }
@@ -108,7 +108,7 @@ final class AnnotationUtils
                     }
                 }
                 else if (value instanceof Annotation) {
-                    throw new JmxException(Reason.CONFIG,
+                    throw new JmxException(Reason.INVALID_ANNOTATION,
                             "@DescriptorKey can not be applied to an annotation field type: annotationClass=%s, field=%s",
                             annotation.annotationType().getName(),
                             field.getName());
