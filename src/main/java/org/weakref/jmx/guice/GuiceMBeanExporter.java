@@ -15,20 +15,18 @@
  */
 package org.weakref.jmx.guice;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
+import java.util.Set;
+
 import org.weakref.jmx.MBeanExporter;
 
-import javax.management.MBeanServer;
-import java.util.Set;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 class GuiceMBeanExporter
 {
     @Inject
-    public GuiceMBeanExporter(Set<Mapping> mappings, MBeanServer server, Injector injector)
+    public GuiceMBeanExporter(Set<Mapping> mappings, MBeanExporter exporter, Injector injector)
     {
-        MBeanExporter exporter = new MBeanExporter(server);
-
         for (Mapping mapping : mappings) {
             exporter.export(mapping.getName(), injector.getInstance(mapping.getKey()));
         }

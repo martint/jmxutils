@@ -15,6 +15,8 @@
  */
 package org.weakref.jmx;
 
+import java.lang.management.ManagementFactory;
+
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
@@ -25,11 +27,20 @@ import javax.management.ObjectName;
 
 import org.weakref.jmx.JmxException.Reason;
 
-import java.lang.management.ManagementFactory;
+import com.google.inject.Inject;
 
 public class MBeanExporter
 {
     private final MBeanServer server;
+
+    /**
+     * Default constructor for use by Guice if you do not bind anything;
+     * creates a MBeanExporter with the platform {@link MBeanServer}
+     */
+    @Inject
+    MBeanExporter() {
+        this(ManagementFactory.getPlatformMBeanServer());
+    }
 
     public MBeanExporter(MBeanServer server)
     {
