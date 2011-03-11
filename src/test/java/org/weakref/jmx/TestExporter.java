@@ -18,9 +18,12 @@ package org.weakref.jmx;
 
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.weakref.jmx.testing.TestingMBeanServer;
+
 import static org.weakref.jmx.Util.getUniqueObjectName;
 
 import javax.management.AttributeNotFoundException;
@@ -68,11 +71,11 @@ public class TestExporter
         }
     }
 
-    @BeforeTest
+    @BeforeMethod
     private void setup()
             throws IOException, MalformedObjectNameException, NotBoundException
     {
-        server = ManagementFactory.getPlatformMBeanServer();
+        server = new TestingMBeanServer();
 
         objects = new ArrayList<Pair<ObjectName, ?>>(2);
         objects.add(Pair.of(getUniqueObjectName(), new SimpleObject()));
@@ -82,20 +85,20 @@ public class TestExporter
         objects.add(Pair.of(getUniqueObjectName(), new NestedObject()));
         objects.add(Pair.of(getUniqueObjectName(), new CustomNestedAnnotationObject()));
 
-        MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
+        MBeanExporter exporter = new MBeanExporter(server);
         for (Pair<ObjectName, ?> pair : objects) {
             exporter.export(pair.left.getCanonicalName(), pair.right);
         }
     }
 
-    @AfterTest
-    public void teardown()
-            throws IOException, InstanceNotFoundException, MBeanRegistrationException
-    {
-        for (Pair<ObjectName, ?> pair : objects) {
-            server.unregisterMBean(pair.left);
-        }
-    }
+//    @AfterTest
+//    public void teardown()
+//            throws IOException, InstanceNotFoundException, MBeanRegistrationException
+//    {
+//        for (Pair<ObjectName, ?> pair : objects) {
+//            server.unregisterMBean(pair.left);
+//        }
+//    }
 
 //    @Test
 //    public void testMBeanInfo()

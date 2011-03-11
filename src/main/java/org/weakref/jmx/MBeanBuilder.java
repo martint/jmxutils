@@ -37,6 +37,16 @@ class MBeanBuilder
         this.className = className;
     }
 
+    public static MBeanBuilder from(String className)
+    {
+        return new MBeanBuilder(className);
+    }
+
+    public static MBeanBuilder from(Object object)
+    {
+        return new MBeanBuilder(object);
+    }
+
     public MBeanBuilder(Object target)
     {
         if (target == null) {
