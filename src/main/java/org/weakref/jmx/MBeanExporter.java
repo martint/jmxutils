@@ -38,7 +38,8 @@ public class MBeanExporter
      * creates a MBeanExporter with the platform {@link MBeanServer}
      */
     @Inject
-    MBeanExporter() {
+    MBeanExporter()
+    {
         this(ManagementFactory.getPlatformMBeanServer());
     }
 
