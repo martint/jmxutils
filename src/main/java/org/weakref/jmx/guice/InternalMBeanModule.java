@@ -15,8 +15,6 @@
  */
 package org.weakref.jmx.guice;
 
-import static com.google.inject.Scopes.SINGLETON;
-
 import com.google.inject.AbstractModule;
 
 /**
@@ -29,7 +27,7 @@ final class InternalMBeanModule
     @Override
     protected void configure()
     {
-        bind(GuiceMBeanExporter.class).in(SINGLETON);
+        bind(GuiceMBeanExporter.class).asEagerSingleton();
     }
 
     @Override
