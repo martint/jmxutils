@@ -43,8 +43,8 @@ import com.google.inject.name.Names;
 
 public class TestMBeanModule
 {
-    @Test(expectedExceptions = InstanceNotFoundException.class)
-    public void testNothingExportedInDevelopmentStage() 
+    @Test
+    public void testExportedInDevelopmentStageToo() 
     	throws IntrospectionException, InstanceNotFoundException, ReflectionException 
     {
     	final ObjectName name = Util.getUniqueObjectName();
@@ -58,14 +58,14 @@ public class TestMBeanModule
                 bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
             }
         },
-                new MBeanModule()
-                {
-                    @Override
-                    protected void configureMBeans()
-                    {
-                        export(SimpleObject.class).as(name.getCanonicalName());
-                    }
-                });
+        new MBeanModule()
+        {
+            @Override
+            protected void configureMBeans()
+            {
+                export(SimpleObject.class).as(name.getCanonicalName());
+            }
+        });
         
         MBeanServer server = injector.getInstance(MBeanServer.class);
         Assert.assertNotNull(server.getMBeanInfo(name));
