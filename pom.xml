@@ -7,7 +7,7 @@
     <version>1.10-SNAPSHOT</version>
     <name>jmxutils</name>
     <description>Exporting JMX mbeans made easy</description>
-    <url>http://github.com/martint/jmxutils</url>
+    <url>https://github.com/martint/jmxutils</url>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -25,7 +25,7 @@
     <scm>
         <connection>scm:git:git://github.com/martint/jmxutils.git</connection>
         <developerConnection>scm:git:git@github.com:martint/jmxutils.git</developerConnection>
-        <url>http://github.com/martint/jmxutils/tree/master</url>
+        <url>https://github.com/martint/jmxutils</url>
     </scm>
 
     <dependencies>
