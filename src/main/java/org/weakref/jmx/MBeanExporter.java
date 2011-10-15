@@ -33,16 +33,12 @@ public class MBeanExporter
 {
     private final MBeanServer server;
 
-    /**
-     * Default constructor for use by Guice if you do not bind anything;
-     * creates a MBeanExporter with the platform {@link MBeanServer}
-     */
-    @Inject
     MBeanExporter()
     {
         this(ManagementFactory.getPlatformMBeanServer());
     }
 
+    @Inject
     public MBeanExporter(MBeanServer server)
     {
         this.server = server;
