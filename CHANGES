@@ -1,3 +1,17 @@
+# Version 1.10
+
+- [Bug] Make mbean server injectable (broke in 1.9)
+
+# Version 1.9
+
+- Improve error reporting
+- Add mock mbean server for testing
+- Make MBeanExporter injectable
+
+# Version 1.8
+
+- Add support for @Nested and @Flatten
+
 # Version 1.7
 
 - Add convenience method to get MBeanExporter configured with platform mbean server
