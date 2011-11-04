@@ -16,6 +16,8 @@
 package org.weakref.jmx;
 
 import java.lang.management.ManagementFactory;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
@@ -32,6 +34,7 @@ import com.google.inject.Inject;
 public class MBeanExporter
 {
     private final MBeanServer server;
+    private final Set<String> exportedObjectNames = new HashSet<String>();
 
     MBeanExporter()
     {
@@ -52,7 +55,10 @@ public class MBeanExporter
             MBeanBuilder builder = new MBeanBuilder(object);
             MBean mbean = builder.build();
 
-            server.registerMBean(mbean, objectName);
+            synchronized(exportedObjectNames) {
+                exportedObjectNames.add(name);
+                server.registerMBean(mbean, objectName);
+            }
         }
         catch (MalformedObjectNameException e) {
             throw new JmxException(Reason.MALFORMED_OBJECT_NAME, e.getMessage());
@@ -76,7 +82,10 @@ public class MBeanExporter
         try {
             objectName = new ObjectName(name);
 
-            server.unregisterMBean(objectName);
+            synchronized(exportedObjectNames) {
+                server.unregisterMBean(objectName);
+                exportedObjectNames.remove(name);
+            }
         }
         catch (MalformedObjectNameException e) {
             throw new JmxException(Reason.MALFORMED_OBJECT_NAME, e.getMessage());
@@ -87,7 +96,19 @@ public class MBeanExporter
         catch (InstanceNotFoundException e) {
             throw new JmxException(JmxException.Reason.INSTANCE_NOT_FOUND, e.getMessage());
         }
+    }
 
+    /**
+     * Unexports all MBeans that have been exported through this MBeanExporter.
+     */
+    public void unexportAll()
+    {
+        synchronized(exportedObjectNames) {
+            for (String objectName : exportedObjectNames) {
+                unexport(objectName);
+            }
+            exportedObjectNames.clear();
+        }
     }
 
     /**

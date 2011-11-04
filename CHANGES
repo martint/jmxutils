@@ -1,3 +1,7 @@
+# Version 1.11
+
+- Add function to MBeanExporter to unexport all exported mbeans
+
 # Version 1.10
 
 - [Bug] Make mbean server injectable (broke in 1.9)
