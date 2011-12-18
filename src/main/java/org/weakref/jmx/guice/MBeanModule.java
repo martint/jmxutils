@@ -62,13 +62,13 @@ public class MBeanModule
     {
         return builder.export(key);
     }
-    
+
     protected AnnotatedExportBuilder export(Class<?> clazz)
     {
         return builder.export(clazz);
     }
-    
-    public static ExportBuilder newExporter(Binder binder) 
+
+    public static ExportBuilder newExporter(Binder binder)
     {
     	return new ExportBuilder(newSetBinder(binder, Mapping.class));
     }

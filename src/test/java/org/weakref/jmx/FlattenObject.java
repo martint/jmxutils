@@ -19,7 +19,7 @@ public class FlattenObject
 {
     private final SimpleObject simpleObject = new SimpleObject();
 
-    @Managed @Flatten       
+    @Managed @Flatten
     public SimpleObject getSimpleObject()
     {
         return simpleObject;
