@@ -1,6 +1,7 @@
 # Version 1.11
 
 - Add function to MBeanExporter to unexport all exported mbeans
+- Remove need to use PRODUCTION state in guice to enable jmxutils
 
 # Version 1.10
 
