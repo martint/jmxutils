@@ -164,7 +164,7 @@ To use jmxutils in maven projects:
 <dependency>
     <groupId>org.weakref</groupId>
     <artifactId>jmxutils</artifactId>
-    <version>1.6</version>
+    <version>1.11</version>
 </dependency>
 ```
 
