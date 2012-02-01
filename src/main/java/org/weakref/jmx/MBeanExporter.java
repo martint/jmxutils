@@ -104,7 +104,8 @@ public class MBeanExporter
     public void unexportAll()
     {
         synchronized(exportedObjectNames) {
-            for (String objectName : exportedObjectNames) {
+            // Copy exportedObjectNames since unexport modifies it, causing ConcurrentModificationException
+            for (String objectName : new HashSet<String>(exportedObjectNames)) {
                 unexport(objectName);
             }
             exportedObjectNames.clear();
