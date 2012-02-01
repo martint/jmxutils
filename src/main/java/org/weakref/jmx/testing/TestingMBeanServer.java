@@ -14,7 +14,6 @@ import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
-import javax.management.OperationsException;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
 import javax.management.loading.ClassLoaderRepository;

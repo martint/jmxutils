@@ -17,8 +17,6 @@ package org.weakref.jmx.guice;
 
 import static org.weakref.jmx.ObjectNames.generatedNameOf;
 
-import java.lang.annotation.Annotation;
-
 import com.google.inject.name.Named;
 import org.weakref.jmx.ObjectNames;
 
@@ -39,7 +37,7 @@ public class NamedBindingBuilder
     /**
      * Names the MBean according to {@link ObjectNames} name generator methods.
      */
-    public void withGeneratedName() 
+    public void withGeneratedName()
     {
         if (key.getAnnotation() != null) {
             if (key.getAnnotation() instanceof Named) {

@@ -17,9 +17,7 @@
 package org.weakref.jmx;
 
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.weakref.jmx.testing.TestingMBeanServer;
@@ -33,7 +31,6 @@ import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
-import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -41,7 +38,6 @@ import javax.management.ReflectionException;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.NotBoundException;
@@ -72,7 +68,7 @@ public class TestExporter
     }
 
     @BeforeMethod
-    private void setup()
+    void setup()
             throws IOException, MalformedObjectNameException, NotBoundException
     {
         server = new TestingMBeanServer();
@@ -378,7 +374,7 @@ public class TestExporter
     }
 
     @DataProvider(name = "fixtures")
-    private Object[][] getFixtures()
+    Object[][] getFixtures()
     {
         return new Object[][] {
 
