@@ -103,11 +103,20 @@ public class MBeanExporter
     }
 
     /**
+     * @deprecated Backwards compatible to 1.11. For new code, use {@link MBeanExporter#unexportAllAndReportMissing()}.
+     */
+    @Deprecated
+    public void unexportAll()
+    {
+        unexportAllAndReportMissing();
+    }
+
+    /**
      * Unexports all MBeans that have been exported through this MBeanExporter.
      *
      * @return a map of object names that could not be exported and the corresponding exception.
      */
-    public Map<String, Exception> unexportAll()
+    public Map<String, Exception> unexportAllAndReportMissing()
     {
         Map<String, Exception> errors = new HashMap<String, Exception>();
 

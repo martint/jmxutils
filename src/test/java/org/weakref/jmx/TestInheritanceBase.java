@@ -15,7 +15,6 @@
  */
 package org.weakref.jmx;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
 

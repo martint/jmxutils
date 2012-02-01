@@ -88,7 +88,7 @@ public class TestUnexporter
     public void testUnexportAll()
             throws IntrospectionException, ReflectionException
     {
-        exporter.unexportAll();
+        exporter.unexportAllAndReportMissing();
 
         for (ObjectName name : objectNames) {
             try {
@@ -105,7 +105,7 @@ public class TestUnexporter
     public void testUnexportAllIdempotent()
             throws IntrospectionException, ReflectionException
     {
-        exporter.unexportAll();
+        exporter.unexportAllAndReportMissing();
 
         for (ObjectName name : objectNames) {
             try {
@@ -117,7 +117,7 @@ public class TestUnexporter
             }
         }
 
-        Map<String,Exception> errors = exporter.unexportAll();
+        Map<String,Exception> errors = exporter.unexportAllAndReportMissing();
         Assert.assertTrue(errors.isEmpty());
     }
 
@@ -127,7 +127,7 @@ public class TestUnexporter
     {
         server.unregisterMBean(objectNames.get(0));
 
-        Map<String,Exception> errors = exporter.unexportAll();
+        Map<String,Exception> errors = exporter.unexportAllAndReportMissing();
         Assert.assertTrue(errors.isEmpty());
 
         for (ObjectName name : objectNames) {
