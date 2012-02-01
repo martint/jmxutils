@@ -1,39 +1,43 @@
 package org.weakref.jmx;
 
-import java.lang.management.ManagementFactory;
-
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
+import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.lang.String.format;
 
 public class TestUnexporter
 {
     private MBeanServer server = null;
     private MBeanExporter exporter = null;
 
-    private ObjectName objectName = null;
-    private String name = null;
+    private List<ObjectName> objectNames;
 
     @BeforeMethod
     public void setUp()
     {
-        Assert.assertNull(name);
-        objectName = Util.getUniqueObjectName();
-        name = objectName.getCanonicalName();
         server = ManagementFactory.getPlatformMBeanServer();
         exporter = new MBeanExporter(server);
 
-        exporter.export(name, new TestBean());
+        objectNames = new ArrayList<ObjectName>();
+        for (int i = 0; i < 10; ++i) {
+            ObjectName name = Util.getUniqueObjectName();
+            objectNames.add(name);
+            exporter.export(name.getCanonicalName(), new TestBean());
+        }
 
         Assert.assertNotNull(server);
         Assert.assertNotNull(exporter);
-        Assert.assertNotNull(objectName);
-        Assert.assertNotNull(name);
     }
 
     @AfterMethod
@@ -41,44 +45,57 @@ public class TestUnexporter
     {
         Assert.assertNotNull(server);
         Assert.assertNotNull(exporter);
-        Assert.assertNotNull(objectName);
 
-        if (name != null) {
+        for (ObjectName name : objectNames) {
             try {
-                exporter.unexport(name);
+                exporter.unexport(name.getCanonicalName());
             }
-            catch (JmxException je) {
-                Assert.fail("Could not unexport mbean", je);
+            catch (JmxException e) {
+                // ignore
             }
-            name = null;
         }
-
-        server = null;
-        exporter = null;
-        objectName = null;
     }
 
     @Test(expectedExceptions = InstanceNotFoundException.class)
     public void testUnexportOk() throws Exception
     {
-        Assert.assertEquals("Hello!", server.getAttribute(objectName, "Hello"));
-        exporter.unexport(name);
-        name = null;
-        server.getAttribute(objectName, "Hello");
+        ObjectName name = objectNames.get(0);
+
+        Assert.assertEquals("Hello!", server.getAttribute(name, "Hello"));
+        exporter.unexport(name.getCanonicalName());
+        server.getAttribute(name, "Hello");
     }
 
     @Test
     public void testUnexportDouble() throws Throwable
     {
-        Assert.assertEquals("Hello!", server.getAttribute(objectName, "Hello"));
-        exporter.unexport(name);
+        ObjectName name = objectNames.get(0);
+
+        Assert.assertEquals("Hello!", server.getAttribute(name, "Hello"));
+        exporter.unexport(name.getCanonicalName());
 
         try {
-            exporter.unexport(name);
+            exporter.unexport(name.getCanonicalName());
         }
         catch (JmxException e) {
             Assert.assertEquals(e.getReason(), JmxException.Reason.INSTANCE_NOT_FOUND);
-            name = null;
+        }
+    }
+
+    @Test
+    public void testUnexportAll()
+            throws IntrospectionException, ReflectionException
+    {
+        exporter.unexportAll();
+
+        for (ObjectName name : objectNames) {
+            try {
+                server.getMBeanInfo(name);
+                Assert.fail(format("failed to unexport %s", name.getCanonicalName()));
+            }
+            catch (InstanceNotFoundException e) {
+                // success
+            }
         }
     }
 

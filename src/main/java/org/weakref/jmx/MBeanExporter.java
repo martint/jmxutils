@@ -15,9 +15,8 @@
  */
 package org.weakref.jmx;
 
-import java.lang.management.ManagementFactory;
-import java.util.HashSet;
-import java.util.Set;
+import com.google.inject.Inject;
+import org.weakref.jmx.JmxException.Reason;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
@@ -26,10 +25,15 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
+import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.weakref.jmx.JmxException.Reason;
-
-import com.google.inject.Inject;
+import static java.lang.String.format;
 
 public class MBeanExporter
 {
@@ -100,15 +104,37 @@ public class MBeanExporter
 
     /**
      * Unexports all MBeans that have been exported through this MBeanExporter.
+     *
+     * @return a map of object names that could not be exported and the corresponding exception.
      */
-    public void unexportAll()
+    public Map<String, Exception> unexportAll()
     {
+        Map<String, Exception> errors = new HashMap<String, Exception>();
+
         synchronized(exportedObjectNames) {
+            List<String> toRemove = new ArrayList<String>(exportedObjectNames.size());
             for (String objectName : exportedObjectNames) {
-                unexport(objectName);
+                try {
+                    server.unregisterMBean(new ObjectName(objectName));
+                    toRemove.add(objectName);
+                }
+                catch(InstanceNotFoundException e) {
+                    // ignore ... mbean has already been unregistered elsewhere
+                    toRemove.add(objectName);
+                }
+                catch (MalformedObjectNameException e) {
+                    throw new IllegalStateException(format("Found a malformed object name [%s]. This should never happen", objectName), e);
+                }
+                catch (MBeanRegistrationException e) {
+                    //noinspection ThrowableResultOfMethodCallIgnored
+                    errors.put(objectName, e);
+                }
             }
-            exportedObjectNames.clear();
+
+            exportedObjectNames.removeAll(toRemove);
         }
+
+        return errors;
     }
 
     /**
