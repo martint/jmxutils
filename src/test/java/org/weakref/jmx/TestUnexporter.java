@@ -7,12 +7,14 @@ import org.testng.annotations.Test;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
+import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.String.format;
 
@@ -98,6 +100,47 @@ public class TestUnexporter
             }
         }
     }
+
+    @Test
+    public void testUnexportAllIdempotent()
+            throws IntrospectionException, ReflectionException
+    {
+        exporter.unexportAll();
+
+        for (ObjectName name : objectNames) {
+            try {
+                server.getMBeanInfo(name);
+                Assert.fail(format("failed to unexport %s", name.getCanonicalName()));
+            }
+            catch (InstanceNotFoundException e) {
+                // success
+            }
+        }
+
+        Map<String,Exception> errors = exporter.unexportAll();
+        Assert.assertTrue(errors.isEmpty());
+    }
+
+    @Test
+    public void testUnexportAllIgnoresMissing()
+            throws IntrospectionException, ReflectionException, InstanceNotFoundException, MBeanRegistrationException
+    {
+        server.unregisterMBean(objectNames.get(0));
+
+        Map<String,Exception> errors = exporter.unexportAll();
+        Assert.assertTrue(errors.isEmpty());
+
+        for (ObjectName name : objectNames) {
+            try {
+                server.getMBeanInfo(name);
+                Assert.fail(format("failed to unexport %s", name.getCanonicalName()));
+            }
+            catch (InstanceNotFoundException e) {
+                // success
+            }
+        }
+    }
+
 
     public static class TestBean
     {
