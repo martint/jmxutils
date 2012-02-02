@@ -66,7 +66,7 @@ class MBeanBuilder
                 if (attributeBuilder == null) {
                     attributeBuilder = new MBeanAttributeBuilder().named(attributeName).onInstance(target);
                 }
-                
+
                 if (isGetter(concreteMethod)) {
                     attributeBuilder = attributeBuilder
                             .withConcreteGetter(concreteMethod)
@@ -134,7 +134,7 @@ class MBeanBuilder
         for (MBeanOperationBuilder operationBuilder : operationBuilders) {
             operations.add(operationBuilder.build());
         }
-        
+
         return new MBean(className, description, attributes, operations);
     }
 }

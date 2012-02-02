@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Util
 {
     private final static AtomicInteger id = new AtomicInteger(0);
-    
+
     public static ObjectName getUniqueObjectName()
     {
         try {

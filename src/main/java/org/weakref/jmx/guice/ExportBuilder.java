@@ -5,8 +5,8 @@ import com.google.inject.multibindings.Multibinder;
 
 public class ExportBuilder
 {
-	private final Multibinder<Mapping> binder; 
-	
+	private final Multibinder<Mapping> binder;
+
 	ExportBuilder(Multibinder<Mapping> binder)
     {
 		this.binder = binder;

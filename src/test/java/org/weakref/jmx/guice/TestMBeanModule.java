@@ -44,8 +44,8 @@ import com.google.inject.name.Names;
 public class TestMBeanModule
 {
     @Test
-    public void testExportedInDevelopmentStageToo() 
-    	throws IntrospectionException, InstanceNotFoundException, ReflectionException 
+    public void testExportedInDevelopmentStageToo()
+    	throws IntrospectionException, InstanceNotFoundException, ReflectionException
     {
     	final ObjectName name = Util.getUniqueObjectName();
 
@@ -66,7 +66,7 @@ public class TestMBeanModule
                 export(SimpleObject.class).as(name.getCanonicalName());
             }
         });
-        
+
         MBeanServer server = injector.getInstance(MBeanServer.class);
         Assert.assertNotNull(server.getMBeanInfo(name));
     }
@@ -161,7 +161,7 @@ public class TestMBeanModule
         Assert.assertNotNull(server.getMBeanInfo(name));
         server.unregisterMBean(name);
     }
-    
+
     @Test
     public void testMultipleModules()
             throws IOException, IntrospectionException, InstanceNotFoundException, ReflectionException, MalformedObjectNameException, MBeanRegistrationException
@@ -270,9 +270,9 @@ public class TestMBeanModule
         server.unregisterMBean(objectName1);
         server.unregisterMBean(objectName2);
     }
-    
+
     @Test
-    public void testExportBuilder() 
+    public void testExportBuilder()
     	throws IntrospectionException, InstanceNotFoundException, ReflectionException, MBeanRegistrationException
     {
     	final ObjectName objectName1 = Util.getUniqueObjectName();
