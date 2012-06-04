@@ -18,8 +18,11 @@ package org.weakref.jmx;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -29,6 +32,8 @@ import javax.management.DescriptorKey;
 import javax.management.ImmutableDescriptor;
 
 import org.weakref.jmx.JmxException.Reason;
+
+import static java.util.Arrays.asList;
 
 final class AnnotationUtils
 {
@@ -44,80 +49,113 @@ final class AnnotationUtils
     public static Descriptor buildDescriptor(Annotation... annotations)
     {
         Map<String, Object> fields = new TreeMap<String, Object>();
+
+        // process all direct annotations
+        for (Annotation annotation : computeWalkSequence(annotations)) {
+            processAnnotation(annotation, fields);
+        }
+
+        return new ImmutableDescriptor(fields);
+    }
+
+    public static List<Annotation> computeWalkSequence(Annotation... annotations)
+    {
+        Set<Annotation> seen = new HashSet<Annotation>();
+        List<Annotation> result = new ArrayList<Annotation>();
+
+        computeWalkSequence(seen, result, annotations);
+
+        return new ArrayList<Annotation>(result);
+    }
+
+    private static void computeWalkSequence(Set<Annotation> seen, List<Annotation> result, Annotation... annotations)
+    {
+        seen.addAll(asList(annotations));
+
         for (Annotation annotation : annotations) {
-            // for each field in the annotation
-            for (Method field : annotation.annotationType().getMethods()) {
-                // if the field is annotated with the descriptor key
-                DescriptorKey descriptorKey = field.getAnnotation(DescriptorKey.class);
-                if (descriptorKey == null) {
-                    continue;
+            for (Annotation parent : annotation.annotationType().getAnnotations()) {
+                if (!seen.contains(parent)) {
+                    computeWalkSequence(seen, result, parent);
                 }
-
-                // name is the name of the method
-                String name = descriptorKey.value();
-
-                // invoke method to get the value
-                Object value;
-                try {
-                    value = field.invoke(annotation);
-                }
-                catch (Exception e) {
-                    Throwable cause = e;
-                    if (e instanceof InvocationTargetException) {
-                        cause = e.getCause();
-                    }
-                    throw new JmxException(Reason.INVALID_ANNOTATION, cause,
-                            "Unexpected exception getting value from @DescriptorKey field type: annotationClass=%s, field=%s",
-                            annotation.annotationType().getName(), field.getName());
-                }
-
-                // skip null values, since that is the default
-                if (value == null) {
-                    continue;
-                }
-
-                // Convert Class and Enum value or array value to String or String array
-                // see DescriptorKey javadocs for more info
-                if (value instanceof Class) {
-                    value = ((Class<?>) value).getName();
-                }
-                else if (value instanceof Enum) {
-                    value = ((Enum<?>) value).name();
-                }
-                else if (value.getClass().isArray()) {
-                    Class<?> componentType = value.getClass().getComponentType();
-                    if (Class.class.equals(componentType)) {
-                        Class<?>[] classArray = (Class<?>[]) value;
-                        String[] stringArray = new String[classArray.length];
-                        for (int i = 0; i < classArray.length; i++) {
-                            if (classArray[i] != null) {
-                                stringArray[i] = classArray[i].getName();
-                            }
-                        }
-                        value = stringArray;
-                    }
-                    else if (componentType.isEnum()) {
-                        Enum<?>[] enumArray = (Enum<?>[]) value;
-                        String[] stringArray = new String[enumArray.length];
-                        for (int i = 0; i < enumArray.length; i++) {
-                            if (enumArray[i] != null) {
-                                stringArray[i] = enumArray[i].name();
-                            }
-                        }
-                        value = stringArray;
-                    }
-                }
-                else if (value instanceof Annotation) {
-                    throw new JmxException(Reason.INVALID_ANNOTATION,
-                            "@DescriptorKey can not be applied to an annotation field type: annotationClass=%s, field=%s",
-                            annotation.annotationType().getName(),
-                            field.getName());
-                }
-
-                fields.put(name, value);
             }
         }
-        return new ImmutableDescriptor(fields);
+
+        Collections.addAll(result, annotations);
+    }
+
+    private static void processAnnotation(Annotation annotation, Map<String, Object> fieldsCollector)
+    {
+        // for each field in the annotation
+        for (Method field : annotation.annotationType().getMethods()) {
+            // if the field is annotated with the descriptor key
+            DescriptorKey descriptorKey = field.getAnnotation(DescriptorKey.class);
+            if (descriptorKey == null) {
+                continue;
+            }
+
+            // name is the name of the method
+            String name = descriptorKey.value();
+
+            // invoke method to get the value
+            Object value;
+            try {
+                value = field.invoke(annotation);
+            }
+            catch (Exception e) {
+                Throwable cause = e;
+                if (e instanceof InvocationTargetException) {
+                    cause = e.getCause();
+                }
+                throw new JmxException(Reason.INVALID_ANNOTATION, cause,
+                        "Unexpected exception getting value from @DescriptorKey field type: annotationClass=%s, field=%s",
+                        annotation.annotationType().getName(), field.getName());
+            }
+
+            // skip null values, since that is the default
+            if (value == null) {
+                continue;
+            }
+
+            // Convert Class and Enum value or array value to String or String array
+            // see DescriptorKey javadocs for more info
+            if (value instanceof Class) {
+                value = ((Class<?>) value).getName();
+            }
+            else if (value instanceof Enum) {
+                value = ((Enum<?>) value).name();
+            }
+            else if (value.getClass().isArray()) {
+                Class<?> componentType = value.getClass().getComponentType();
+                if (Class.class.equals(componentType)) {
+                    Class<?>[] classArray = (Class<?>[]) value;
+                    String[] stringArray = new String[classArray.length];
+                    for (int i = 0; i < classArray.length; i++) {
+                        if (classArray[i] != null) {
+                            stringArray[i] = classArray[i].getName();
+                        }
+                    }
+                    value = stringArray;
+                }
+                else if (componentType.isEnum()) {
+                    Enum<?>[] enumArray = (Enum<?>[]) value;
+                    String[] stringArray = new String[enumArray.length];
+                    for (int i = 0; i < enumArray.length; i++) {
+                        if (enumArray[i] != null) {
+                            stringArray[i] = enumArray[i].name();
+                        }
+                    }
+                    value = stringArray;
+                }
+            }
+            else if (value instanceof Annotation) {
+                throw new JmxException(Reason.INVALID_ANNOTATION,
+                        "@DescriptorKey can not be applied to an annotation field type: annotationClass=%s, field=%s",
+                        annotation.annotationType().getName(),
+                        field.getName());
+            }
+
+            fieldsCollector.put(name, value);
+        }
     }
 
     public static String getDescription(Descriptor descriptor, Method... annotatedMethods)
