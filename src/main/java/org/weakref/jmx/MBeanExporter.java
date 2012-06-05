@@ -15,7 +15,9 @@
  */
 package org.weakref.jmx;
 
+import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
+import com.google.inject.internal.ImmutableMap;
 import org.weakref.jmx.JmxException.Reason;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -28,17 +30,15 @@ import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static java.lang.String.format;
 
 public class MBeanExporter
 {
     private final MBeanServer server;
-    private final Set<String> exportedObjectNames = new HashSet<String>();
+    private final Map<String, Object> exportedObjects;
 
     MBeanExporter()
     {
@@ -49,6 +49,7 @@ public class MBeanExporter
     public MBeanExporter(MBeanServer server)
     {
         this.server = server;
+        exportedObjects = new MapMaker().weakKeys().weakValues().makeMap();
     }
 
     public void export(String name, Object object)
@@ -59,8 +60,8 @@ public class MBeanExporter
             MBeanBuilder builder = new MBeanBuilder(object);
             MBean mbean = builder.build();
 
-            synchronized(exportedObjectNames) {
-                exportedObjectNames.add(name);
+            synchronized(exportedObjects) {
+                exportedObjects.put(name, object);
                 server.registerMBean(mbean, objectName);
             }
         }
@@ -86,9 +87,9 @@ public class MBeanExporter
         try {
             objectName = new ObjectName(name);
 
-            synchronized(exportedObjectNames) {
+            synchronized(exportedObjects) {
                 server.unregisterMBean(objectName);
-                exportedObjectNames.remove(name);
+                exportedObjects.remove(name);
             }
         }
         catch (MalformedObjectNameException e) {
@@ -120,9 +121,9 @@ public class MBeanExporter
     {
         Map<String, Exception> errors = new HashMap<String, Exception>();
 
-        synchronized(exportedObjectNames) {
-            List<String> toRemove = new ArrayList<String>(exportedObjectNames.size());
-            for (String objectName : exportedObjectNames) {
+        synchronized(exportedObjects) {
+            List<String> toRemove = new ArrayList<String>(exportedObjects.size());
+            for (String objectName : exportedObjects.keySet()) {
                 try {
                     server.unregisterMBean(new ObjectName(objectName));
                     toRemove.add(objectName);
@@ -140,12 +141,19 @@ public class MBeanExporter
                 }
             }
 
-            exportedObjectNames.removeAll(toRemove);
+            exportedObjects.keySet().removeAll(toRemove);
         }
 
         return errors;
     }
 
+    public Map<String, Object> getExportedObjects()
+    {
+        synchronized (exportedObjects) {
+            return ImmutableMap.copyOf(exportedObjects);
+        }
+    }
+    
     /**
      * Get an MBeanExporter that uses the default platform mbean server
      *
