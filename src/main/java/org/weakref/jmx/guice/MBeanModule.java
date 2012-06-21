@@ -31,7 +31,7 @@ public class MBeanModule
     {
         builder = newExporter(binder());
 
-        install(new InternalMBeanModule());
+        bind(GuiceMBeanExporter.class).asEagerSingleton();
         configureMBeans();
     }
 
