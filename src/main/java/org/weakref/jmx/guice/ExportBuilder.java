@@ -3,6 +3,7 @@ package org.weakref.jmx.guice;
 import com.google.inject.Key;
 import com.google.inject.multibindings.Multibinder;
 
+@Deprecated
 public class ExportBuilder
 {
 	private final Multibinder<Mapping> binder; 

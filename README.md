@@ -30,44 +30,21 @@ exporter.unexport("test:name=X");
 
 # Guice support
 
-## Subclassing MBeanModule
-
 ```java
 Injector injector = Guice.createInjector(
-    new AbstractModule() {
-        @Override
-        protected void configure() {
-            // MBeanModules expect an MBeanServer to be bound
-            binder().bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
-        }
-    },
-    new MBeanModule() {
-        @Override
-        protected void configureMBeans()
-        {
-            export(ManagedObject.class).as("test:name=X");
-            export(ManagedObject.class).annotatedWith(SomeAnnotation.class).as("test:name=Y");
-        }
-    }, ...); 
-```
-
-## Exporting from custom modules
-
-```java
-Injector injector = Guice.createInjector(
-    new MBeanModule(), // used to trigger registration of mbeans exported via ExportBuilder
+    new MBeanModule(), // used to trigger registration of mbeans exported via ExportBinder
     new AbstractModule() {
             @Override
             protected void configure() {
                // MBeanModule expects an MBeanServer to be bound
-               binder().bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
+               bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
 
-               ExportBuilder builder = MBeanModule.newExporter(binder());
-               builder.export(AnotherManagedObject.class).as("test:name="Z");
+               ExportBinder exporter = ExportBinder.newExporter(binder());
+               exporter.export(AnotherManagedObject.class).as("test:name="Z");
                
                // You can use a standardized naming scheme for singletons if you wish.
                // See ObjectNames.generatedNameOf(Class<?>) for the naming scheme.
-               builder.export(ManagedSingleton.class).withGeneratedName();
+               exporter.export(ManagedSingleton.class).withGeneratedName();
             }
     }, ...);
 ```

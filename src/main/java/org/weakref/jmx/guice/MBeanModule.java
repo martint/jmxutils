@@ -54,21 +54,27 @@ public class MBeanModule
      *              builder.export(AnotherManagedObject.class).as("test:name="Z");
      *          }
      *      });
+     *
+     *  @deprecated subclassing no longer supported. Use ExportBinder instead
      */
+    @Deprecated
     protected void configureMBeans() {
     }
 
+    @Deprecated
     protected NamedBindingBuilder export(Key<?> key)
     {
         return builder.export(key);
     }
-    
+
+    @Deprecated
     protected AnnotatedExportBuilder export(Class<?> clazz)
     {
         return builder.export(clazz);
     }
-    
-    public static ExportBuilder newExporter(Binder binder) 
+
+    @Deprecated
+    public static ExportBuilder newExporter(Binder binder)
     {
     	return new ExportBuilder(newSetBinder(binder, Mapping.class));
     }

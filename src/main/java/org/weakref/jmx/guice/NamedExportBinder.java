@@ -15,28 +15,25 @@
  */
 package org.weakref.jmx.guice;
 
-import static org.weakref.jmx.ObjectNames.generatedNameOf;
-
-import com.google.inject.name.Named;
-import org.weakref.jmx.ObjectNames;
-
 import com.google.inject.Key;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Named;
 
-@Deprecated
-public class NamedBindingBuilder
+import static org.weakref.jmx.ObjectNames.generatedNameOf;
+
+public class NamedExportBinder
 {
     protected final Multibinder<Mapping> binder;
     protected final Key<?> key;
 
-    NamedBindingBuilder(Multibinder<Mapping> binder, Key<?> key)
+    NamedExportBinder(Multibinder<Mapping> binder, Key<?> key)
     {
         this.binder = binder;
         this.key = key;
     }
 
     /**
-     * Names the MBean according to {@link ObjectNames} name generator methods.
+     * Names the MBean according to {@link org.weakref.jmx.ObjectNames} name generator methods.
      */
     public void withGeneratedName()
     {

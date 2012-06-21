@@ -20,22 +20,21 @@ import com.google.inject.multibindings.Multibinder;
 
 import java.lang.annotation.Annotation;
 
-@Deprecated
-public class AnnotatedExportBuilder
-        extends NamedBindingBuilder
+public class AnnotatedExportBinder
+        extends NamedExportBinder
 {
-    AnnotatedExportBuilder(Multibinder<Mapping> binder, Key<?> key)
+    AnnotatedExportBinder(Multibinder<Mapping> binder, Key<?> key)
     {
         super(binder, key);
     }
 
-    public NamedBindingBuilder annotatedWith(Annotation annotation)
+    public NamedExportBinder annotatedWith(Annotation annotation)
     {
-        return new NamedBindingBuilder(binder, Key.get(key.getTypeLiteral(), annotation));
+        return new NamedExportBinder(binder, Key.get(key.getTypeLiteral(), annotation));
     }
 
-    public NamedBindingBuilder annotatedWith(Class<? extends Annotation> annotationClass)
+    public NamedExportBinder annotatedWith(Class<? extends Annotation> annotationClass)
     {
-        return new NamedBindingBuilder(binder, Key.get(key.getTypeLiteral(), annotationClass));
+        return new NamedExportBinder(binder, Key.get(key.getTypeLiteral(), annotationClass));
     }
 }
