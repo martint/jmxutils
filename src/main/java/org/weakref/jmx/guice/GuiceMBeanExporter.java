@@ -25,10 +25,21 @@ import com.google.inject.Injector;
 class GuiceMBeanExporter
 {
     @Inject
-    public GuiceMBeanExporter(Set<Mapping> mappings, MBeanExporter exporter, Injector injector)
+    public GuiceMBeanExporter(Set<Mapping> mappings, Set<SetMapping<?>> setMappings, MBeanExporter exporter, Injector injector)
     {
         for (Mapping mapping : mappings) {
             exporter.export(mapping.getName(), injector.getInstance(mapping.getKey()));
+        }
+
+        for (SetMapping<?> mapping : setMappings) {
+            NamingFunction<Object> namingFunction = (NamingFunction<Object>) mapping.getNamingFunction();
+
+            Set<?> set = injector.getInstance(mapping.getKey());
+
+            for (Object instance : set) {
+                String name = namingFunction.name(instance);
+                exporter.export(name, instance);
+            }
         }
     }
 }

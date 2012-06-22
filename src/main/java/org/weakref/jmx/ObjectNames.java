@@ -58,10 +58,23 @@ public class ObjectNames {
    * @param named
    * @return JMX object name of the form "[package_name]:type=[class_name],name=[named_value]"
    */
-  public static String generatedNameOf(Class<?> clazz, Named named) {
-    return format("%s:type=%s,name=%s", 
-        clazz.getPackage().getName(),
-        clazz.getSimpleName(),
-        named.value());
+  public static String generatedNameOf(Class<?> clazz, Named named)
+  {
+      return generatedNameOf(clazz, named.value());
   }
+
+    /**
+     * Produce a generated JMX object name.
+     *
+     * @param clazz
+     * @param name
+     * @return JMX object name of the form "[package_name]:type=[class_name],name=[named_value]"
+     */
+    public static String generatedNameOf(Class<?> clazz, String name)
+    {
+        return format("%s:type=%s,name=%s",
+                clazz.getPackage().getName(),
+                clazz.getSimpleName(),
+                name);
+    }
 }

@@ -19,6 +19,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -218,4 +219,49 @@ public class TestMBeanModule
         server.unregisterMBean(objectName1);
         server.unregisterMBean(objectName2);
     }
+
+
+
+    @Test
+    public void testSet()
+            throws Exception
+    {
+        final ObjectName name1 = new ObjectName(generatedNameOf(SimpleObject.class, "blue"));
+        final ObjectName name2 = new ObjectName(generatedNameOf(SimpleObject.class, "red"));
+
+        Injector injector = Guice.createInjector(PRODUCTION, new MBeanModule(), new AbstractModule()
+        {
+            @Override
+            protected void configure()
+            {
+                Multibinder<SimpleObject> multibinder = Multibinder.newSetBinder(binder(), SimpleObject.class);
+
+                SimpleObject object1 = new SimpleObject();
+                object1.setStringValue("blue");
+                multibinder.addBinding().toInstance(object1);
+
+                SimpleObject object2 = new SimpleObject();
+                object2.setStringValue("red");
+                multibinder.addBinding().toInstance(object2);
+
+                bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
+                ExportBinder.newExporter(binder()).exportSet(SimpleObject.class).withGeneratedName(new NamingFunction<SimpleObject>()
+                {
+                    public String name(SimpleObject object)
+                    {
+                        return object.getStringValue();
+                    }
+                });
+            }
+        });
+
+        MBeanServer server = injector.getInstance(MBeanServer.class);
+
+        Assert.assertNotNull(server.getMBeanInfo(name1));
+        Assert.assertNotNull(server.getMBeanInfo(name2));
+
+        server.unregisterMBean(name1);
+        server.unregisterMBean(name2);
+    }
+
 }
