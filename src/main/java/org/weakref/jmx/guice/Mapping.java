@@ -19,8 +19,8 @@ import com.google.inject.Key;
 
 class Mapping
 {
-    private String name;
-    private Key<?> key;
+    private final String name;
+    private final Key<?> key;
 
     Mapping(String name, Key<?> key)
     {
