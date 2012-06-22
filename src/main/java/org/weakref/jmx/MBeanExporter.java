@@ -15,9 +15,9 @@
  */
 package org.weakref.jmx;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
-import com.google.inject.internal.ImmutableMap;
 import org.weakref.jmx.JmxException.Reason;
 
 import javax.management.InstanceAlreadyExistsException;
