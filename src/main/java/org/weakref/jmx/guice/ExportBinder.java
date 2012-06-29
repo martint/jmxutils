@@ -11,18 +11,21 @@ public class ExportBinder
 {
     private final Multibinder<Mapping> binder;
     private final Multibinder<SetMapping<?>> collectionBinder;
+    private final Multibinder<MapMapping<?, ?>> mapBinder;
 
-    ExportBinder(Multibinder<Mapping> binder, Multibinder<SetMapping<?>> collectionBinder)
+    ExportBinder(Multibinder<Mapping> binder, Multibinder<SetMapping<?>> collectionBinder, Multibinder<MapMapping<?, ?>> mapBinder)
     {
         this.binder = binder;
         this.collectionBinder = collectionBinder;
+        this.mapBinder = mapBinder;
     }
 
     public static ExportBinder newExporter(Binder binder)
     {
         Multibinder<SetMapping<?>> collectionBinder = newSetBinder(binder, new TypeLiteral<SetMapping<?>>() {});
+        Multibinder<MapMapping<?, ?>> mapBinder = newSetBinder(binder, new TypeLiteral<MapMapping<?, ?>>() {});
 
-        return new ExportBinder(newSetBinder(binder, Mapping.class), collectionBinder);
+        return new ExportBinder(newSetBinder(binder, Mapping.class), collectionBinder, mapBinder);
     }
 
     public AnnotatedExportBinder export(Class<?> clazz)
@@ -39,4 +42,15 @@ public class ExportBinder
     {
         return new SetExportBinder<T>(collectionBinder, clazz);
     }
+
+    public <V> StringMapExportBinder<V> exportMap(Class<V> valueClass)
+    {
+        return new StringMapExportBinder<V>(mapBinder, valueClass);
+    }
+
+    public <K, V> MapExportBinder<K, V> exportMap(Class<K> keyClass, Class<V> valueClass)
+    {
+        return new MapExportBinder<K, V>(mapBinder, keyClass, valueClass);
+    }
+
 }

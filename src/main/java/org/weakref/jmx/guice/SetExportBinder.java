@@ -14,13 +14,13 @@ public class SetExportBinder<T>
         this.clazz = clazz;
     }
 
-    public void withGeneratedName(final NamingFunction<T> itemNamer)
+    public void withGeneratedName(final NamingFunction<T> itemNamingFunction)
     {
         NamingFunction<T> namingFunction = new NamingFunction<T>()
         {
             public String name(T object)
             {
-                String itemName = itemNamer.name(object);
+                String itemName = itemNamingFunction.name(object);
                 return ObjectNames.generatedNameOf(clazz, itemName);
             }
         };
