@@ -9,18 +9,18 @@ import java.util.Set;
 
 class SetMapping<T>
 {
-    private final NamingFunction<T> namingFunction;
+    private final ObjectNameFunction<T> objectNameFunction;
     private final Class<T> clazz;
 
-    SetMapping(Class<T> key, NamingFunction<T> namingFunction)
+    SetMapping(Class<T> key, ObjectNameFunction<T> objectNameFunction)
     {
         this.clazz = key;
-        this.namingFunction = namingFunction;
+        this.objectNameFunction = objectNameFunction;
     }
 
-    public NamingFunction<T> getNamingFunction()
+    public ObjectNameFunction<T> getObjectNameFunction()
     {
-        return namingFunction;
+        return objectNameFunction;
     }
 
     public Key<Set<T>> getKey()

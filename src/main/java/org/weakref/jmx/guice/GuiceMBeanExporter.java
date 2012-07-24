@@ -15,13 +15,13 @@
  */
 package org.weakref.jmx.guice;
 
-import java.util.Map;
-import java.util.Set;
-
-import org.weakref.jmx.MBeanExporter;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import org.weakref.jmx.MBeanExporter;
+
+import javax.management.ObjectName;
+import java.util.Map;
+import java.util.Set;
 
 class GuiceMBeanExporter
 {
@@ -42,12 +42,12 @@ class GuiceMBeanExporter
     private <K, V> void exportMaps(Set<MapMapping<K, V>> mapMappings, MBeanExporter exporter, Injector injector)
     {
         for (MapMapping<K, V> mapping : mapMappings) {
-            NamingFunction<Map.Entry<K, V>> namingFunction = mapping.getNamingFunction();
+            ObjectNameFunction<Map.Entry<K, V>> namingFunction = mapping.getObjectNameFunction();
 
             Map<K, V> map = injector.getInstance(mapping.getKey());
 
             for (Map.Entry<K, V> entry : map.entrySet()) {
-                String name = namingFunction.name(entry);
+                ObjectName name = namingFunction.name(entry);
                 exporter.export(name, entry.getValue());
             }
         }
@@ -56,12 +56,12 @@ class GuiceMBeanExporter
     private <T> void exportSets(Set<SetMapping<T>> setMappings, MBeanExporter exporter, Injector injector)
     {
         for (SetMapping<T> mapping : setMappings) {
-            NamingFunction<T> namingFunction = mapping.getNamingFunction();
+            ObjectNameFunction<T> objectNameFunction = mapping.getObjectNameFunction();
 
             Set<T> set = injector.getInstance(mapping.getKey());
 
             for (T instance : set) {
-                String name = namingFunction.name(instance);
+                ObjectName name = objectNameFunction.name(instance);
                 exporter.export(name, instance);
             }
         }
