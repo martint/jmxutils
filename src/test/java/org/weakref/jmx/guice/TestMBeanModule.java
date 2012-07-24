@@ -53,6 +53,9 @@ public class TestMBeanModule
             @Override
             protected void configure()
             {
+                binder().requireExplicitBindings();
+                binder().disableCircularProxies();
+
                 bind(SimpleObject.class).asEagerSingleton();
                 bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
                 ExportBinder.newExporter(binder()).export(SimpleObject.class).as(name.getCanonicalName());
@@ -74,6 +77,9 @@ public class TestMBeanModule
             @Override
             protected void configure()
             {
+                binder().requireExplicitBindings();
+                binder().disableCircularProxies();
+
                 bind(SimpleObject.class).asEagerSingleton();
                 bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
                 ExportBinder.newExporter(binder()).export(SimpleObject.class).as(name.getCanonicalName());
@@ -97,6 +103,9 @@ public class TestMBeanModule
             @Override
             protected void configure()
             {
+                binder().requireExplicitBindings();
+                binder().disableCircularProxies();
+
                 bind(SimpleObject.class).asEagerSingleton();
                 bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
                 ExportBinder.newExporter(binder()).export(SimpleObject.class).withGeneratedName();
@@ -121,6 +130,9 @@ public class TestMBeanModule
             @Override
             protected void configure()
             {
+                binder().requireExplicitBindings();
+                binder().disableCircularProxies();
+
                 bind(SimpleObject.class).annotatedWith(named("hello")).toInstance(new SimpleObject());
                 bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
                 ExportBinder.newExporter(binder()).export(SimpleObject.class).annotatedWith(named("hello")).withGeneratedName();
@@ -144,6 +156,9 @@ public class TestMBeanModule
             @Override
             protected void configure()
             {
+                binder().requireExplicitBindings();
+                binder().disableCircularProxies();
+
                 bind(SimpleObject.class).annotatedWith(TestAnnotation.class).toInstance(new SimpleObject());
                 bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
                 ExportBinder.newExporter(binder()).export(SimpleObject.class).annotatedWith(TestAnnotation.class).as(objectName.getCanonicalName());
@@ -168,6 +183,9 @@ public class TestMBeanModule
             @Override
             protected void configure()
             {
+                binder().requireExplicitBindings();
+                binder().disableCircularProxies();
+
                 bind(SimpleObject.class).annotatedWith(Names.named("1")).toInstance(new SimpleObject());
                 bind(SimpleObject.class).annotatedWith(Names.named("2")).toInstance(new SimpleObject());
                 bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
@@ -199,6 +217,9 @@ public class TestMBeanModule
             @Override
             protected void configure()
             {
+                binder().requireExplicitBindings();
+                binder().disableCircularProxies();
+
                 bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
                 bind(SimpleObject.class).toInstance(new SimpleObject());
                 bind(SimpleObject.class).annotatedWith(Names.named("1")).toInstance(new SimpleObject());
@@ -234,6 +255,9 @@ public class TestMBeanModule
             @Override
             protected void configure()
             {
+                binder().requireExplicitBindings();
+                binder().disableCircularProxies();
+
                 Multibinder<SimpleObject> multibinder = Multibinder.newSetBinder(binder(), SimpleObject.class);
 
                 SimpleObject object1 = new SimpleObject();

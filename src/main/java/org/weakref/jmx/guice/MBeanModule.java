@@ -15,11 +15,13 @@
  */
 package org.weakref.jmx.guice;
 
-import static com.google.inject.multibindings.Multibinder.newSetBinder;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Key;
+import com.google.inject.Scopes;
+import org.weakref.jmx.MBeanExporter;
+
+import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
 public class MBeanModule
         extends AbstractModule
@@ -32,6 +34,7 @@ public class MBeanModule
         builder = newExporter(binder());
 
         bind(GuiceMBeanExporter.class).asEagerSingleton();
+        bind(MBeanExporter.class).in(Scopes.SINGLETON);
         configureMBeans();
     }
 

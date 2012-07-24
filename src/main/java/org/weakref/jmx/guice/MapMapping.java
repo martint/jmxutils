@@ -6,23 +6,24 @@ import com.google.inject.Key;
 
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.Map.Entry;
 
 class MapMapping<K, V>
 {
-    private final NamingFunction<Map.Entry<K, V>> namingFunction;
+    private final ObjectNameFunction<Entry<K, V>> objectNameFunction;
     private final Class<K> keyClass;
     private final Class<V> valueClass;
 
-    MapMapping(Class<K> keyClass, Class<V> valueClass, NamingFunction<Map.Entry<K, V>> namingFunction)
+    MapMapping(Class<K> keyClass, Class<V> valueClass, ObjectNameFunction<Map.Entry<K, V>> objectNameFunction)
     {
         this.keyClass = keyClass;
         this.valueClass = valueClass;
-        this.namingFunction = namingFunction;
+        this.objectNameFunction = objectNameFunction;
     }
 
-    public NamingFunction<Map.Entry<K, V>> getNamingFunction()
+    public ObjectNameFunction<Map.Entry<K, V>> getObjectNameFunction()
     {
-        return namingFunction;
+        return objectNameFunction;
     }
 
     public Key<Map<K, V>> getKey()

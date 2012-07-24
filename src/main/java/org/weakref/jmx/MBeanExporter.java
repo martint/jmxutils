@@ -32,13 +32,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static java.lang.String.format;
+import java.util.Map.Entry;
 
 public class MBeanExporter
 {
     private final MBeanServer server;
-    private final Map<String, Object> exportedObjects;
+    private final Map<ObjectName, Object> exportedObjects;
 
     MBeanExporter()
     {
@@ -57,19 +56,27 @@ public class MBeanExporter
         ObjectName objectName;
         try {
             objectName = new ObjectName(name);
-            MBeanBuilder builder = new MBeanBuilder(object);
-            MBean mbean = builder.build();
-
-            synchronized(exportedObjects) {
-                exportedObjects.put(name, object);
-                server.registerMBean(mbean, objectName);
-            }
         }
         catch (MalformedObjectNameException e) {
             throw new JmxException(Reason.MALFORMED_OBJECT_NAME, e.getMessage());
         }
+
+        export(objectName, object);
+    }
+
+    public void export(ObjectName objectName, Object object)
+    {
+        try {
+            MBeanBuilder builder = new MBeanBuilder(object);
+            MBean mbean = builder.build();
+
+            synchronized(exportedObjects) {
+                exportedObjects.put(objectName, object);
+                server.registerMBean(mbean, objectName);
+            }
+        }
         catch (InstanceAlreadyExistsException e) {
-            throw new JmxException(JmxException.Reason.INSTANCE_ALREADY_EXISTS, e.getMessage());
+            throw new JmxException(Reason.INSTANCE_ALREADY_EXISTS, e.getMessage());
         }
         catch (MBeanRegistrationException e) {
             throw new JmxException(Reason.MBEAN_REGISTRATION, e.getMessage(), e.getCause());
@@ -86,20 +93,27 @@ public class MBeanExporter
 
         try {
             objectName = new ObjectName(name);
-
-            synchronized(exportedObjects) {
-                server.unregisterMBean(objectName);
-                exportedObjects.remove(name);
-            }
         }
         catch (MalformedObjectNameException e) {
             throw new JmxException(Reason.MALFORMED_OBJECT_NAME, e.getMessage());
         }
+
+        unexport(objectName);
+    }
+
+    public void unexport(ObjectName objectName)
+    {
+        try {
+            synchronized(exportedObjects) {
+                server.unregisterMBean(objectName);
+                exportedObjects.remove(objectName);
+            }
+        }
         catch (MBeanRegistrationException e) {
-            throw new JmxException(JmxException.Reason.MBEAN_REGISTRATION, e.getMessage(), e.getCause());
+            throw new JmxException(Reason.MBEAN_REGISTRATION, e.getMessage(), e.getCause());
         }
         catch (InstanceNotFoundException e) {
-            throw new JmxException(JmxException.Reason.INSTANCE_NOT_FOUND, e.getMessage());
+            throw new JmxException(Reason.INSTANCE_NOT_FOUND, e.getMessage());
         }
     }
 
@@ -122,22 +136,19 @@ public class MBeanExporter
         Map<String, Exception> errors = new HashMap<String, Exception>();
 
         synchronized(exportedObjects) {
-            List<String> toRemove = new ArrayList<String>(exportedObjects.size());
-            for (String objectName : exportedObjects.keySet()) {
+            List<ObjectName> toRemove = new ArrayList<ObjectName>(exportedObjects.size());
+            for (ObjectName objectName : exportedObjects.keySet()) {
                 try {
-                    server.unregisterMBean(new ObjectName(objectName));
+                    server.unregisterMBean(objectName);
                     toRemove.add(objectName);
                 }
                 catch(InstanceNotFoundException e) {
                     // ignore ... mbean has already been unregistered elsewhere
                     toRemove.add(objectName);
                 }
-                catch (MalformedObjectNameException e) {
-                    throw new IllegalStateException(format("Found a malformed object name [%s]. This should never happen", objectName), e);
-                }
                 catch (MBeanRegistrationException e) {
                     //noinspection ThrowableResultOfMethodCallIgnored
-                    errors.put(objectName, e);
+                    errors.put(objectName.toString(), e);
                 }
             }
 
@@ -150,7 +161,11 @@ public class MBeanExporter
     public Map<String, Object> getExportedObjects()
     {
         synchronized (exportedObjects) {
-            return ImmutableMap.copyOf(exportedObjects);
+            ImmutableMap.Builder<String,Object> builder = ImmutableMap.builder();
+            for (Entry<ObjectName, Object> entry : exportedObjects.entrySet()) {
+                builder.put(entry.getKey().toString(), entry.getValue());
+            }
+            return builder.build();
         }
     }
     
