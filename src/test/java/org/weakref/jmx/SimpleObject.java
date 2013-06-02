@@ -33,6 +33,7 @@ public class SimpleObject
     private Double doubleBoxedValue;
     private String stringValue;
     private Object objectValue;
+    private int privateValue;
 
     private int notManaged;
     private int writeOnly;
@@ -266,6 +267,18 @@ public class SimpleObject
     public void setReadOnly(int readOnly)
     {
         this.readOnly = readOnly;
+    }
+
+    @Managed
+    private int getPrivateValue()
+    {
+        return privateValue;
+    }
+
+    @Managed
+    private void setPrivateValue(int privateValue)
+    {
+        this.privateValue = privateValue;
     }
 
     @Managed(description = "epic description")

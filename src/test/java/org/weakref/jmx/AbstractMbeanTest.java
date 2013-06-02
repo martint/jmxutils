@@ -17,6 +17,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
+import static org.weakref.jmx.ReflectionUtils.getMethod;
 
 public abstract class AbstractMbeanTest<T>
 {
@@ -44,7 +45,7 @@ public abstract class AbstractMbeanTest<T>
         for (T t : objects) {
             String attributeName = toFeatureName(attribute, t);
             SimpleObject simpleObject = toSimpleObject(t);
-            Method setter = simpleObject.getClass().getMethod(methodName, clazz);
+            Method setter = getMethod(simpleObject.getClass(), methodName, clazz);
 
             MBeanInfo info = getMBeanInfo(t);
             MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
@@ -65,7 +66,7 @@ public abstract class AbstractMbeanTest<T>
         for (T t : objects) {
             String attributeName = toFeatureName(attribute, t);
             SimpleObject simpleObject = toSimpleObject(t);
-            Method getter = simpleObject.getClass().getMethod(methodName);
+            Method getter = getMethod(simpleObject.getClass(), methodName);
 
             MBeanInfo info = getMBeanInfo(t);
             MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
@@ -166,7 +167,7 @@ public abstract class AbstractMbeanTest<T>
         for (T t : objects) {
             String attributeName = toFeatureName(attribute, t);
             SimpleObject simpleObject = toSimpleObject(t);
-            Method setter = simpleObject.getClass().getMethod(methodName, clazz);
+            Method setter = getMethod(simpleObject.getClass(), methodName, clazz);
 
             for (Object value : values) {
                 setter.invoke(simpleObject, value);
@@ -185,7 +186,7 @@ public abstract class AbstractMbeanTest<T>
         for (T t : objects) {
             String attributeName = toFeatureName(attribute, t);
             SimpleObject simpleObject = toSimpleObject(t);
-            Method getter = simpleObject.getClass().getMethod(methodName);
+            Method getter = getMethod(simpleObject.getClass(), methodName);
 
             for (Object value : values) {
                 setAttribute(t, attributeName, value);
@@ -339,7 +340,10 @@ public abstract class AbstractMbeanTest<T>
 
                 new Object[] { "StringValue", false, new Object[] { null, "hello there" }, String.class },
 
-                new Object[] { "ObjectValue", false, new Object[] { "random object", 1, true }, Object.class }
+                new Object[] { "ObjectValue", false, new Object[] { "random object", 1, true }, Object.class },
+
+                new Object[] { "PrivateValue", false, new Object[] { Integer.MAX_VALUE, Integer.MIN_VALUE, 0 },
+                        Integer.TYPE },
 
         };
     }
