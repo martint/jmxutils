@@ -76,6 +76,20 @@ public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
         return server.getMBeanInfo(namedObject.objectName);
     }
 
+    @Override
+    protected Object getAttribute(NamedObject namedObject, String attributeName)
+            throws MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException
+    {
+        return server.getAttribute(namedObject.objectName, attributeName);
+    }
+
+    @Override
+    protected void setAttribute(NamedObject namedObject, String attributeName, Object value)
+            throws InstanceNotFoundException, AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException
+    {
+        server.setAttribute(namedObject.objectName, new javax.management.Attribute(attributeName, value));
+    }
+
     @BeforeMethod
     void setup()
             throws IOException, MalformedObjectNameException, NotBoundException
@@ -113,146 +127,6 @@ public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
 //            info.get
 //        }
 //    }
-
-    @Test(dataProvider = "fixtures")
-    public void testOperationInfo(String attribute, boolean isIs, Object[] values, Class<?> clazz)
-            throws Exception
-    {
-        for (NamedObject namedObject : objects) {
-            String operationName = toFeatureName("echo", namedObject);
-
-            MBeanInfo beanInfo = getMBeanInfo(namedObject);
-            MBeanOperationInfo operationInfo = null;
-            for (MBeanOperationInfo info : beanInfo.getOperations()) {
-                if (info.getName().equals(operationName)) {
-                    operationInfo = info;
-                }
-            }
-
-            Assert.assertNotNull(operationInfo, "OperationInfo for " + operationName);
-            Assert.assertEquals(operationInfo.getName(), operationName, "Operation Name for " + operationName);
-            Assert.assertEquals(operationInfo.getImpact(), MBeanOperationInfo.UNKNOWN, "Operation Impact for " + operationName);
-            Assert.assertEquals(operationInfo.getReturnType(), Object.class.getName(), "Operation Return Type for " + operationName);
-            Assert.assertEquals(operationInfo.getSignature().length, 1, "Operation Parameter Length for " + operationName);
-            MBeanParameterInfo parameterInfo = operationInfo.getSignature()[0];
-            Assert.assertEquals(parameterInfo.getName(), "value", "Operation Parameter[0] Name for " + operationName);
-            Assert.assertEquals(parameterInfo.getType(), Object.class.getName(), "Operation Parameter[0] Type for " + operationName);
-        }
-    }
-
-    @Test(dataProvider = "fixtures")
-    public void testGet(String attribute, boolean isIs, Object[] values, Class<?> clazz)
-            throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException,
-            AttributeNotFoundException, MBeanException, NoSuchMethodException, InvocationTargetException,
-            IllegalAccessException
-    {
-        String methodName = "set" + attribute;
-        for (NamedObject namedObject : objects) {
-            String attributeName = toFeatureName(attribute, namedObject);
-            SimpleObject simpleObject = toSimpleObject(namedObject);
-            Method setter = simpleObject.getClass().getMethod(methodName, clazz);
-
-            for (Object value : values) {
-                setter.invoke(simpleObject, value);
-
-                Assert.assertEquals(server.getAttribute(namedObject.objectName, attributeName), value);
-            }
-        }
-    }
-
-    @Test(dataProvider = "fixtures")
-    public void testSet(String attribute, boolean isIs, Object[] values, Class<?> clazz)
-            throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException,
-            AttributeNotFoundException, MBeanException, NoSuchMethodException, InvocationTargetException,
-            IllegalAccessException, InvalidAttributeValueException
-    {
-        String methodName = (isIs ? "is" : "get") + attribute;
-
-        for (NamedObject namedObject : objects) {
-            String attributeName = toFeatureName(attribute, namedObject);
-            SimpleObject simpleObject = toSimpleObject(namedObject);
-            Method getter = simpleObject.getClass().getMethod(methodName);
-
-            for (Object value : values) {
-                server.setAttribute(namedObject.objectName, new javax.management.Attribute(attributeName, value));
-
-                Assert.assertEquals(getter.invoke(simpleObject), value);
-            }
-        }
-    }
-
-    @Test
-    public void testSetFailsOnNotManaged()
-            throws InstanceNotFoundException, IOException, InvalidAttributeValueException, ReflectionException,
-            AttributeNotFoundException, MBeanException
-    {
-        for (NamedObject namedObject : objects) {
-            SimpleObject simpleObject = toSimpleObject(namedObject);
-
-            simpleObject.setNotManaged(1);
-            try {
-                server.setAttribute(namedObject.objectName, new javax.management.Attribute("NotManaged", 2));
-                Assert.fail("Should not allow setting unmanaged attribute");
-            }
-            catch (AttributeNotFoundException e) {
-                // ignore
-            }
-
-            Assert.assertEquals(simpleObject.getNotManaged(), 1);
-        }
-    }
-
-    @Test
-    public void testGetFailsOnNotManaged()
-            throws InstanceNotFoundException, IOException, InvalidAttributeValueException, ReflectionException,
-            AttributeNotFoundException, MBeanException
-    {
-
-        for (NamedObject namedObject : objects) {
-            try {
-                server.getAttribute(namedObject.objectName, "NotManaged");
-                Assert.fail("Should not allow getting unmanaged attribute");
-            }
-            catch (AttributeNotFoundException e) {
-                // ignore
-            }
-        }
-    }
-
-    @Test
-    public void testGetFailsOnWriteOnly()
-            throws InstanceNotFoundException, IOException, ReflectionException, MBeanException
-    {
-        for (NamedObject namedObject : objects) {
-            try {
-                server.getAttribute(namedObject.objectName, "WriteOnly");
-                Assert.fail("Should not allow getting write-only attribute");
-            }
-            catch (AttributeNotFoundException e) {
-                // ignore
-            }
-        }
-    }
-
-    @Test
-    public void testSetFailsOnReadOnly()
-            throws InstanceNotFoundException, IOException, ReflectionException, MBeanException,
-            InvalidAttributeValueException
-    {
-        for (NamedObject namedObject : objects) {
-            SimpleObject simpleObject = toSimpleObject(namedObject);
-            simpleObject.setReadOnly(1);
-            try {
-                server.setAttribute(namedObject.objectName, new javax.management.Attribute("ReadOnly", 2));
-                Assert.fail("Should not allow setting read-only attribute");
-            }
-            catch (AttributeNotFoundException e) {
-                // ignore
-            }
-
-            Assert.assertEquals(simpleObject.getReadOnly(), 1);
-        }
-    }
 
     @Test
     public void testDescription()

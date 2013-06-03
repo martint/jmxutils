@@ -4,8 +4,18 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanException;
 import javax.management.MBeanInfo;
+import javax.management.MBeanOperationInfo;
+import javax.management.MBeanParameterInfo;
+import javax.management.MalformedObjectNameException;
+import javax.management.ReflectionException;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -22,6 +32,13 @@ public abstract class AbstractMbeanTest<T>
 
     protected abstract MBeanInfo getMBeanInfo(T t)
             throws Exception;
+
+    protected abstract Object getAttribute(T t, String attributeName)
+            throws Exception;
+
+    protected abstract void setAttribute(T t, String attributeName, Object value)
+            throws Exception;
+
 
     @Test(dataProvider = "fixtures")
     public void testGetterAttributeInfo(String attribute, boolean isIs, Object[] values, Class<?> clazz)
@@ -117,6 +134,139 @@ public abstract class AbstractMbeanTest<T>
             }
         }
         return null;
+    }
+
+    @Test(dataProvider = "fixtures")
+    public void testOperationInfo(String attribute, boolean isIs, Object[] values, Class<?> clazz)
+            throws Exception
+    {
+        for (T t : objects) {
+            String operationName = toFeatureName("echo", t);
+
+            MBeanInfo beanInfo = getMBeanInfo(t);
+            MBeanOperationInfo operationInfo = null;
+            for (MBeanOperationInfo info : beanInfo.getOperations()) {
+                if (info.getName().equals(operationName)) {
+                    operationInfo = info;
+                }
+            }
+
+            Assert.assertNotNull(operationInfo, "OperationInfo for " + operationName);
+            Assert.assertEquals(operationInfo.getName(), operationName, "Operation Name for " + operationName);
+            Assert.assertEquals(operationInfo.getImpact(), MBeanOperationInfo.UNKNOWN, "Operation Impact for " + operationName);
+            Assert.assertEquals(operationInfo.getReturnType(), Object.class.getName(), "Operation Return Type for " + operationName);
+            Assert.assertEquals(operationInfo.getSignature().length, 1, "Operation Parameter Length for " + operationName);
+            MBeanParameterInfo parameterInfo = operationInfo.getSignature()[0];
+            Assert.assertEquals(parameterInfo.getName(), "value", "Operation Parameter[0] Name for " + operationName);
+            Assert.assertEquals(parameterInfo.getType(), Object.class.getName(), "Operation Parameter[0] Type for " + operationName);
+        }
+    }
+
+    @Test(dataProvider = "fixtures")
+    public void testGet(String attribute, boolean isIs, Object[] values, Class<?> clazz)
+            throws Exception
+    {
+        String methodName = "set" + attribute;
+        for (T t : objects) {
+            String attributeName = toFeatureName(attribute, t);
+            SimpleObject simpleObject = toSimpleObject(t);
+            Method setter = simpleObject.getClass().getMethod(methodName, clazz);
+
+            for (Object value : values) {
+                setter.invoke(simpleObject, value);
+
+                Assert.assertEquals(getAttribute(t, attributeName), value);
+            }
+        }
+    }
+
+    @Test(dataProvider = "fixtures")
+    public void testSet(String attribute, boolean isIs, Object[] values, Class<?> clazz)
+            throws Exception
+    {
+        String methodName = (isIs ? "is" : "get") + attribute;
+
+        for (T t : objects) {
+            String attributeName = toFeatureName(attribute, t);
+            SimpleObject simpleObject = toSimpleObject(t);
+            Method getter = simpleObject.getClass().getMethod(methodName);
+
+            for (Object value : values) {
+                setAttribute(t, attributeName, value);
+
+                Assert.assertEquals(getter.invoke(simpleObject), value);
+            }
+        }
+    }
+
+    @Test
+    public void testSetFailsOnNotManaged()
+            throws Exception
+    {
+        for (T t : objects) {
+            SimpleObject simpleObject = toSimpleObject(t);
+
+            simpleObject.setNotManaged(1);
+            try {
+                setAttribute(t, "NotManaged", 2);
+                Assert.fail("Should not allow setting unmanaged attribute");
+            }
+            catch (AttributeNotFoundException e) {
+                // ignore
+            }
+
+            Assert.assertEquals(simpleObject.getNotManaged(), 1);
+        }
+    }
+
+    @Test
+    public void testGetFailsOnNotManaged()
+            throws Exception
+    {
+
+        for (T t : objects) {
+            try {
+                getAttribute(t, "NotManaged");
+                Assert.fail("Should not allow getting unmanaged attribute");
+            }
+            catch (AttributeNotFoundException e) {
+                // ignore
+            }
+        }
+    }
+
+    @Test
+    public void testGetFailsOnWriteOnly()
+            throws Exception
+    {
+        for (T t : objects) {
+            try {
+                getAttribute(t, "WriteOnly");
+                Assert.fail("Should not allow getting write-only attribute");
+            }
+            catch (AttributeNotFoundException e) {
+                // ignore
+            }
+        }
+    }
+
+    @Test
+    public void testSetFailsOnReadOnly()
+            throws Exception
+    {
+        for (T t : objects) {
+            SimpleObject simpleObject = toSimpleObject(t);
+            simpleObject.setReadOnly(1);
+            try {
+                setAttribute(t, "ReadOnly", 2);
+                Assert.fail("Should not allow setting read-only attribute");
+            }
+            catch (AttributeNotFoundException e) {
+                // ignore
+            }
+
+            Assert.assertEquals(simpleObject.getReadOnly(), 1);
+        }
     }
 
     @DataProvider(name = "fixtures")
