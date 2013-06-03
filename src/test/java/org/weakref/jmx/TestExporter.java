@@ -90,6 +90,14 @@ public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
         server.setAttribute(namedObject.objectName, new javax.management.Attribute(attributeName, value));
     }
 
+    @Override
+    protected Object invoke(NamedObject namedObject, Object value, String operationName)
+            throws InstanceNotFoundException, MBeanException, ReflectionException
+    {
+        return server.invoke(namedObject.objectName, operationName, new Object[] { value },
+                                          new String[] { Object.class.getName() });
+    }
+
     @BeforeMethod
     void setup()
             throws IOException, MalformedObjectNameException, NotBoundException
@@ -128,38 +136,6 @@ public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
 //        }
 //    }
 
-    @Test
-    public void testDescription()
-            throws Exception
-    {
-        for (NamedObject namedObject : objects) {
-            boolean described = false;
-            for (MBeanAttributeInfo info : getMBeanInfo(namedObject).getAttributes()) {
-                String attributeName = toFeatureName("DescribedInt", namedObject);
-                if (info.getName().equals(attributeName)) {
-                    Assert.assertEquals("epic description", info.getDescription());
-                    described = true;
-                }
-                else {
-                    Assert.assertEquals("", info.getDescription());
-                }
-            }
-            Assert.assertTrue(described);
-        }
-    }
-
-    @Test(dataProvider = "fixtures")
-    public void testOperation(String attribute, boolean isIs, Object[] values, Class<?> clazz)
-            throws InstanceNotFoundException, IOException, ReflectionException, MBeanException
-    {
-        for (NamedObject namedObject : objects) {
-            for (Object value : values) {
-                String operationName = toFeatureName("echo", namedObject);
-                Assert.assertEquals(server.invoke(namedObject.objectName, operationName, new Object[] { value },
-                                                  new String[] { Object.class.getName() }), value);
-            }
-        }
-    }
 }
 
 

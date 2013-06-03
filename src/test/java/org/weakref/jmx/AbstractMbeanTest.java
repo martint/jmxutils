@@ -39,6 +39,8 @@ public abstract class AbstractMbeanTest<T>
     protected abstract void setAttribute(T t, String attributeName, Object value)
             throws Exception;
 
+    protected abstract Object invoke(T t, Object value, String operationName)
+            throws Exception;
 
     @Test(dataProvider = "fixtures")
     public void testGetterAttributeInfo(String attribute, boolean isIs, Object[] values, Class<?> clazz)
@@ -266,6 +268,38 @@ public abstract class AbstractMbeanTest<T>
             }
 
             Assert.assertEquals(simpleObject.getReadOnly(), 1);
+        }
+    }
+
+    @Test
+    public void testDescription()
+            throws Exception
+    {
+        for (T t : objects) {
+            boolean described = false;
+            for (MBeanAttributeInfo info : getMBeanInfo(t).getAttributes()) {
+                String attributeName = toFeatureName("DescribedInt", t);
+                if (info.getName().equals(attributeName)) {
+                    Assert.assertEquals("epic description", info.getDescription());
+                    described = true;
+                }
+                else {
+                    Assert.assertEquals("", info.getDescription());
+                }
+            }
+            Assert.assertTrue(described);
+        }
+    }
+
+    @Test(dataProvider = "fixtures")
+    public void testOperation(String attribute, boolean isIs, Object[] values, Class<?> clazz)
+            throws Exception
+    {
+        for (T t : objects) {
+            for (Object value : values) {
+                String operationName = toFeatureName("echo", t);
+                Assert.assertEquals(invoke(t, value, operationName), value);
+            }
         }
     }
 

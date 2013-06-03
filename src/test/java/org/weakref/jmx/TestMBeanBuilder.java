@@ -63,40 +63,11 @@ public class TestMBeanBuilder extends AbstractMbeanTest<Object>
         MBeanBuilder.from(object).build().setAttribute(new javax.management.Attribute(attributeName, value));
     }
 
-    @Test
-    public void testDescription()
-            throws IntrospectionException, InstanceNotFoundException, ReflectionException
+    @Override
+    protected Object invoke(Object object, Object value, String operationName)
+            throws MBeanException, ReflectionException
     {
-        for (Object object : objects) {
-            boolean described = false;
-
-            for (MBeanAttributeInfo info : getMBeanInfo(object).getAttributes()) {
-                String attributeName = toFeatureName("DescribedInt", object);
-                if (info.getName().equals(attributeName)) {
-                    assertEquals("epic description", info.getDescription());
-                    described = true;
-                }
-                else {
-                    assertEquals("", info.getDescription());
-                }
-            }
-            assertTrue(described);
-        }
+        return MBeanBuilder.from(object).build().invoke(operationName, new Object[]{value},
+                new String[]{Object.class.getName()});
     }
-
-    @Test(dataProvider = "fixtures")
-    public void testOperation(String attribute, boolean isIs, Object[] values, Class<?> clazz)
-            throws InstanceNotFoundException, IOException, ReflectionException, MBeanException
-    {
-        for (Object object : objects) {
-
-            for (Object value : values) {
-                String operationName = toFeatureName("echo", object);
-                assertEquals(MBeanBuilder.from(object).build().invoke(operationName, new Object[]{value},
-                        new String[]{Object.class.getName()}), value);
-            }
-        }
-    }
-
-
 }
