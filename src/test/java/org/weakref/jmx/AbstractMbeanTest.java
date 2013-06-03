@@ -1,10 +1,123 @@
 package org.weakref.jmx;
 
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanInfo;
+import java.lang.reflect.Method;
+import java.util.List;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public abstract class AbstractMbeanTest<T>
 {
+    protected List<T> objects;
+
     protected abstract Object getObject(T t);
+
+    protected abstract MBeanInfo getMBeanInfo(T t)
+            throws Exception;
+
+    @Test(dataProvider = "fixtures")
+    public void testGetterAttributeInfo(String attribute, boolean isIs, Object[] values, Class<?> clazz)
+            throws Exception
+    {
+        String methodName = "set" + attribute;
+        for (T t : objects) {
+            String attributeName = toFeatureName(attribute, t);
+            SimpleObject simpleObject = toSimpleObject(t);
+            Method setter = simpleObject.getClass().getMethod(methodName, clazz);
+
+            MBeanInfo info = getMBeanInfo(t);
+            MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
+            Assert.assertNotNull(attributeInfo, "AttributeInfo for " + attributeName);
+            Assert.assertEquals(attributeInfo.getName(), attributeName, "Attribute Name for " + attributeName);
+            Assert.assertEquals(attributeInfo.getType(), setter.getParameterTypes()[0].getName(), "Attribute type for " + attributeName);
+            Assert.assertEquals(attributeInfo.isIs(), isIs, "Attribute isIs for " + attributeName);
+            Assert.assertTrue(attributeInfo.isReadable(), "Attribute Readable for " + attributeName);
+        }
+    }
+
+    @Test(dataProvider = "fixtures")
+    public void testSetterAttributeInfo(String attribute, boolean isIs, Object[] values, Class<?> clazz)
+            throws Exception
+    {
+        String methodName = (isIs ? "is" : "get") + attribute;
+
+        for (T t : objects) {
+            String attributeName = toFeatureName(attribute, t);
+            SimpleObject simpleObject = toSimpleObject(t);
+            Method getter = simpleObject.getClass().getMethod(methodName);
+
+            MBeanInfo info = getMBeanInfo(t);
+            MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
+            Assert.assertNotNull(attributeInfo, "AttributeInfo for " + attributeName);
+            Assert.assertEquals(attributeInfo.getName(), attributeName, "Attribute Name for " + attributeName);
+            Assert.assertEquals(attributeInfo.getType(), getter.getReturnType().getName(), "Attribute Type for " + attributeName);
+            Assert.assertTrue(attributeInfo.isWritable(), "Attribute Writable for " + attributeName);
+        }
+    }
+
+    @Test
+    public void testNotManagedAttributeInfo()
+            throws Exception
+    {
+
+        for (T t : objects) {
+            MBeanInfo info = getMBeanInfo(t);
+            String attributeName = toFeatureName("NotManaged", t);
+            MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
+            Assert.assertNull(attributeInfo, "AttributeInfo for " + attributeName);
+        }
+    }
+
+    @Test
+    public void testReadOnlyAttributeInfo()
+            throws Exception
+    {
+        for (T t : objects) {
+            MBeanInfo info = getMBeanInfo(t);
+
+            String attributeName = toFeatureName("ReadOnly", t);
+            MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
+            assertNotNull(attributeInfo, "AttributeInfo for " + attributeName);
+            assertEquals(attributeInfo.getName(), attributeName, "Attribute Name for " + attributeName);
+            assertEquals(attributeInfo.getType(), "int", "Attribute Type for " + attributeName);
+            assertTrue(attributeInfo.isReadable(), "Attribute Readable for " + attributeName);
+            assertFalse(attributeInfo.isWritable(), "Attribute Writable for " + attributeName);
+        }
+    }
+
+    @Test
+    public void testWriteOnlyAttributeInfo()
+            throws Exception
+    {
+        for (T t : objects) {
+            MBeanInfo info = getMBeanInfo(t);
+            String attributeName = toFeatureName("WriteOnly", t);
+            MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
+            Assert.assertNotNull(attributeInfo, "AttributeInfo for " + attributeName);
+            Assert.assertEquals(attributeInfo.getName(), attributeName, "Attribute Name for " + attributeName);
+            Assert.assertEquals(attributeInfo.getType(), "int", "Attribute Type for " + attributeName);
+            Assert.assertFalse(attributeInfo.isReadable(), "Attribute Readable for " + attributeName);
+            Assert.assertTrue(attributeInfo.isWritable(), "Attribute Writable for " + attributeName);
+        }
+    }
+
+    protected MBeanAttributeInfo getAttributeInfo(MBeanInfo info, String attributeName)
+    {
+        for (MBeanAttributeInfo attributeInfo : info.getAttributes()) {
+            if (attributeInfo.getName().equals(attributeName)) {
+                return attributeInfo;
+            }
+        }
+        return null;
+    }
 
     @DataProvider(name = "fixtures")
     Object[][] getFixtures()

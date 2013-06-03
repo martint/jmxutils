@@ -13,7 +13,6 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
 import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -28,10 +27,9 @@ import static org.testng.Assert.assertTrue;
 
 public class TestMBeanBuilder extends AbstractMbeanTest<Object>
 {
-    private final List<Object> objects = new ArrayList<Object>();
-
     public TestMBeanBuilder()
     {
+        objects = new ArrayList<Object>();
         objects.add(new SimpleObject());
         objects.add(new CustomAnnotationObject());
         objects.add(new FlattenObject());
@@ -45,102 +43,10 @@ public class TestMBeanBuilder extends AbstractMbeanTest<Object>
         return o;
     }
 
-    @Test(dataProvider = "fixtures")
-    public void testGetterAttributeInfo(String attribute, boolean isIs, Object[] values, Class<?> clazz)
-            throws Exception
+    @Override
+    protected MBeanInfo getMBeanInfo(Object object)
     {
-        String methodName = "set" + attribute;
-        for (Object object : objects) {
-            MBeanInfo info = MBeanBuilder.from(object).build().getMBeanInfo();
-
-            String attributeName = toFeatureName(attribute, object);
-            SimpleObject simpleObject = toSimpleObject(object);
-            Method setter = simpleObject.getClass().getMethod(methodName, clazz);
-
-            MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
-            assertNotNull(attributeInfo, "AttributeInfo for " + attributeName);
-            assertEquals(attributeInfo.getName(), attributeName, "Attribute Name for " + attributeName);
-            assertEquals(attributeInfo.getType(), setter.getParameterTypes()[0].getName(), "Attribute type for " + attributeName);
-            assertEquals(attributeInfo.isIs(), isIs, "Attribute isIs for " + attributeName);
-            assertTrue(attributeInfo.isReadable(), "Attribute Readable for " + attributeName);
-        }
-    }
-
-    @Test(dataProvider = "fixtures")
-    public void testSetterAttributeInfo(String attribute, boolean isIs, Object[] values, Class<?> clazz)
-            throws Exception
-    {
-        String methodName = (isIs ? "is" : "get") + attribute;
-
-        for (Object object : objects) {
-            String attributeName = toFeatureName(attribute, object);
-            SimpleObject simpleObject = toSimpleObject(object);
-            Method getter = simpleObject.getClass().getMethod(methodName);
-
-            MBeanInfo info = MBeanBuilder.from(object).build().getMBeanInfo();
-            MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
-            assertNotNull(attributeInfo, "AttributeInfo for " + attributeName);
-            assertEquals(attributeInfo.getName(), attributeName, "Attribute Name for " + attributeName);
-            assertEquals(attributeInfo.getType(), getter.getReturnType().getName(), "Attribute Type for " + attributeName);
-            assertTrue(attributeInfo.isWritable(), "Attribute Writable for " + attributeName);
-        }
-    }
-
-    @Test
-    public void testNotManagedAttributeInfo()
-            throws Exception
-    {
-        for (Object object : objects) {
-            MBeanInfo info = MBeanBuilder.from(object).build().getMBeanInfo();
-
-            String attributeName = toFeatureName("NotManaged", object);
-            MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
-            Assert.assertNull(attributeInfo, "AttributeInfo for " + attributeName);
-        }
-    }
-
-    @Test
-    public void testReadOnlyAttributeInfo()
-            throws Exception
-    {
-        for (Object object : objects) {
-            MBeanInfo info = MBeanBuilder.from(object).build().getMBeanInfo();
-
-            String attributeName = toFeatureName("ReadOnly", object);
-            MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
-            assertNotNull(attributeInfo, "AttributeInfo for " + attributeName);
-            assertEquals(attributeInfo.getName(), attributeName, "Attribute Name for " + attributeName);
-            assertEquals(attributeInfo.getType(), "int", "Attribute Type for " + attributeName);
-            assertTrue(attributeInfo.isReadable(), "Attribute Readable for " + attributeName);
-            assertFalse(attributeInfo.isWritable(), "Attribute Writable for " + attributeName);
-        }
-    }
-
-    @Test
-    public void testWriteOnlyAttributeInfo()
-            throws Exception
-    {
-        for (Object object : objects) {
-            MBeanInfo info = MBeanBuilder.from(object).build().getMBeanInfo();
-
-            String attributeName = toFeatureName("WriteOnly", object);
-            MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
-            assertNotNull(attributeInfo, "AttributeInfo for " + attributeName);
-            assertEquals(attributeInfo.getName(), attributeName, "Attribute Name for " + attributeName);
-            assertEquals(attributeInfo.getType(), "int", "Attribute Type for " + attributeName);
-            assertFalse(attributeInfo.isReadable(), "Attribute Readable for " + attributeName);
-            assertTrue(attributeInfo.isWritable(), "Attribute Writable for " + attributeName);
-        }
-    }
-
-    private MBeanAttributeInfo getAttributeInfo(MBeanInfo info, String attributeName)
-    {
-        for (MBeanAttributeInfo attributeInfo : info.getAttributes()) {
-            if (attributeInfo.getName().equals(attributeName)) {
-                return attributeInfo;
-            }
-        }
-        return null;
+        return MBeanBuilder.from(object).build().getMBeanInfo();
     }
 
     @Test(dataProvider = "fixtures")
@@ -150,7 +56,7 @@ public class TestMBeanBuilder extends AbstractMbeanTest<Object>
         for (Object object : objects) {
             String operationName = toFeatureName("echo", object);
 
-            MBeanInfo beanInfo = MBeanBuilder.from(object).build().getMBeanInfo();
+            MBeanInfo beanInfo = getMBeanInfo(object);
             MBeanOperationInfo operationInfo = null;
             for (MBeanOperationInfo info : beanInfo.getOperations()) {
                 if (info.getName().equals(operationName)) {
@@ -296,7 +202,7 @@ public class TestMBeanBuilder extends AbstractMbeanTest<Object>
     {
         for (Object object : objects) {
             boolean described = false;
-            MBeanInfo mbeanInfo = MBeanBuilder.from(object).build().getMBeanInfo();
+            MBeanInfo mbeanInfo = getMBeanInfo(object);
 
             for (MBeanAttributeInfo info : mbeanInfo.getAttributes()) {
                 String attributeName = toFeatureName("DescribedInt", object);
