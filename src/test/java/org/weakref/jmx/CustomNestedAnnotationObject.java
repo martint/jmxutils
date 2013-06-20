@@ -30,7 +30,7 @@ public class CustomNestedAnnotationObject extends NestedObject
         public abstract String description() default "";
     }
 
-    @Managed @CustomNested
+    @CustomNested
     public SimpleObject getSimpleObject()
     {
         return super.getSimpleObject();

@@ -87,7 +87,7 @@ public class NestedExample
 {
    private final NestedObject nestedObject = new NestedObject();
 
-   @Managed @Nested
+   @Nested
    public NestedObject getNestedObject()
    {
        return nestedObject;
@@ -111,7 +111,7 @@ public class FlattenedExample
 {
    private final FlattenedObject flattenedObject = new FlattenedObject();
 
-   @Managed @Flatten
+   @Flatten
    public FlattenedObject getFlattenedObject()
    {
        return flattenedObject;

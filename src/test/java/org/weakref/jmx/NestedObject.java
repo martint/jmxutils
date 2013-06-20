@@ -19,7 +19,7 @@ public class NestedObject
 {
     private final SimpleObject simpleObject = new SimpleObject();
 
-    @Managed @Nested
+    @Nested
     public SimpleObject getSimpleObject()
     {
         return simpleObject;

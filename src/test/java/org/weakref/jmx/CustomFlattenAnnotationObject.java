@@ -30,7 +30,7 @@ public class CustomFlattenAnnotationObject extends FlattenObject
         String description() default "";
     }
 
-    @Managed @CustomFlatten
+    @CustomFlatten
     public SimpleObject getSimpleObject()
     {
         return super.getSimpleObject();
