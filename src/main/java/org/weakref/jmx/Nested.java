@@ -22,6 +22,7 @@ import java.lang.annotation.ElementType;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+@ManagedAnnotation
 public @interface Nested
 {
 }
