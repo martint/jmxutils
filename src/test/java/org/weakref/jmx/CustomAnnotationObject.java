@@ -6,8 +6,29 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 public class CustomAnnotationObject
-        extends SimpleObject
+        implements SimpleInterface
 {
+    private boolean booleanValue;
+    private Boolean booleanBoxedValue;
+    private byte byteValue;
+    private Byte byteBoxedValue;
+    private short shortValue;
+    private Short shortBoxedValue;
+    private int integerValue;
+    private Integer integerBoxedValue;
+    private long longValue;
+    private Long longBoxedValue;
+    private float floatValue;
+    private Float floatBoxedValue;
+    private double doubleValue;
+    private Double doubleBoxedValue;
+    private String stringValue;
+    private Object objectValue;
+    private int privateValue;
+
+    private int notManaged;
+    private int writeOnly;
+    private int readOnly;
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ ElementType.METHOD })
@@ -26,280 +47,251 @@ public class CustomAnnotationObject
     }
 
 
-    @Override
     @Managed1
     public boolean isBooleanValue()
     {
-        return super.isBooleanValue();
+        return booleanValue;
     }
 
-    @Override
     @Managed2
     public void setBooleanValue(boolean booleanValue)
     {
-        super.setBooleanValue(booleanValue);
+        this.booleanValue = booleanValue;
     }
 
-    @Override
     @Managed2
     public Boolean isBooleanBoxedValue()
     {
-        return super.isBooleanBoxedValue();
+        return booleanBoxedValue;
     }
 
-    @Override
     @Managed1
     public void setBooleanBoxedValue(Boolean booleanBoxedValue)
     {
-        super.setBooleanBoxedValue(booleanBoxedValue);
+        this.booleanBoxedValue = booleanBoxedValue;
     }
 
-    @Override
     @Managed1
     public byte getByteValue()
     {
-        return super.getByteValue();
+        return byteValue;
     }
 
-    @Override
     @Managed1
     public void setByteValue(byte byteValue)
     {
-        super.setByteValue(byteValue);
+        this.byteValue = byteValue;
     }
 
-    @Override
     @Managed2
     public Byte getByteBoxedValue()
     {
-        return super.getByteBoxedValue();
+        return byteBoxedValue;
     }
 
-    @Override
     @Managed2
     public void setByteBoxedValue(Byte byteBoxedValue)
     {
-        super.setByteBoxedValue(byteBoxedValue);
+        this.byteBoxedValue = byteBoxedValue;
     }
 
-    @Override
     @Managed2
     public short getShortValue()
     {
-        return super.getShortValue();
+        return shortValue;
     }
 
-    @Override
     @Managed2
     public void setShortValue(short shortValue)
     {
-        super.setShortValue(shortValue);
+        this.shortValue = shortValue;
     }
 
-    @Override
     @Managed1
     public Short getShortBoxedValue()
     {
-        return super.getShortBoxedValue();
+        return shortBoxedValue;
     }
 
-    @Override
     @Managed1
     public void setShortBoxedValue(Short shortBoxedValue)
     {
-        super.setShortBoxedValue(shortBoxedValue);
+        this.shortBoxedValue = shortBoxedValue;
     }
 
-    @Override
     @Managed1
     public int getIntegerValue()
     {
-        return super.getIntegerValue();
+        return integerValue;
     }
 
-    @Override
     @Managed2
     public void setIntegerValue(int integerValue)
     {
-        super.setIntegerValue(integerValue);
+        this.integerValue = integerValue;
     }
 
-    @Override
     @Managed2
     public Integer getIntegerBoxedValue()
     {
-        return super.getIntegerBoxedValue();
+        return integerBoxedValue;
     }
 
-    @Override
     @Managed1
     public void setIntegerBoxedValue(Integer integerBoxedValue)
     {
-        super.setIntegerBoxedValue(integerBoxedValue);
+        this.integerBoxedValue = integerBoxedValue;
     }
 
-    @Override
     @Managed1
     public long getLongValue()
     {
-        return super.getLongValue();
+        return longValue;
     }
 
-    @Override
     @Managed2
     public void setLongValue(long longValue)
     {
-        super.setLongValue(longValue);
+        this.longValue = longValue;
     }
 
-    @Override
     @Managed1
     public Long getLongBoxedValue()
     {
-        return super.getLongBoxedValue();
+        return longBoxedValue;
     }
 
-    @Override
     @Managed1
     public void setLongBoxedValue(Long longBoxedValue)
     {
-        super.setLongBoxedValue(longBoxedValue);
+        this.longBoxedValue = longBoxedValue;
     }
 
-    @Override
     @Managed2
     public float getFloatValue()
     {
-        return super.getFloatValue();
+        return floatValue;
     }
 
-    @Override
     @Managed2
     public void setFloatValue(float floatValue)
     {
-        super.setFloatValue(floatValue);
+        this.floatValue = floatValue;
     }
 
-    @Override
     @Managed1
     public Float getFloatBoxedValue()
     {
-        return super.getFloatBoxedValue();
+        return floatBoxedValue;
     }
 
-    @Override
     @Managed2
     public void setFloatBoxedValue(Float floatBoxedValue)
     {
-        super.setFloatBoxedValue(floatBoxedValue);
+        this.floatBoxedValue = floatBoxedValue;
     }
 
-    @Override
     @Managed1
     public double getDoubleValue()
     {
-        return super.getDoubleValue();
+        return this.doubleValue;
     }
 
-    @Override
     @Managed2
     public void setDoubleValue(double doubleValue)
     {
-        super.setDoubleValue(doubleValue);
+        this.doubleValue = doubleValue;
     }
 
-    @Override
     @Managed1
     public Double getDoubleBoxedValue()
     {
-        return super.getDoubleBoxedValue();
+        return doubleBoxedValue;
     }
 
-    @Override
     @Managed1
     public void setDoubleBoxedValue(Double doubleBoxedValue)
     {
-        super.setDoubleBoxedValue(doubleBoxedValue);
+        this.doubleBoxedValue = doubleBoxedValue;
     }
 
-    @Override
     @Managed2
     public String getStringValue()
     {
-        return super.getStringValue();
+        return stringValue;
     }
 
-    @Override
     @Managed2
     public void setStringValue(String stringValue)
     {
-        super.setStringValue(stringValue);
+        this.stringValue = stringValue;
     }
 
-    @Override
     public void setNotManaged(int value)
     {
-        super.setNotManaged(value);
+        this.notManaged = value;
     }
 
-    @Override
     public int getNotManaged()
     {
-        return super.getNotManaged();
+        return notManaged;
     }
 
-    @Override
     @Managed2
     public Object echo(Object value)
     {
-        return super.echo(value);
+        return value;
     }
 
-    @Override
     @Managed1
     public Object getObjectValue()
     {
-        return super.getObjectValue();
+        return objectValue;
     }
 
-    @Override
     @Managed2
     public void setObjectValue(Object objectValue)
     {
-        super.setObjectValue(objectValue);
+        this.objectValue = objectValue;
     }
 
-    @Override
     public int getWriteOnly()
     {
-        return super.getWriteOnly();
+        return writeOnly;
     }
 
-    @Override
     @Managed1
     public void setWriteOnly(int writeOnly)
     {
-        super.setWriteOnly(writeOnly);
+        this.writeOnly = writeOnly;
     }
 
-    @Override
     @Managed2
     public int getReadOnly()
     {
-        return super.getReadOnly();
+        return readOnly;
     }
 
-    @Override
     public void setReadOnly(int readOnly)
     {
-        super.setReadOnly(readOnly);
+        this.readOnly = readOnly;
     }
 
-    @Override
+    @Managed1
+    private int getPrivateValue()
+    {
+        return privateValue;
+    }
+
+    @Managed2
+    private void setPrivateValue(int privateValue)
+    {
+        this.privateValue = privateValue;
+    }
+
     @Managed1(description = "epic description")
     public int getDescribedInt()
     {
-        return super.getDescribedInt();
+        return 1;
     }
-
 }

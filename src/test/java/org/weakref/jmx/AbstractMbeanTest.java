@@ -44,8 +44,8 @@ public abstract class AbstractMbeanTest<T>
         String methodName = "set" + attribute;
         for (T t : objects) {
             String attributeName = toFeatureName(attribute, t);
-            SimpleObject simpleObject = toSimpleObject(t);
-            Method setter = getMethod(simpleObject.getClass(), methodName, clazz);
+            SimpleInterface simpleInterface = toSimpleInterface(t);
+            Method setter = getMethod(simpleInterface.getClass(), methodName, clazz);
 
             MBeanInfo info = getMBeanInfo(t);
             MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
@@ -65,8 +65,8 @@ public abstract class AbstractMbeanTest<T>
 
         for (T t : objects) {
             String attributeName = toFeatureName(attribute, t);
-            SimpleObject simpleObject = toSimpleObject(t);
-            Method getter = getMethod(simpleObject.getClass(), methodName);
+            SimpleInterface simpleInterface = toSimpleInterface(t);
+            Method getter = getMethod(simpleInterface.getClass(), methodName);
 
             MBeanInfo info = getMBeanInfo(t);
             MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
@@ -166,11 +166,11 @@ public abstract class AbstractMbeanTest<T>
         String methodName = "set" + attribute;
         for (T t : objects) {
             String attributeName = toFeatureName(attribute, t);
-            SimpleObject simpleObject = toSimpleObject(t);
-            Method setter = getMethod(simpleObject.getClass(), methodName, clazz);
+            SimpleInterface simpleInterface = toSimpleInterface(t);
+            Method setter = getMethod(simpleInterface.getClass(), methodName, clazz);
 
             for (Object value : values) {
-                setter.invoke(simpleObject, value);
+                setter.invoke(simpleInterface, value);
 
                 assertEquals(getAttribute(t, attributeName), value);
             }
@@ -185,13 +185,13 @@ public abstract class AbstractMbeanTest<T>
 
         for (T t : objects) {
             String attributeName = toFeatureName(attribute, t);
-            SimpleObject simpleObject = toSimpleObject(t);
-            Method getter = getMethod(simpleObject.getClass(), methodName);
+            SimpleInterface simpleInterface = toSimpleInterface(t);
+            Method getter = getMethod(simpleInterface.getClass(), methodName);
 
             for (Object value : values) {
                 setAttribute(t, attributeName, value);
 
-                assertEquals(getter.invoke(simpleObject), value);
+                assertEquals(getter.invoke(simpleInterface), value);
             }
         }
     }
@@ -201,9 +201,9 @@ public abstract class AbstractMbeanTest<T>
             throws Exception
     {
         for (T t : objects) {
-            SimpleObject simpleObject = toSimpleObject(t);
+            SimpleInterface simpleInterface = toSimpleInterface(t);
 
-            simpleObject.setNotManaged(1);
+            simpleInterface.setNotManaged(1);
             try {
                 setAttribute(t, "NotManaged", 2);
                 fail("Should not allow setting unmanaged attribute");
@@ -212,7 +212,7 @@ public abstract class AbstractMbeanTest<T>
                 // ignore
             }
 
-            assertEquals(simpleObject.getNotManaged(), 1);
+            assertEquals(simpleInterface.getNotManaged(), 1);
         }
     }
 
@@ -252,8 +252,8 @@ public abstract class AbstractMbeanTest<T>
             throws Exception
     {
         for (T t : objects) {
-            SimpleObject simpleObject = toSimpleObject(t);
-            simpleObject.setReadOnly(1);
+            SimpleInterface simpleInterface = toSimpleInterface(t);
+            simpleInterface.setReadOnly(1);
             try {
                 setAttribute(t, "ReadOnly", 2);
                 fail("Should not allow setting read-only attribute");
@@ -262,7 +262,7 @@ public abstract class AbstractMbeanTest<T>
                 // ignore
             }
 
-            assertEquals(simpleObject.getReadOnly(), 1);
+            assertEquals(simpleInterface.getReadOnly(), 1);
         }
     }
 
@@ -360,21 +360,21 @@ public abstract class AbstractMbeanTest<T>
         return attributeName;
     }
 
-    protected SimpleObject toSimpleObject(T t)
+    protected SimpleInterface toSimpleInterface(T t)
     {
-        SimpleObject simpleObject;
-        if (getObject(t) instanceof SimpleObject) {
-            simpleObject = (SimpleObject) getObject(t);
+        SimpleInterface simpleInterface;
+        if (getObject(t) instanceof SimpleInterface) {
+            simpleInterface = (SimpleInterface) getObject(t);
         }
         else if (getObject(t) instanceof FlattenObject) {
-            simpleObject = ((FlattenObject) getObject(t)).getSimpleObject();
+            simpleInterface = ((FlattenObject) getObject(t)).getSimpleObject();
         }
         else if (getObject(t) instanceof NestedObject) {
-            simpleObject = ((NestedObject) getObject(t)).getSimpleObject();
+            simpleInterface = ((NestedObject) getObject(t)).getSimpleObject();
         }
         else {
-            throw new IllegalArgumentException("Expected objects of type SimpleObject or FlattenObject but got " + getObject(t).getClass().getName());
+            throw new IllegalArgumentException("Expected objects implementing SimpleInterface or FlattenObject but got " + getObject(t).getClass().getName());
         }
-        return simpleObject;
+        return simpleInterface;
     }
 }

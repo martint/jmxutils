@@ -16,6 +16,7 @@
 package org.weakref.jmx;
 
 public class SimpleObject
+        implements SimpleInterface
 {
     private boolean booleanValue;
     private Boolean booleanBoxedValue;
