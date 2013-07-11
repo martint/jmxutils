@@ -75,6 +75,44 @@ public class ObjectNames {
         return format("%s:type=%s,name=%s",
                 clazz.getPackage().getName(),
                 clazz.getSimpleName(),
-                name);
+                quoteValueIfNecessary(name));
+    }
+
+    private static String quoteValueIfNecessary(String name)
+    {
+        boolean needQuote = false;
+        StringBuilder builder = new StringBuilder("\"");
+        for (int i = 0; i < name.length(); ++i) {
+            char c = name.charAt(i);
+            switch (c) {
+                case ':':
+                case ',':
+                case '=':
+                    needQuote = true;
+                    builder.append(c);
+                    break;
+                case '\"':
+                case '?':
+                case '*':
+                    needQuote = true;
+                    builder.append('\\');
+                    builder.append(c);
+                    break;
+                case '\n':
+                    needQuote = true;
+                    builder.append("\\n");
+                    break;
+                case '\\':
+                    builder.append("\\\\");
+                    break;
+                default:
+                    builder.append(c);
+            }
+        }
+
+        if (needQuote) {
+            name = builder.append('\"').toString();
+        }
+        return name;
     }
 }
