@@ -1,10 +1,10 @@
 package org.weakref.jmx;
 
-import static java.lang.String.format;
+import com.google.inject.name.Named;
 
 import java.lang.annotation.Annotation;
 
-import com.google.inject.name.Named;
+import static java.lang.String.format;
 
 /**
  * Generate JMX object names.
@@ -75,6 +75,71 @@ public class ObjectNames {
         return format("%s:type=%s,name=%s",
                 clazz.getPackage().getName(),
                 clazz.getSimpleName(),
-                name);
+                quoteValueIfNecessary(name));
+    }
+
+    static String quoteValueIfNecessary(String name)
+    {
+        boolean needQuote = false;
+        StringBuilder builder = new StringBuilder("\"");
+        for (int i = 0; i < name.length(); ++i) {
+            char c = name.charAt(i);
+            switch (c) {
+                case ':':
+                case ',':
+                case '=':
+                    needQuote = true;
+                    builder.append(c);
+                    break;
+                case '\"':
+                case '?':
+                case '*':
+                    needQuote = true;
+                    builder.append('\\');
+                    builder.append(c);
+                    break;
+                case '\n':
+                    needQuote = true;
+                    builder.append("\\n");
+                    break;
+                case '\\':
+                    builder.append("\\\\");
+                    break;
+                default:
+                    builder.append(c);
+            }
+        }
+
+        if (needQuote) {
+            name = builder.append('\"').toString();
+        }
+        return name;
+    }
+
+    public static ObjectNameBuilder builder(Class<?> clazz)
+    {
+        return new ObjectNameBuilder(clazz.getPackage().getName())
+                .withProperty("name", clazz.getSimpleName());
+    }
+
+    public static ObjectNameBuilder builder(Class<?> clazz, Annotation annotation)
+    {
+        return new ObjectNameBuilder(clazz.getPackage().getName())
+                .withProperty("type", clazz.getSimpleName())
+                .withProperty("name", annotation.annotationType().getSimpleName());
+    }
+
+    public static ObjectNameBuilder builder(Class<?> clazz, Class<? extends Annotation> annotationClass)
+    {
+        return new ObjectNameBuilder(clazz.getPackage().getName())
+                .withProperty("type", clazz.getSimpleName())
+                .withProperty("name", annotationClass.getSimpleName());
+    }
+
+    public static ObjectNameBuilder builder(Class<?> clazz, Named named)
+    {
+        return new ObjectNameBuilder(clazz.getPackage().getName())
+                .withProperty("type", clazz.getSimpleName())
+                .withProperty("name", named.value());
     }
 }

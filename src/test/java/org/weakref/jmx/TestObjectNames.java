@@ -1,13 +1,17 @@
 package org.weakref.jmx;
 
-import static org.testng.Assert.assertEquals;
-import static org.weakref.jmx.ObjectNames.generatedNameOf;
-
-import java.lang.annotation.Annotation;
-
+import com.google.inject.name.Names;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.google.inject.name.Names;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.weakref.jmx.ObjectNames.generatedNameOf;
 
 public class TestObjectNames {
 
@@ -54,5 +58,50 @@ public class TestObjectNames {
     assertEquals(
         generatedNameOf(Inner.class), 
         "org.weakref.jmx:name=Inner");
+  }
+
+  @Test(dataProvider = "names")
+  public void testQuotesName(String name, boolean shouldQuote)
+          throws MalformedObjectNameException
+  {
+      ObjectName objectName = ObjectName.getInstance(generatedNameOf(SimpleObject.class, Names.named(name)));
+      if (shouldQuote) {
+          String quotedName = objectName.getKeyProperty("name");
+          int index = 0;
+          StringBuilder builder = new StringBuilder();
+          assertEquals(quotedName.charAt(index++), '\"');
+          char c;
+          while ((c = quotedName.charAt(index++)) != '\"') {
+              if (c == '\\') {
+                  c = quotedName.charAt(index++);
+                  assertTrue("*?n\\\"".indexOf(c) != -1, "valid character '" + c + "' after backslash");
+                  if (c == 'n') {
+                      builder.append('\n');
+                  }
+                  else {
+                      builder.append(c);
+                  }
+              }
+              else {
+                builder.append(c);
+              }
+          }
+          assertEquals(index, quotedName.length());
+          assertEquals(builder.toString(), name);
+      }
+      else {
+          assertEquals(objectName.getKeyProperty("name"), name);
+      }
+  }
+
+  @DataProvider(name = "names")
+  public Object[][] getNames()
+  {
+      ArrayList<Object[]> names = new ArrayList<Object[]>();
+      for (char c = 0; c < 500; ++c) {
+          names.add(new Object[] {String.valueOf(c), ",=:*?\"\n".indexOf(c) != -1});
+      }
+      names.add(new Object[] {":\\", true});
+      return names.toArray(new Object[][]{});
   }
 }
