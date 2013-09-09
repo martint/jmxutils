@@ -66,7 +66,7 @@ final class ReflectionUtils
             if (targetException instanceof RuntimeException) {
                 throw new MBeanException(
                         (RuntimeException) targetException,
-                        "RuntimeException occured while invoking " + toSimpleName(method));
+                        "RuntimeException occurred while invoking " + toSimpleName(method));
             }
             else if (targetException instanceof ReflectionException) {
                 // allow ReflectionException to passthrough
@@ -79,30 +79,30 @@ final class ReflectionUtils
             else if (targetException instanceof Exception) {
                 throw new MBeanException(
                         (Exception) targetException,
-                        "Exception occured while invoking " + toSimpleName(method));
+                        "Exception occurred while invoking " + toSimpleName(method));
             }
             else if (targetException instanceof Error) {
                 throw new RuntimeErrorException(
                         (Error) targetException,
-                        "Error occured while invoking " + toSimpleName(method));
+                        "Error occurred while invoking " + toSimpleName(method));
             }
             else {
                 throw new RuntimeErrorException(
                         new AssertionError(targetException),
-                        "Unexpected throwable occured while invoking " + toSimpleName(method));
+                        "Unexpected throwable occurred while invoking " + toSimpleName(method));
             }
         }
         catch (RuntimeException e) {
-            throw new RuntimeOperationsException(e, "RuntimeException occured while invoking " + toSimpleName(method));
+            throw new RuntimeOperationsException(e, "RuntimeException occurred while invoking " + toSimpleName(method));
         }
         catch (IllegalAccessException e) {
-            throw new ReflectionException(e, "IllegalAccessException occured while invoking " + toSimpleName(method));
+            throw new ReflectionException(e, "IllegalAccessException occurred while invoking " + toSimpleName(method));
         }
         catch (Error err) {
-            throw new RuntimeErrorException(err, "Error occured while invoking " + toSimpleName(method));
+            throw new RuntimeErrorException(err, "Error occurred while invoking " + toSimpleName(method));
         }
         catch (Exception e) {
-            throw new ReflectionException(e, "Exception occured while invoking " + toSimpleName(method));
+            throw new ReflectionException(e, "Exception occurred while invoking " + toSimpleName(method));
         }
     }
 
