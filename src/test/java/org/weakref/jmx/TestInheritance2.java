@@ -15,7 +15,7 @@
  */
 package org.weakref.jmx;
 
-// Overriden method, inherit annotation from protected parent => A
+// Overridden method, inherit annotation from protected parent => A
 public class TestInheritance2
     extends TestInheritanceBase
 {
