@@ -17,6 +17,7 @@
 package org.weakref.jmx;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 import org.weakref.jmx.testing.TestingMBeanServer;
 
 import javax.management.AttributeNotFoundException;
@@ -28,10 +29,12 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
+
 import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.util.ArrayList;
 
+import static org.testng.Assert.assertEquals;
 import static org.weakref.jmx.Util.getUniqueObjectName;
 
 public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
@@ -108,6 +111,21 @@ public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
         for (NamedObject namedObject : objects) {
             exporter.export(namedObject.objectName.getCanonicalName(), namedObject.object);
         }
+    }
+
+    @Test
+    void testDuplicateKey()
+    {
+        MBeanExporter exporter = new MBeanExporter(server);
+
+        exporter.export(new String("test:test=test"), new SimpleObject());
+        try {
+            exporter.export(new String("test:test=test"), new SimpleObject());
+        }
+        catch(JmxException e) {
+            // do nothing
+        }
+        assertEquals(exporter.getExportedObjects().size(), 1);
     }
 
 //    @AfterTest
