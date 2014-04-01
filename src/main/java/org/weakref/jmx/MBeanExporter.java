@@ -27,6 +27,7 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
+
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +49,7 @@ public class MBeanExporter
     public MBeanExporter(MBeanServer server)
     {
         this.server = server;
-        exportedObjects = new MapMaker().weakKeys().weakValues().makeMap();
+        exportedObjects = new MapMaker().weakValues().makeMap();
     }
 
     public void export(String name, Object object)
@@ -71,8 +72,11 @@ public class MBeanExporter
             MBean mbean = builder.build();
 
             synchronized(exportedObjects) {
-                exportedObjects.put(objectName, object);
+                if(exportedObjects.containsKey(objectName)) {
+                    throw new JmxException(Reason.INSTANCE_ALREADY_EXISTS, "key already exported");
+                }
                 server.registerMBean(mbean, objectName);
+                exportedObjects.put(objectName, object);
             }
         }
         catch (InstanceAlreadyExistsException e) {
