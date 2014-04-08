@@ -11,7 +11,7 @@ import static org.weakref.jmx.ObjectNames.quoteValueIfNecessary;
 public class ObjectNameBuilder
 {
     private static final Pattern BAD_PACKAGENAME_PATTERN = Pattern.compile("[:?*]");
-    private StringBuilder objectName;
+    private final StringBuilder objectName;
     private final Set<String> properties = new HashSet<String>();
 
     public ObjectNameBuilder(String packageName)

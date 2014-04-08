@@ -60,6 +60,13 @@ public class TestObjectNames {
         "org.weakref.jmx:name=Inner");
   }
 
+   @Test
+   public void testGeneratedNameOfStringWithQuoting() {
+     assertEquals(
+        generatedNameOf(SimpleObject.class, "bar,baz"),
+        "org.weakref.jmx:type=SimpleObject,name=\"bar,baz\"");
+   }
+
   @Test(dataProvider = "names")
   public void testQuotesName(String name, boolean shouldQuote)
           throws MalformedObjectNameException
