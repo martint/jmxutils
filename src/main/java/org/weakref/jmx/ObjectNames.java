@@ -4,8 +4,6 @@ import com.google.inject.name.Named;
 
 import java.lang.annotation.Annotation;
 
-import static java.lang.String.format;
-
 /**
  * Generate JMX object names.
  */
@@ -20,9 +18,7 @@ public final class ObjectNames
      */
     public static String generatedNameOf(Class<?> clazz)
     {
-        return format("%s:name=%s",
-                clazz.getPackage().getName(),
-                clazz.getSimpleName());
+        return builder(clazz).build();
     }
 
     /**
@@ -32,10 +28,7 @@ public final class ObjectNames
      */
     public static String generatedNameOf(Class<?> clazz, Annotation annotation)
     {
-        return format("%s:type=%s,name=%s",
-                clazz.getPackage().getName(),
-                clazz.getSimpleName(),
-                annotation.annotationType().getSimpleName());
+        return builder(clazz, annotation).build();
     }
 
     /**
@@ -45,10 +38,7 @@ public final class ObjectNames
      */
     public static String generatedNameOf(Class<?> clazz, Class<? extends Annotation> annotationClass)
     {
-        return format("%s:type=%s,name=%s",
-                clazz.getPackage().getName(),
-                clazz.getSimpleName(),
-                annotationClass.getSimpleName());
+        return builder(clazz, annotationClass).build();
     }
 
     /**
@@ -58,7 +48,7 @@ public final class ObjectNames
      */
     public static String generatedNameOf(Class<?> clazz, Named named)
     {
-        return generatedNameOf(clazz, named.value());
+        return builder(clazz, named).build();
     }
 
     /**
@@ -68,10 +58,7 @@ public final class ObjectNames
      */
     public static String generatedNameOf(Class<?> clazz, String name)
     {
-        return format("%s:type=%s,name=%s",
-                clazz.getPackage().getName(),
-                clazz.getSimpleName(),
-                quoteValueIfNecessary(name));
+        return builder(clazz, name).build();
     }
 
     static String quoteValueIfNecessary(String name)
