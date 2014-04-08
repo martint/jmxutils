@@ -67,6 +67,14 @@ public class TestObjectNameBuilder
     }
 
     @Test
+    public void testObjectNameBuilderWithString()
+    {
+        assertEquals(
+                ObjectNames.builder(SimpleObject.class, "foo").build(),
+                "org.weakref.jmx:type=SimpleObject,name=foo");
+    }
+
+    @Test
     public void testObjectNameBuilderWithProperty()
     {
         assertEquals(

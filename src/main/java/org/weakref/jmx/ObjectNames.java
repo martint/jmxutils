@@ -120,22 +120,23 @@ public final class ObjectNames
 
     public static ObjectNameBuilder builder(Class<?> clazz, Annotation annotation)
     {
-        return new ObjectNameBuilder(clazz.getPackage().getName())
-                .withProperty("type", clazz.getSimpleName())
-                .withProperty("name", annotation.annotationType().getSimpleName());
+        return builder(clazz, annotation.annotationType());
     }
 
     public static ObjectNameBuilder builder(Class<?> clazz, Class<? extends Annotation> annotationClass)
     {
-        return new ObjectNameBuilder(clazz.getPackage().getName())
-                .withProperty("type", clazz.getSimpleName())
-                .withProperty("name", annotationClass.getSimpleName());
+        return builder(clazz, annotationClass.getSimpleName());
     }
 
     public static ObjectNameBuilder builder(Class<?> clazz, Named named)
     {
+        return builder(clazz, named.value());
+    }
+
+    public static ObjectNameBuilder builder(Class<?> clazz, String name)
+    {
         return new ObjectNameBuilder(clazz.getPackage().getName())
                 .withProperty("type", clazz.getSimpleName())
-                .withProperty("name", named.value());
+                .withProperty("name", name);
     }
 }
