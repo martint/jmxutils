@@ -1,3 +1,7 @@
+# Version 1.17
+
+- Fix issue when using exportMap due to an incompatibility between Guava < 16.0.1 and Java 7u51+
+
 # Version 1.16
 
 - Add ObjectNamesBuilder method that takes a string
