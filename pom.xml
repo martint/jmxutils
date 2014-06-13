@@ -3,7 +3,7 @@
     <groupId>org.weakref</groupId>
     <artifactId>jmxutils</artifactId>
     <packaging>jar</packaging>
-    <version>1.17-SNAPSHOT</version>
+    <version>1.17</version>
     <name>jmxutils</name>
     <description>Exporting JMX mbeans made easy</description>
     <url>https://github.com/martint/jmxutils</url>
@@ -25,7 +25,7 @@
         <connection>scm:git:git://github.com/martint/jmxutils.git</connection>
         <developerConnection>scm:git:git@github.com:martint/jmxutils.git</developerConnection>
         <url>https://github.com/martint/jmxutils</url>
-      <tag>HEAD</tag>
+      <tag>1.17</tag>
   </scm>
 
     <dependencies>
