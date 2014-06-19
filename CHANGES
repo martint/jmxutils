@@ -1,3 +1,7 @@
+# Version 1.18
+
+- Fix shading of classes in Guava
+
 # Version 1.17
 
 - Fix issue when using exportMap due to an incompatibility between Guava < 16.0.1 and Java 7u51+
