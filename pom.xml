@@ -25,8 +25,12 @@
         <connection>scm:git:git://github.com/martint/jmxutils.git</connection>
         <developerConnection>scm:git:git@github.com:martint/jmxutils.git</developerConnection>
         <url>https://github.com/martint/jmxutils</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
+
+    <properties>
+        <shadeBase>org.weakref.jmx.internal</shadeBase>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -109,7 +113,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>1.4</version>
+                <version>2.3</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -117,6 +121,9 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <createSourcesJar>true</createSourcesJar>
+                            <shadeSourcesContent>true</shadeSourcesContent>
+                            <dependencyReducedPomLocation>${project.build.directory}/pom.xml</dependencyReducedPomLocation>
                             <artifactSet>
                                 <includes>
                                     <include>com.thoughtworks.paranamer:paranamer</include>
@@ -126,13 +133,31 @@
                             <relocations>
                                 <relocation>
                                     <pattern>com.thoughtworks.paranamer</pattern>
-                                    <shadedPattern>org.weakref.jmx.com.thoughworks.paranamer</shadedPattern>
+                                    <shadedPattern>${shadeBase}.paranamer</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.google.common</pattern>
-                                    <shadedPattern>org.weakref.jmx.com.google.common</shadedPattern>
+                                    <shadedPattern>${shadeBase}.guava</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.google.thirdparty</pattern>
+                                    <shadedPattern>${shadeBase}.guava</shadedPattern>
                                 </relocation>
                             </relocations>
+                            <filters>
+                                <filter>
+                                    <artifact>com.thoughtworks.paranamer:paranamer</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/maven/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>com.google.guava:guava</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/maven/**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>
