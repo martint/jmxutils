@@ -82,8 +82,7 @@ public class MBeanOperationBuilder
         //
         // Build Parameter Infos
         // Extract parameter names from debug symbols
-        Paranamer paranamer = new BytecodeReadingParanamer();
-        String[] parameterNames = paranamer.lookupParameterNames(concreteMethod);
+        String[] parameterNames = getParameterNames(concreteMethod);
         Class<?>[] types = concreteMethod.getParameterTypes();
 
         // Parameter annotations used form descriptor come from the annotated method, not the public method
@@ -127,5 +126,20 @@ public class MBeanOperationBuilder
                 descriptor);
 
         return new ReflectionMBeanOperation(mbeanOperationInfo, target, concreteMethod);
+    }
+
+    private static String[] getParameterNames(Method method)
+    {
+        try {
+            Paranamer paranamer = new BytecodeReadingParanamer();
+            return paranamer.lookupParameterNames(method);
+        }
+        catch (RuntimeException e) {
+            String[] names = new String[method.getParameterCount()];
+            for (int i = 0; i < names.length; i++) {
+                names[i] = "p" + i;
+            }
+            return names;
+        }
     }
 }
