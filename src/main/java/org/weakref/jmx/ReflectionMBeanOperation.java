@@ -15,22 +15,26 @@
  */
 package org.weakref.jmx;
 
+import com.google.common.base.Supplier;
+
 import javax.management.MBeanException;
 import javax.management.MBeanOperationInfo;
 import javax.management.ReflectionException;
 import java.lang.reflect.Method;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 class ReflectionMBeanOperation implements MBeanOperation
 {
     private final MBeanOperationInfo info;
-    private final Object target;
+    private final Supplier targetSupplier;
     private final Method method;
     private final Signature signature;
 
-    public ReflectionMBeanOperation(MBeanOperationInfo info, Object target, Method method)
+    public ReflectionMBeanOperation(MBeanOperationInfo info, Supplier targetSupplier, Method method)
     {
         this.info = info;
-        this.target = target;
+        this.targetSupplier = targetSupplier;
         this.method = method;
 
         this.signature = new Signature(method);
@@ -41,25 +45,19 @@ class ReflectionMBeanOperation implements MBeanOperation
         return info;
     }
 
-    public Object getTarget()
-    {
-        return target;
-    }
-
     public Signature getSignature()
     {
         return signature;
     }
 
-    public Method getMethod()
-    {
-        return method;
-    }
-
     public Object invoke(Object[] params)
             throws MBeanException, ReflectionException
     {
-        Object result = ReflectionUtils.invoke(target, method, params);
-        return result;
+        return ReflectionUtils.invoke(getTarget(), method, params);
+    }
+
+    private Object getTarget()
+    {
+        return checkNotNull(targetSupplier.get(), "target is null");
     }
 }

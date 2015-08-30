@@ -18,6 +18,9 @@ package org.weakref.jmx;
 import static org.weakref.jmx.ReflectionUtils.isValidGetter;
 import static org.weakref.jmx.ReflectionUtils.isValidSetter;
 
+import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableList;
+
 import javax.management.Descriptor;
 import javax.management.ImmutableDescriptor;
 import javax.management.MBeanAttributeInfo;
@@ -31,7 +34,7 @@ import java.util.regex.Pattern;
 public class MBeanAttributeBuilder
 {
     private final static Pattern getterOrSetterPattern = Pattern.compile("(get|set|is)(.+)");
-    private Object target;
+    private Supplier targetSupplier;
     private String name;
     private Method concreteGetter;
     private Method annotatedGetter;
@@ -40,10 +43,10 @@ public class MBeanAttributeBuilder
     private boolean flatten;
     private boolean nested;
 
-    public MBeanAttributeBuilder onInstance(Object target)
+    public MBeanAttributeBuilder withTargetSupplier(Supplier targetSupplier)
     {
-        if (target == null) throw new NullPointerException("target is null");
-        this.target = target;
+        if (targetSupplier == null) throw new NullPointerException("targetSupplier is null");
+        this.targetSupplier = targetSupplier;
         return this;
     }
 
@@ -116,7 +119,7 @@ public class MBeanAttributeBuilder
 
     public Collection<? extends MBeanFeature> build()
     {
-        if (target == null) {
+        if (targetSupplier == null) {
             throw new IllegalArgumentException("JmxAttribute must have a target object");
         }
 
@@ -132,18 +135,13 @@ public class MBeanAttributeBuilder
                 throw new IllegalArgumentException("Flattened JmxAttribute must have a concrete getter");
             }
 
-            Object value = null;
-            try {
-                value = concreteGetter.invoke(target);
+            Class targetType = getNestedTargetType(concreteGetter);
+            if(targetType == null){
+                return ImmutableList.of();
             }
-            catch (Exception e) {
-                // todo log me
-            }
-            if (value == null) {
-                return Collections.emptySet();
-            }
+            Supplier nestedObjectSupplier = createNestedObjectSupplier(targetType, concreteGetter);
 
-            MBean mbean = new MBeanBuilder(value).build();
+            MBean mbean = MBeanBuilder.from(targetType, nestedObjectSupplier).build();
             ArrayList<MBeanFeature> features = new ArrayList<MBeanFeature>();
             features.addAll(mbean.getAttributes());
             features.addAll(mbean.getOperations());
@@ -155,18 +153,13 @@ public class MBeanAttributeBuilder
                 throw new IllegalArgumentException("Nested JmxAttribute must have a concrete getter");
             }
 
-            Object value = null;
-            try {
-                value = concreteGetter.invoke(target);
+            Class targetType = getNestedTargetType(concreteGetter);
+            if(targetType == null){
+                return ImmutableList.of();
             }
-            catch (Exception e) {
-                // todo log me
-            }
-            if (value == null) {
-                return Collections.emptySet();
-            }
+            Supplier nestedObjectSupplier = createNestedObjectSupplier(targetType, concreteGetter);
 
-            MBean mbean = new MBeanBuilder(value).build();
+            MBean mbean = MBeanBuilder.from(targetType, nestedObjectSupplier).build();
             ArrayList<MBeanFeature> features = new ArrayList<MBeanFeature>();
             for (MBeanAttribute attribute : mbean.getAttributes()) {
                 features.add(new NestedMBeanAttribute(attributeName, attribute));
@@ -219,7 +212,7 @@ public class MBeanAttributeBuilder
                     descriptor);
 
 
-            return Collections.singleton(new ReflectionMBeanAttribute(mbeanAttributeInfo, target, concreteGetter, concreteSetter));
+            return Collections.singleton(new ReflectionMBeanAttribute(mbeanAttributeInfo, targetSupplier, concreteGetter, concreteSetter));
         }
     }
 
@@ -241,5 +234,32 @@ public class MBeanAttributeBuilder
             }
         }
         return null;
+    }
+
+    private Class getNestedTargetType(Method concreteGetter)
+    {
+        try {
+            Object value = concreteGetter.invoke(targetSupplier.get());
+            return value.getClass();
+        }
+        catch (Exception e) {
+            // todo log me
+            return null;
+        }
+    }
+
+    private Supplier createNestedObjectSupplier(final Class requiredType, final Method concreteGetter){
+        return new Supplier() {
+            public Object get()
+            {
+                try {
+                    return requiredType.cast(concreteGetter.invoke(targetSupplier.get()));
+                }
+                catch (Exception e) {
+                    // todo log me
+                    return null;
+                }
+            }
+        };
     }
 }

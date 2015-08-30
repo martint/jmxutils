@@ -19,11 +19,16 @@ import static org.weakref.jmx.ReflectionUtils.getAttributeName;
 import static org.weakref.jmx.ReflectionUtils.isGetter;
 import static org.weakref.jmx.ReflectionUtils.isSetter;
 
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 class MBeanBuilder
 {
@@ -32,30 +37,24 @@ class MBeanBuilder
     private final List<MBeanOperationBuilder> operationBuilders = new ArrayList<MBeanOperationBuilder>();
     private String description;
 
-    public MBeanBuilder(String className)
-    {
-        this.className = className;
-    }
-
-    public static MBeanBuilder from(String className)
-    {
-        return new MBeanBuilder(className);
-    }
-
     public static MBeanBuilder from(Object object)
     {
-        return new MBeanBuilder(object);
+        return from(object.getClass(), Suppliers.ofInstance(object));
     }
 
-    public MBeanBuilder(Object target)
+    static MBeanBuilder from(Class targetType, Supplier targetSupplier)
     {
-        if (target == null) {
-            throw new NullPointerException("target is null");
-        }
+        return new MBeanBuilder(targetType, targetSupplier);
+    }
+
+    private MBeanBuilder(Class targetType, Supplier targetSupplier)
+    {
+        checkNotNull(targetType, "targetType is null");
+        checkNotNull(targetSupplier, "targetSupplier is null");
 
         Map<String, MBeanAttributeBuilder> attributeBuilders = new TreeMap<String, MBeanAttributeBuilder>();
 
-        for (Map.Entry<Method, Method> entry : AnnotationUtils.findManagedMethods(target.getClass()).entrySet()) {
+        for (Map.Entry<Method, Method> entry : AnnotationUtils.findManagedMethods(targetType).entrySet()) {
             Method concreteMethod = entry.getKey();
             Method annotatedMethod = entry.getValue();
 
@@ -64,9 +63,9 @@ class MBeanBuilder
 
                 MBeanAttributeBuilder attributeBuilder = attributeBuilders.get(attributeName);
                 if (attributeBuilder == null) {
-                    attributeBuilder = new MBeanAttributeBuilder().named(attributeName).onInstance(target);
+                    attributeBuilder = new MBeanAttributeBuilder().named(attributeName).withTargetSupplier(targetSupplier);
                 }
-                
+
                 if (isGetter(concreteMethod)) {
                     attributeBuilder = attributeBuilder
                             .withConcreteGetter(concreteMethod)
@@ -84,7 +83,7 @@ class MBeanBuilder
                 // TODO: change this so that we are not making assumptions about mutability or side effects
                 //       in the builder
                 addOperation()
-                        .onInstance(target)
+                        .withTargetSupplier(targetSupplier)
                         .withConcreteMethod(concreteMethod)
                         .withAnnotatedMethod(annotatedMethod)
                         .build();
@@ -95,8 +94,8 @@ class MBeanBuilder
             this.attributeBuilders.add(attributeBuilder);
         }
 
-        className = target.getClass().getName();
-        description = AnnotationUtils.getDescription(target.getClass().getAnnotations());
+        className = targetType.getName();
+        description = AnnotationUtils.getDescription(targetType.getAnnotations());
     }
 
     public MBeanBuilder withDescription(String description)
@@ -105,13 +104,15 @@ class MBeanBuilder
         return this;
     }
 
-    public MBeanAttributeBuilder addAttribute() {
+    public MBeanAttributeBuilder addAttribute()
+    {
         MBeanAttributeBuilder builder = new MBeanAttributeBuilder();
         attributeBuilders.add(builder);
         return builder;
     }
 
-    public MBeanOperationBuilder addOperation() {
+    public MBeanOperationBuilder addOperation()
+    {
         MBeanOperationBuilder builder = new MBeanOperationBuilder();
         operationBuilders.add(builder);
         return builder;
@@ -134,7 +135,7 @@ class MBeanBuilder
         for (MBeanOperationBuilder operationBuilder : operationBuilders) {
             operations.add(operationBuilder.build());
         }
-        
+
         return new MBean(className, description, attributes, operations);
     }
 }
