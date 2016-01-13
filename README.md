@@ -141,9 +141,11 @@ To use jmxutils in maven projects:
 <dependency>
     <groupId>org.weakref</groupId>
     <artifactId>jmxutils</artifactId>
-    <version>1.18</version>
+    <version>...</version>
 </dependency>
 ```
+
+Current version: [![Maven Central](https://img.shields.io/maven-central/v/org.weakref/jmxutils.svg?label=jmxutils)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.weakref%22%20AND%20a%3A%22jmxutils%22)
 
 # License
 
