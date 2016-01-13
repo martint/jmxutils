@@ -91,7 +91,7 @@ public class MBeanOperationBuilder
             parameterAnnotations = annotatedMethod.getParameterAnnotations();
         }
         else {
-            parameterAnnotations = new Annotation[annotatedMethod.getParameterTypes().length][];
+            parameterAnnotations = new Annotation[parameterNames.length][];
         }
 
         MBeanParameterInfo[] parameterInfos = new MBeanParameterInfo[parameterNames.length];
