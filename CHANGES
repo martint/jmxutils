@@ -1,3 +1,7 @@
+# Version 1.19
+
+- Mitigate compatibility issue due to Paranamer not supporting Java 8 bytecode
+
 # Version 1.18
 
 - Fix shading of classes in Guava
