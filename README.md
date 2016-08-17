@@ -40,7 +40,7 @@ Injector injector = Guice.createInjector(
                bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
 
                ExportBinder exporter = ExportBinder.newExporter(binder());
-               exporter.export(AnotherManagedObject.class).as("test:name="Z");
+               exporter.export(AnotherManagedObject.class).as("test:name=\"Z\"");
                
                // You can use a standardized naming scheme for singletons if you wish.
                // See ObjectNames.generatedNameOf(Class<?>) for the naming scheme.
