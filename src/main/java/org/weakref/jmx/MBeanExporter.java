@@ -73,7 +73,7 @@ public class MBeanExporter
 
             synchronized(exportedObjects) {
                 if(exportedObjects.containsKey(objectName)) {
-                    throw new JmxException(Reason.INSTANCE_ALREADY_EXISTS, "key already exported");
+                    throw new JmxException(Reason.INSTANCE_ALREADY_EXISTS, "key already exported: %s", objectName);
                 }
                 server.registerMBean(mbean, objectName);
                 exportedObjects.put(objectName, object);
