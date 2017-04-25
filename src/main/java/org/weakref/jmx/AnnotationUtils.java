@@ -15,6 +15,13 @@
  */
 package org.weakref.jmx;
 
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
+import org.weakref.jmx.JmxException.Reason;
+
+import javax.management.Descriptor;
+import javax.management.DescriptorKey;
+import javax.management.ImmutableDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -26,12 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
-import javax.management.Descriptor;
-import javax.management.DescriptorKey;
-import javax.management.ImmutableDescriptor;
-
-import org.weakref.jmx.JmxException.Reason;
 
 import static java.util.Arrays.asList;
 
@@ -230,23 +231,45 @@ final class AnnotationUtils
     public static Map<Method, Method> findManagedMethods(Class<?> clazz)
     {
         Map<Method, Method> result = new HashMap<Method, Method>();
+        Set<Signature> foundMethods = new HashSet<Signature>();
+        findManagedMethods(clazz, result, foundMethods);
 
-        // gather all publicly available methods
+        return result;
+    }
+
+    private static void findManagedMethods(Class<?> clazz, Map<Method, Method> result, Set<Signature> foundMethods)
+    {
+        // gather all available methods
         // this returns everything, even if it's declared in a parent
-        for (Method method : clazz.getMethods()) {
+        for (Method method : clazz.getDeclaredMethods()) {
             // skip methods that are used internally by the vm for implementing covariance, etc
             if (method.isSynthetic() || method.isBridge()) {
                 continue;
             }
 
+            Signature methodSignature = new Signature(method);
+            if (foundMethods.contains(methodSignature)) {
+                continue;
+            }
+            foundMethods.add(methodSignature);
+
             // look for annotations recursively in superclasses or interfaces
             Method managedMethod = findManagedMethod(clazz, method.getName(), method.getParameterTypes());
             if (managedMethod != null) {
+                method.setAccessible(true);
+                managedMethod.setAccessible(true);
                 result.put(method, managedMethod);
             }
         }
 
-        return result;
+        Class<?> superclass = clazz.getSuperclass();
+        if (superclass != null) {
+            findManagedMethods(superclass, result, foundMethods);
+        }
+
+        for (Class<?> iface : clazz.getInterfaces()) {
+            findManagedMethods(iface, result, foundMethods);
+        }
     }
 
     public static Method findManagedMethod(Method method)

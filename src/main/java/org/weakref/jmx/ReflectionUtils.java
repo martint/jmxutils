@@ -21,11 +21,11 @@ import javax.management.RuntimeErrorException;
 import javax.management.RuntimeOperationsException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Map;
-import java.util.LinkedHashMap;
-import java.util.Collections;
 
 final class ReflectionUtils
 {
@@ -53,8 +53,8 @@ final class ReflectionUtils
             throws MBeanException, ReflectionException
     {
         assertNotNull(target, "target");
-        assertNotNull(target, "method");
-        assertNotNull(target, "params");
+        assertNotNull(method, "method");
+        assertNotNull(params, "params");
 
         try {
             Object result = method.invoke(target, params);
@@ -164,6 +164,46 @@ final class ReflectionUtils
         else {
             return value == null || type.isInstance(value);
         }
+    }
+
+    public static Method getMethod(Class<?> target, String name, Class<?>... parameterTypes)
+            throws NoSuchMethodException
+    {
+        Method method = getMethod0(target, name, parameterTypes);
+        if (method != null) {
+            return method;
+        }
+
+        // Throw a NoSuchMethodException
+        return target.getMethod(name, parameterTypes);
+    }
+
+    private static Method getMethod0(Class<?> target, String name, Class<?>[] parameterTypes)
+    {
+        try {
+            Method method = target.getDeclaredMethod(name, parameterTypes);
+            method.setAccessible(true);
+            return method;
+        }
+        catch (NoSuchMethodException ignored) {
+        }
+
+        Class<?> superclass = target.getSuperclass();
+        if (superclass != null) {
+            Method method = getMethod0(superclass, name, parameterTypes);
+            if (method != null) {
+                return method;
+            }
+        }
+
+        for (Class<?> iface : target.getInterfaces()) {
+            Method method = getMethod0(iface, name, parameterTypes);
+            if (method != null) {
+                return method;
+            }
+        }
+
+        return null;
     }
 
     private static void assertNotNull(Object param, String name)
