@@ -68,7 +68,7 @@ public class MBeanExporter
     public void export(ObjectName objectName, Object object)
     {
         try {
-            MBeanBuilder builder = new MBeanBuilder(object);
+            MBeanBuilder builder = MBeanBuilder.from(object);
             MBean mbean = builder.build();
 
             synchronized(exportedObjects) {

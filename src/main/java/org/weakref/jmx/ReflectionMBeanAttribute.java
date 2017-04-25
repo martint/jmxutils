@@ -15,7 +15,9 @@
  */
 package org.weakref.jmx;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.weakref.jmx.ReflectionUtils.invoke;
+import com.google.common.base.Supplier;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.InvalidAttributeValueException;
@@ -27,21 +29,21 @@ import java.lang.reflect.Method;
 class ReflectionMBeanAttribute implements MBeanAttribute
 {
     private final MBeanAttributeInfo info;
-    private final Object target;
+    private final Supplier targetSupplier;
     private final String name;
     private final Method getter;
     private final Method setter;
 
-    public ReflectionMBeanAttribute(MBeanAttributeInfo info, Object target, Method getter, Method setter)
+    public ReflectionMBeanAttribute(MBeanAttributeInfo info, Supplier targetSupplier, Method getter, Method setter)
     {
         if (info == null) {
             throw new NullPointerException("info is null");
         }
-        if (target == null) {
-            throw new NullPointerException("target is null");
+        if (targetSupplier == null) {
+            throw new NullPointerException("targetSupplier is null");
         }
         this.info = info;
-        this.target = target;
+        this.targetSupplier = targetSupplier;
         this.name = info.getName();
         this.getter = getter;
         this.setter = setter;
@@ -50,11 +52,6 @@ class ReflectionMBeanAttribute implements MBeanAttribute
     public MBeanAttributeInfo getInfo()
     {
         return info;
-    }
-
-    public Object getTarget()
-    {
-        return target;
     }
 
     public String getName()
@@ -68,8 +65,7 @@ class ReflectionMBeanAttribute implements MBeanAttribute
         if (getter == null) {
             throw new AttributeNotFoundException(name + " is write-only");
         }
-        Object result = invoke(target, getter);
-        return result;
+        return invoke(getTarget(), getter);
     }
 
     public void setValue(Object value)
@@ -81,6 +77,11 @@ class ReflectionMBeanAttribute implements MBeanAttribute
         if (!ReflectionUtils.isAssignable(value, setter.getParameterTypes()[0])) {
             throw new InvalidAttributeValueException("Can not assign " + value.getClass() + " to attribute " + name);
         }
-        invoke(target, setter, value);
+        invoke(getTarget(), setter, value);
+    }
+
+    private Object getTarget()
+    {
+        return checkNotNull(targetSupplier.get(), "target is null");
     }
 }

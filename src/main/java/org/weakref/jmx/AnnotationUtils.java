@@ -225,7 +225,7 @@ final class AnnotationUtils
      *
      * @param clazz the class to analyze
      * @return a map that associates a concrete method to the actual method tagged as managed
-     *         (which may belong to a different class in clazz's hierarchy)
+     * (which may belong to a different class in clazz's hierarchy)
      */
     public static Map<Method, Method> findManagedMethods(Class<?> clazz)
     {
@@ -259,7 +259,7 @@ final class AnnotationUtils
         try {
             Method method = clazz.getDeclaredMethod(methodName, paramTypes);
             if (isManagedMethod(method)) return method;
-        }
+            }
         catch (NoSuchMethodException e) {
             // ignore
         }
@@ -293,30 +293,41 @@ final class AnnotationUtils
 
     public static boolean isFlatten(Method method)
     {
-        return method != null && isAnnotationPresent(Flatten.class, new HashSet<Class<? extends Annotation>>(), method.getAnnotations());
+        return findAnnotation(Flatten.class, method) != null;
     }
 
     public static boolean isNested(Method method)
     {
-        return method != null && isAnnotationPresent(Nested.class, new HashSet<Class<? extends Annotation>>(), method.getAnnotations());
+        return findAnnotation(Nested.class, method) != null;
     }
 
-    private static boolean isAnnotationPresent(Class<? extends Annotation> annotationClass, Set<Class<? extends Annotation>> processedTypes, Annotation... annotations)
+    public static <T extends Annotation> T findAnnotation(Class<T> annotationClass, Method method)
+    {
+        if (method != null) {
+            return findAnnotation(annotationClass, new HashSet<Class<? extends Annotation>>(), method.getAnnotations());
+        }
+        return null;
+    }
+
+    private static <T extends Annotation> T findAnnotation(Class<T> annotationClass, Set<Class<? extends Annotation>> processedTypes, Annotation... annotations)
     {
         // are any of the annotations the specified annotation
         for (Annotation annotation : annotations) {
             if (annotationClass.isInstance(annotation)) {
-                return true;
+                return annotationClass.cast(annotation);
             }
         }
 
         // are any of the annotations annotated with the specified annotation
         for (Annotation annotation : annotations) {
-            if (processedTypes.add(annotation.annotationType()) && isAnnotationPresent(annotationClass, processedTypes, annotation.annotationType().getAnnotations())) {
-                return true;
+            if (processedTypes.add(annotation.annotationType())) {
+                T foundAnnotation = findAnnotation(annotationClass, processedTypes, annotation.annotationType().getAnnotations());
+                if (foundAnnotation != null) {
+                    return foundAnnotation;
+                }
             }
         }
 
-        return false;
+        return null;
     }
 }

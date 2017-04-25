@@ -15,26 +15,28 @@
  */
 package org.weakref.jmx;
 
+import com.google.common.base.Supplier;
 import com.thoughtworks.paranamer.BytecodeReadingParanamer;
 import com.thoughtworks.paranamer.Paranamer;
 
 import javax.management.Descriptor;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 public class MBeanOperationBuilder
 {
-    private Object target;
+    private Supplier targetSupplier;
     private String name;
     private Method concreteMethod;
     private Method annotatedMethod;
 
-    public MBeanOperationBuilder onInstance(Object target)
+    public MBeanOperationBuilder withTargetSupplier(Supplier targetSupplier)
     {
-        if (target == null) throw new NullPointerException("target is null");
-        this.target = target;
+        if (targetSupplier == null) throw new NullPointerException("targetSupplier is null");
+        this.targetSupplier = targetSupplier;
         return this;
     }
 
@@ -65,7 +67,7 @@ public class MBeanOperationBuilder
 
     public MBeanOperation build()
     {
-        if (target == null) {
+        if (targetSupplier == null) {
             throw new IllegalArgumentException("JmxOperation must have a target object");
         }
 
@@ -125,7 +127,7 @@ public class MBeanOperationBuilder
                 MBeanOperationInfo.UNKNOWN,
                 descriptor);
 
-        return new ReflectionMBeanOperation(mbeanOperationInfo, target, concreteMethod);
+        return new ReflectionMBeanOperation(mbeanOperationInfo, targetSupplier, concreteMethod);
     }
 
     private static String[] getParameterNames(Method method)

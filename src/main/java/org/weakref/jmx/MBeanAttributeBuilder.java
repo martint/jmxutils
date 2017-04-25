@@ -18,20 +18,26 @@ package org.weakref.jmx;
 import static org.weakref.jmx.ReflectionUtils.isValidGetter;
 import static org.weakref.jmx.ReflectionUtils.isValidSetter;
 
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
+import com.google.common.collect.ImmutableList;
+
 import javax.management.Descriptor;
 import javax.management.ImmutableDescriptor;
 import javax.management.MBeanAttributeInfo;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MBeanAttributeBuilder
 {
     private final static Pattern getterOrSetterPattern = Pattern.compile("(get|set|is)(.+)");
-    private Object target;
+    private Supplier targetSupplier;
     private String name;
     private Method concreteGetter;
     private Method annotatedGetter;
@@ -40,16 +46,20 @@ public class MBeanAttributeBuilder
     private boolean flatten;
     private boolean nested;
 
-    public MBeanAttributeBuilder onInstance(Object target)
+    public MBeanAttributeBuilder withTargetSupplier(Supplier targetSupplier)
     {
-        if (target == null) throw new NullPointerException("target is null");
-        this.target = target;
+        if (targetSupplier == null) {
+            throw new NullPointerException("targetSupplier is null");
+        }
+        this.targetSupplier = targetSupplier;
         return this;
     }
 
     public MBeanAttributeBuilder named(String name)
     {
-        if (name == null) throw new NullPointerException("name is null");
+        if (name == null) {
+            throw new NullPointerException("name is null");
+        }
         this.name = name;
         return this;
     }
@@ -116,7 +126,7 @@ public class MBeanAttributeBuilder
 
     public Collection<? extends MBeanFeature> build()
     {
-        if (target == null) {
+        if (targetSupplier == null) {
             throw new IllegalArgumentException("JmxAttribute must have a target object");
         }
 
@@ -132,18 +142,14 @@ public class MBeanAttributeBuilder
                 throw new IllegalArgumentException("Flattened JmxAttribute must have a concrete getter");
             }
 
-            Object value = null;
-            try {
-                value = concreteGetter.invoke(target);
+            Class nestedObjectType = getNestedObjectType(concreteGetter);
+            if (nestedObjectType == null) {
+                return ImmutableList.of();
             }
-            catch (Exception e) {
-                // todo log me
-            }
-            if (value == null) {
-                return Collections.emptySet();
-            }
+            long cacheDurationMillis = getNestedObjectCacheDuration(annotatedGetter);
+            Supplier nestedObjectSupplier = createNestedObjectSupplier(nestedObjectType, concreteGetter, cacheDurationMillis);
 
-            MBean mbean = new MBeanBuilder(value).build();
+            MBean mbean = MBeanBuilder.from(nestedObjectType, nestedObjectSupplier).build();
             ArrayList<MBeanFeature> features = new ArrayList<MBeanFeature>();
             features.addAll(mbean.getAttributes());
             features.addAll(mbean.getOperations());
@@ -155,18 +161,14 @@ public class MBeanAttributeBuilder
                 throw new IllegalArgumentException("Nested JmxAttribute must have a concrete getter");
             }
 
-            Object value = null;
-            try {
-                value = concreteGetter.invoke(target);
+            Class nestedObjectType = getNestedObjectType(concreteGetter);
+            if (nestedObjectType == null) {
+                return ImmutableList.of();
             }
-            catch (Exception e) {
-                // todo log me
-            }
-            if (value == null) {
-                return Collections.emptySet();
-            }
+            long cacheDurationMillis = getNestedObjectCacheDuration(annotatedGetter);
+            Supplier nestedObjectSupplier = createNestedObjectSupplier(nestedObjectType, concreteGetter, cacheDurationMillis);
 
-            MBean mbean = new MBeanBuilder(value).build();
+            MBean mbean = MBeanBuilder.from(nestedObjectType, nestedObjectSupplier).build();
             ArrayList<MBeanFeature> features = new ArrayList<MBeanFeature>();
             for (MBeanAttribute attribute : mbean.getAttributes()) {
                 features.add(new NestedMBeanAttribute(attributeName, attribute));
@@ -219,7 +221,7 @@ public class MBeanAttributeBuilder
                     descriptor);
 
 
-            return Collections.singleton(new ReflectionMBeanAttribute(mbeanAttributeInfo, target, concreteGetter, concreteSetter));
+            return Collections.singleton(new ReflectionMBeanAttribute(mbeanAttributeInfo, targetSupplier, concreteGetter, concreteSetter));
         }
     }
 
@@ -241,5 +243,54 @@ public class MBeanAttributeBuilder
             }
         }
         return null;
+    }
+
+    private Class getNestedObjectType(Method concreteGetter)
+    {
+        try {
+            Object value = concreteGetter.invoke(targetSupplier.get());
+            return value.getClass();
+        }
+        catch (Exception e) {
+            // todo log me
+            return null;
+        }
+    }
+
+    private long getNestedObjectCacheDuration(Method annotatedGetter)
+    {
+        long cacheDurationMillis = -1;
+        Nested nestedAnnotation = AnnotationUtils.findAnnotation(Nested.class, annotatedGetter);
+        if (nestedAnnotation != null) {
+            cacheDurationMillis = nestedAnnotation.cacheDurationMillis();
+        }
+        Flatten flattenAnnotation = AnnotationUtils.findAnnotation(Flatten.class, annotatedGetter);
+        if (flattenAnnotation != null) {
+            cacheDurationMillis = flattenAnnotation.cacheDurationMillis();
+        }
+        return cacheDurationMillis;
+    }
+
+    private Supplier createNestedObjectSupplier(final Class requiredType, final Method concreteGetter, long cacheDurationMills)
+    {
+        Supplier supplier = new Supplier()
+        {
+            public Object get()
+            {
+                try {
+                    return requiredType.cast(concreteGetter.invoke(targetSupplier.get()));
+                }
+                catch (Exception e) {
+                    // todo log me
+                    return null;
+                }
+            }
+        };
+        if (cacheDurationMills >= 0) {
+            supplier = Suppliers.memoizeWithExpiration(supplier, cacheDurationMills, TimeUnit.MILLISECONDS);
+        } else {
+            supplier = Suppliers.memoize(supplier);
+        }
+        return supplier;
     }
 }
