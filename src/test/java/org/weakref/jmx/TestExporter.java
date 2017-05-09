@@ -16,7 +16,10 @@
 
 package org.weakref.jmx;
 
+import org.testng.Reporter;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 import org.weakref.jmx.testing.TestingMBeanServer;
 
@@ -40,6 +43,20 @@ import static org.weakref.jmx.Util.getUniqueObjectName;
 public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
 {
     private MBeanServer server;
+    private MBeanExporter exporter;
+    private String namespace;
+
+    @Factory(dataProvider = "namespace")
+    public TestExporter(String namespace)
+    {
+        this.namespace = namespace;
+    }
+    @DataProvider(name = "namespace")
+    public static Object[][] namespaceProvider()
+    {
+        return new Object[][] {new Object[] {"test-1"}, new Object[] {MBeanExporter.GLOBAL_NAMESPACE}};
+    }
+
 
     static class NamedObject
     {
@@ -68,28 +85,28 @@ public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
     protected MBeanInfo getMBeanInfo(NamedObject namedObject)
             throws Exception
     {
-        return server.getMBeanInfo(namedObject.objectName);
+        return server.getMBeanInfo(exporter.getExportedName(namedObject.objectName));
     }
 
     @Override
     protected Object getAttribute(NamedObject namedObject, String attributeName)
             throws MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException
     {
-        return server.getAttribute(namedObject.objectName, attributeName);
+        return server.getAttribute(exporter.getExportedName(namedObject.objectName), attributeName);
     }
 
     @Override
     protected void setAttribute(NamedObject namedObject, String attributeName, Object value)
             throws InstanceNotFoundException, AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException
     {
-        server.setAttribute(namedObject.objectName, new javax.management.Attribute(attributeName, value));
+        server.setAttribute(exporter.getExportedName(namedObject.objectName), new javax.management.Attribute(attributeName, value));
     }
 
     @Override
     protected Object invoke(NamedObject namedObject, Object value, String operationName)
             throws InstanceNotFoundException, MBeanException, ReflectionException
     {
-        return server.invoke(namedObject.objectName, operationName, new Object[] { value },
+        return server.invoke(exporter.getExportedName(namedObject.objectName), operationName, new Object[] {value },
                                           new String[] { Object.class.getName() });
     }
 
@@ -107,7 +124,13 @@ public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
         objects.add(NamedObject.of(getUniqueObjectName(), new NestedObject()));
         objects.add(NamedObject.of(getUniqueObjectName(), new CustomNestedAnnotationObject()));
 
-        MBeanExporter exporter = new MBeanExporter(server);
+        if (namespace.equals(MBeanExporter.GLOBAL_NAMESPACE)) {
+            Reporter.log("Test in namespace: global");
+        }
+        else {
+            Reporter.log("Test in namespace: " + namespace);
+        }
+        exporter = new MBeanExporter(namespace, server);
         for (NamedObject namedObject : objects) {
             exporter.export(namedObject.objectName.getCanonicalName(), namedObject.object);
         }

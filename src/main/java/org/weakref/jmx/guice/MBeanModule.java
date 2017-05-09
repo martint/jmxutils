@@ -24,11 +24,24 @@ import com.google.inject.multibindings.Multibinder;
 import org.weakref.jmx.MBeanExporter;
 
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
+import static java.util.Objects.requireNonNull;
 
 public class MBeanModule
         extends AbstractModule
 {
     private ExportBuilder builder;
+    private final String namespace;
+
+    public MBeanModule(String namespace)
+    {
+        requireNonNull(namespace, "namespace is null");
+        this.namespace = namespace;
+    }
+
+    public MBeanModule()
+    {
+        this(MBeanExporter.GLOBAL_NAMESPACE);
+    }
 
     @Override
     protected final void configure()
@@ -37,6 +50,7 @@ public class MBeanModule
 
         bind(GuiceMBeanExporter.class).asEagerSingleton();
         bind(MBeanExporter.class).in(Scopes.SINGLETON);
+        bindConstant().annotatedWith(MBeanExporter.Namespace.class).to(this.namespace);
 
         Multibinder<SetMapping<?>> collectionBinder = newSetBinder(binder(), new TypeLiteral<SetMapping<?>>() {});
         Multibinder<MapMapping<?, ?>> mapBinder = newSetBinder(binder(), new TypeLiteral<MapMapping<?, ?>>() {});

@@ -23,6 +23,7 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.weakref.jmx.MBeanExporter;
 import org.weakref.jmx.SimpleObject;
 import org.weakref.jmx.Util;
 
@@ -90,6 +91,53 @@ public class TestMBeanModule
 
         Assert.assertNotNull(server.getMBeanInfo(name));
         server.unregisterMBean(name);
+    }
+
+    @Test
+    public void testNamespace()
+            throws IOException, IntrospectionException, InstanceNotFoundException, ReflectionException, MalformedObjectNameException, MBeanRegistrationException
+    {
+        final ObjectName name = Util.getUniqueObjectName();
+        final String namespace1 = "namespace-1";
+        final String namespace2 = "namespace-2";
+
+        Injector injector = Guice.createInjector(PRODUCTION, new MBeanModule(namespace1), new AbstractModule()
+        {
+            @Override
+            protected void configure()
+            {
+                binder().requireExplicitBindings();
+                binder().disableCircularProxies();
+
+                bind(SimpleObject.class).asEagerSingleton();
+                bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
+                ExportBinder.newExporter(binder()).export(SimpleObject.class).as(name.getCanonicalName());
+            }
+        });
+
+        Injector injector2 = Guice.createInjector(PRODUCTION, new MBeanModule(namespace2), new AbstractModule()
+        {
+            @Override
+            protected void configure()
+            {
+                binder().requireExplicitBindings();
+                binder().disableCircularProxies();
+
+                bind(SimpleObject.class).asEagerSingleton();
+                bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
+                ExportBinder.newExporter(binder()).export(SimpleObject.class).as(name.getCanonicalName());
+            }
+        });
+
+        MBeanServer server = injector.getInstance(MBeanServer.class);
+
+        // Same class/name exported in separate namespace
+        ObjectName exportedName1 = MBeanExporter.getExportedName(namespace1, name);
+        Assert.assertNotNull(server.getMBeanInfo(exportedName1));
+        server.unregisterMBean(exportedName1);
+        ObjectName exportedName2 = MBeanExporter.getExportedName(namespace2, name);
+        Assert.assertNotNull(server.getMBeanInfo(exportedName2));
+        server.unregisterMBean(exportedName2);
     }
 
     @Test

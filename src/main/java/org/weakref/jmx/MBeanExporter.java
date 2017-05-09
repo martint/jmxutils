@@ -17,6 +17,7 @@ package org.weakref.jmx;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapMaker;
+import com.google.inject.BindingAnnotation;
 import com.google.inject.Inject;
 import org.weakref.jmx.JmxException.Reason;
 
@@ -28,6 +29,10 @@ import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,16 +44,29 @@ public class MBeanExporter
 {
     private final MBeanServer server;
     private final Map<ObjectName, Object> exportedObjects;
+    private final String namespace;
+    public static final String GLOBAL_NAMESPACE = "";
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD, ElementType.PARAMETER})
+    @BindingAnnotation
+    public @interface Namespace {}
 
     MBeanExporter()
     {
-        this(ManagementFactory.getPlatformMBeanServer());
+        this(GLOBAL_NAMESPACE, ManagementFactory.getPlatformMBeanServer());
+    }
+
+    public MBeanExporter(MBeanServer server)
+    {
+        this(GLOBAL_NAMESPACE, server);
     }
 
     @Inject
-    public MBeanExporter(MBeanServer server)
+    public MBeanExporter(@Namespace String namespace, MBeanServer server)
     {
         this.server = server;
+        this.namespace = namespace;
         exportedObjects = new MapMaker().weakValues().makeMap();
     }
 
@@ -70,9 +88,10 @@ public class MBeanExporter
         try {
             MBeanBuilder builder = new MBeanBuilder(object);
             MBean mbean = builder.build();
+            objectName = getExportedName(objectName);
 
-            synchronized(exportedObjects) {
-                if(exportedObjects.containsKey(objectName)) {
+            synchronized (exportedObjects) {
+                if (exportedObjects.containsKey(objectName)) {
                     throw new JmxException(Reason.INSTANCE_ALREADY_EXISTS, "key already exported: %s", objectName);
                 }
                 server.registerMBean(mbean, objectName);
@@ -108,7 +127,7 @@ public class MBeanExporter
     public void unexport(ObjectName objectName)
     {
         try {
-            synchronized(exportedObjects) {
+            synchronized (exportedObjects) {
                 server.unregisterMBean(objectName);
                 exportedObjects.remove(objectName);
             }
@@ -139,14 +158,14 @@ public class MBeanExporter
     {
         Map<String, Exception> errors = new HashMap<String, Exception>();
 
-        synchronized(exportedObjects) {
+        synchronized (exportedObjects) {
             List<ObjectName> toRemove = new ArrayList<ObjectName>(exportedObjects.size());
             for (ObjectName objectName : exportedObjects.keySet()) {
                 try {
                     server.unregisterMBean(objectName);
                     toRemove.add(objectName);
                 }
-                catch(InstanceNotFoundException e) {
+                catch (InstanceNotFoundException e) {
                     // ignore ... mbean has already been unregistered elsewhere
                     toRemove.add(objectName);
                 }
@@ -165,14 +184,14 @@ public class MBeanExporter
     public Map<String, Object> getExportedObjects()
     {
         synchronized (exportedObjects) {
-            ImmutableMap.Builder<String,Object> builder = ImmutableMap.builder();
+            ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
             for (Entry<ObjectName, Object> entry : exportedObjects.entrySet()) {
                 builder.put(entry.getKey().toString(), entry.getValue());
             }
             return builder.build();
         }
     }
-    
+
     /**
      * Get an MBeanExporter that uses the default platform mbean server
      *
@@ -180,6 +199,34 @@ public class MBeanExporter
      */
     public static MBeanExporter withPlatformMBeanServer()
     {
-        return new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
+        return new MBeanExporter(GLOBAL_NAMESPACE, ManagementFactory.getPlatformMBeanServer());
+    }
+
+    public static MBeanExporter withPlatformMBeanServer(String namespace)
+    {
+        return new MBeanExporter(namespace, ManagementFactory.getPlatformMBeanServer());
+    }
+
+    public static String getExportedName(String namespace, String name)
+    {
+        if (namespace.equals(GLOBAL_NAMESPACE)) {
+            return name;
+        }
+        return namespace + ";" + name;
+    }
+
+    public static ObjectName getExportedName(String namespace, ObjectName name)
+    {
+        try {
+            return new ObjectName(getExportedName(namespace, name.getCanonicalName()));
+        }
+        catch (MalformedObjectNameException e) {
+            throw new JmxException(Reason.MALFORMED_OBJECT_NAME, e.getMessage());
+        }
+    }
+
+    public ObjectName getExportedName(ObjectName name)
+    {
+        return getExportedName(namespace, name);
     }
 }
