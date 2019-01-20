@@ -18,10 +18,15 @@ package org.weakref.jmx.guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.weakref.jmx.MBeanExporter;
+import org.weakref.jmx.ObjectNameGenerator;
 
 import javax.management.ObjectName;
+
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 class GuiceMBeanExporter
 {
@@ -30,47 +35,61 @@ class GuiceMBeanExporter
             Set<SetMapping<?>> setMappings,
             Set<MapMapping<?, ?>> mapMappings,
             MBeanExporter exporter,
+            Optional<ObjectNameGenerator> objectNameGenerator,
             Injector injector)
     {
-        export(mappings, exporter, injector);
+        ObjectNameGenerator generator = objectNameGenerator.orElseGet(ObjectNameGenerator::defaultObjectNameGenerator);
+        export(mappings, exporter, injector, generator);
 
         // cast to Object to get around Java's broken generics
-        exportSets((Set<SetMapping<Object>>) (Object) setMappings, exporter, injector);
-        exportMaps((Set<MapMapping<Object,Object>>) (Object) mapMappings, exporter, injector);
+        exportSets(castSetMapping(setMappings), exporter, injector, generator);
+        exportMaps(castMapMappings(mapMappings), exporter, injector, generator);
     }
 
-    private static <K, V> void exportMaps(Set<MapMapping<K, V>> mapMappings, MBeanExporter exporter, Injector injector)
+    @SuppressWarnings("unchecked")
+    private static Set<MapMapping<Object, Object>> castMapMappings(Object mapMappings)
+    {
+        return (Set<MapMapping<Object,Object>>) mapMappings;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Set<SetMapping<Object>> castSetMapping(Object setMappings)
+    {
+        return (Set<SetMapping<Object>>) setMappings;
+    }
+
+    private static <K, V> void exportMaps(Set<MapMapping<K, V>> mapMappings, MBeanExporter exporter, Injector injector, ObjectNameGenerator objectNameGenerator)
     {
         for (MapMapping<K, V> mapping : mapMappings) {
-            ObjectNameFunction<Map.Entry<K, V>> namingFunction = mapping.getObjectNameFunction();
+            BiFunction<ObjectNameGenerator, Entry<K, V>, ObjectName> namingFunction = mapping.getObjectNameFunction();
 
             Map<K, V> map = injector.getInstance(mapping.getKey());
 
             for (Map.Entry<K, V> entry : map.entrySet()) {
-                ObjectName name = namingFunction.name(entry);
+                ObjectName name = namingFunction.apply(objectNameGenerator, entry);
                 exporter.export(name, entry.getValue());
             }
         }
     }
 
-    private static <T> void exportSets(Set<SetMapping<T>> setMappings, MBeanExporter exporter, Injector injector)
+    private static <T> void exportSets(Set<SetMapping<T>> setMappings, MBeanExporter exporter, Injector injector, ObjectNameGenerator objectNameGenerator)
     {
         for (SetMapping<T> mapping : setMappings) {
-            ObjectNameFunction<T> objectNameFunction = mapping.getObjectNameFunction();
+            BiFunction<ObjectNameGenerator, T, ObjectName> namingFunction = mapping.getObjectNameFunction();
 
             Set<T> set = injector.getInstance(mapping.getKey());
 
             for (T instance : set) {
-                ObjectName name = objectNameFunction.name(instance);
+                ObjectName name = namingFunction.apply(objectNameGenerator, instance);
                 exporter.export(name, instance);
             }
         }
     }
 
-    private static void export(Set<Mapping> mappings, MBeanExporter exporter, Injector injector)
+    private static void export(Set<Mapping> mappings, MBeanExporter exporter, Injector injector, ObjectNameGenerator objectNameGenerator)
     {
         for (Mapping mapping : mappings) {
-            exporter.export(mapping.getName(), injector.getInstance(mapping.getKey()));
+            exporter.export(mapping.getName(objectNameGenerator), injector.getInstance(mapping.getKey()));
         }
     }
 }
