@@ -37,7 +37,7 @@ public class MapExportBinder<K, V>
             }
         };
 
-        binder.addBinding().toInstance(new MapMapping<K, V>(keyClass, valueClass, objectNameFunction));
+        binder.addBinding().toInstance(new MapMapping<>(keyClass, valueClass, objectNameFunction));
     }
 
     public void withGeneratedName(final ObjectNameFunction<V> valueNamingFunction)
@@ -50,7 +50,7 @@ public class MapExportBinder<K, V>
             }
         };
 
-        binder.addBinding().toInstance(new MapMapping<K, V>(keyClass, valueClass, objectNameFunction));
+        binder.addBinding().toInstance(new MapMapping<>(keyClass, valueClass, objectNameFunction));
     }
 
     public void withGeneratedName(final MapNamingFunction<K, V> valueNamingFunction)
@@ -69,7 +69,7 @@ public class MapExportBinder<K, V>
             }
         };
 
-        binder.addBinding().toInstance(new MapMapping<K, V>(keyClass, valueClass, objectNameFunction));
+        binder.addBinding().toInstance(new MapMapping<>(keyClass, valueClass, objectNameFunction));
     }
 
     public void withGeneratedName(final MapObjectNameFunction<K, V> valueNamingFunction)
@@ -82,6 +82,6 @@ public class MapExportBinder<K, V>
             }
         };
 
-        binder.addBinding().toInstance(new MapMapping<K, V>(keyClass, valueClass, objectNameFunction));
+        binder.addBinding().toInstance(new MapMapping<>(keyClass, valueClass, objectNameFunction));
     }
 }

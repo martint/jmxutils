@@ -137,10 +137,10 @@ public class MBeanExporter
      */
     public Map<String, Exception> unexportAllAndReportMissing()
     {
-        Map<String, Exception> errors = new HashMap<String, Exception>();
+        Map<String, Exception> errors = new HashMap<>();
 
         synchronized(exportedObjects) {
-            List<ObjectName> toRemove = new ArrayList<ObjectName>(exportedObjects.size());
+            List<ObjectName> toRemove = new ArrayList<>(exportedObjects.size());
             for (ObjectName objectName : exportedObjects.keySet()) {
                 try {
                     server.unregisterMBean(objectName);

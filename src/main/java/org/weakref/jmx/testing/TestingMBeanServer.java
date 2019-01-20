@@ -27,7 +27,7 @@ import static java.lang.String.format;
 public class TestingMBeanServer
         implements MBeanServer
 {
-    private final Map<ObjectName, DynamicMBean> mbeans = new HashMap<ObjectName, DynamicMBean>();
+    private final Map<ObjectName, DynamicMBean> mbeans = new HashMap<>();
 
     public ObjectInstance registerMBean(Object object, ObjectName name)
             throws InstanceAlreadyExistsException

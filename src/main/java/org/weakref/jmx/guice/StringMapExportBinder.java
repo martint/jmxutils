@@ -35,6 +35,6 @@ public class StringMapExportBinder<V>
             }
         };
 
-        binder.addBinding().toInstance(new MapMapping<String, V>(String.class, valueClass, namingFunction));
+        binder.addBinding().toInstance(new MapMapping<>(String.class, valueClass, namingFunction));
     }
 }

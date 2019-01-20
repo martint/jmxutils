@@ -31,7 +31,7 @@ public class TestUnexporter
         server = ManagementFactory.getPlatformMBeanServer();
         exporter = new MBeanExporter(server);
 
-        objectNames = new ArrayList<ObjectName>();
+        objectNames = new ArrayList<>();
         for (int i = 0; i < 10; ++i) {
             ObjectName name = Util.getUniqueObjectName();
             objectNames.add(name);

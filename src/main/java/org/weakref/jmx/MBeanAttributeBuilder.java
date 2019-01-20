@@ -149,7 +149,7 @@ public class MBeanAttributeBuilder
             }
 
             MBean mbean = new MBeanBuilder(value).build();
-            ArrayList<MBeanFeature> features = new ArrayList<MBeanFeature>();
+            ArrayList<MBeanFeature> features = new ArrayList<>();
             features.addAll(mbean.getAttributes());
             features.addAll(mbean.getOperations());
             return Collections.unmodifiableCollection(features);
@@ -172,7 +172,7 @@ public class MBeanAttributeBuilder
             }
 
             MBean mbean = new MBeanBuilder(value).build();
-            ArrayList<MBeanFeature> features = new ArrayList<MBeanFeature>();
+            ArrayList<MBeanFeature> features = new ArrayList<>();
             for (MBeanAttribute attribute : mbean.getAttributes()) {
                 features.add(new NestedMBeanAttribute(attributeName, attribute));
             }

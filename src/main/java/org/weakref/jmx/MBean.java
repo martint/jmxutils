@@ -48,16 +48,16 @@ class MBean implements DynamicMBean
 
     public MBean(String className, String description, Collection<MBeanAttribute> attributes, Collection<MBeanOperation> operations)
     {
-        List<MBeanAttributeInfo> attributeInfos = new ArrayList<MBeanAttributeInfo>();
-        Map<String, MBeanAttribute> attributesBuilder = new TreeMap<String, MBeanAttribute>();
+        List<MBeanAttributeInfo> attributeInfos = new ArrayList<>();
+        Map<String, MBeanAttribute> attributesBuilder = new TreeMap<>();
         for (MBeanAttribute attribute : attributes) {
             attributesBuilder.put(attribute.getName(), attribute);
             attributeInfos.add(attribute.getInfo());
         }
         this.attributes = Collections.unmodifiableMap(attributesBuilder);
 
-        Map<Signature, MBeanOperation> operationsBuilder = new HashMap<Signature, MBeanOperation>();
-        List<MBeanOperationInfo> operationsInfos = new ArrayList<MBeanOperationInfo>();
+        Map<Signature, MBeanOperation> operationsBuilder = new HashMap<>();
+        List<MBeanOperationInfo> operationsInfos = new ArrayList<>();
         for (MBeanOperation operation : operations) {
             operationsBuilder.put(operation.getSignature(), operation);
             operationsInfos.add(operation.getInfo());

@@ -34,7 +34,7 @@ public class SetExportBinder<T>
             }
         };
 
-        binder.addBinding().toInstance(new SetMapping<T>(clazz, objectNameFunction));
+        binder.addBinding().toInstance(new SetMapping<>(clazz, objectNameFunction));
     }
 
     public void withGeneratedName(final ObjectNameFunction<T> itemNamingFunction)
@@ -47,6 +47,6 @@ public class SetExportBinder<T>
             }
         };
 
-        binder.addBinding().toInstance(new SetMapping<T>(clazz, objectNameFunction));
+        binder.addBinding().toInstance(new SetMapping<>(clazz, objectNameFunction));
     }
 }

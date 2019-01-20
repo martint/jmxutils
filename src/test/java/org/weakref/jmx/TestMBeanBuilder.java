@@ -11,7 +11,7 @@ public class TestMBeanBuilder extends AbstractMbeanTest<Object>
 {
     public TestMBeanBuilder()
     {
-        objects = new ArrayList<Object>();
+        objects = new ArrayList<>();
         objects.add(new SimpleObject());
         objects.add(new CustomAnnotationObject());
         objects.add(new FlattenObject());
