@@ -27,6 +27,7 @@ public class TestInheritance9
     private static class B
             implements C, D
     {
+        @Override
         public Object method()
         {
             return null;
@@ -36,6 +37,7 @@ public class TestInheritance9
     private interface C
         extends E
     {
+        @Override
         Object method();
     }
 

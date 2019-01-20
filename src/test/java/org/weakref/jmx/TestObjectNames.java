@@ -18,6 +18,7 @@ public class TestObjectNames {
   @interface Ann {}
   
   static class AnnImpl implements Ann {
+    @Override
     public Class<? extends Annotation> annotationType() {
       return Ann.class;
     }  

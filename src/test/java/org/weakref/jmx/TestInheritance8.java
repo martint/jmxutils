@@ -27,6 +27,7 @@ public class TestInheritance8
     private static class B
             implements C, D
     {
+        @Override
         public Object method()
         {
             return null;
