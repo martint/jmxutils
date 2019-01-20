@@ -207,13 +207,7 @@ final class AnnotationUtils
                 Method descriptionMethod = annotation.annotationType().getMethod("description");
                 description = descriptionMethod.invoke(annotation).toString();
             }
-            catch (InvocationTargetException e) {
-                // ignore
-            }
-            catch (NoSuchMethodException e) {
-                // ignore
-            }
-            catch (IllegalAccessException e) {
+            catch (ReflectiveOperationException e) {
                 // ignore
             }
         }
