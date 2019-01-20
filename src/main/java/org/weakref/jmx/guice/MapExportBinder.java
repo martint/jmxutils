@@ -1,11 +1,11 @@
 package org.weakref.jmx.guice;
 
-import com.google.common.base.Throwables;
 import com.google.inject.multibindings.Multibinder;
 import org.weakref.jmx.ObjectNames;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+
 import java.util.Map;
 
 public class MapExportBinder<K, V>
@@ -29,7 +29,7 @@ public class MapExportBinder<K, V>
                 return new ObjectName(ObjectNames.generatedNameOf(valueClass, itemName));
             }
             catch (MalformedObjectNameException e) {
-                throw Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
         };
 
@@ -51,7 +51,7 @@ public class MapExportBinder<K, V>
                 return new ObjectName(ObjectNames.generatedNameOf(valueClass, itemName));
             }
             catch (MalformedObjectNameException e) {
-                throw Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
         };
 

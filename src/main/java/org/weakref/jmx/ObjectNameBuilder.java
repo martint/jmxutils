@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.weakref.jmx.ObjectNames.quoteValueIfNecessary;
 
 public class ObjectNameBuilder
@@ -16,7 +16,7 @@ public class ObjectNameBuilder
 
     public ObjectNameBuilder(String packageName)
     {
-        checkNotNull(packageName, "packageName is null");
+        requireNonNull(packageName, "packageName is null");
         checkArgument(!BAD_PACKAGENAME_PATTERN.matcher(packageName).find(), "packageName is invalid");
         this.objectName = new StringBuilder(packageName);
     }
