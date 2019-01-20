@@ -39,7 +39,7 @@ class GuiceMBeanExporter
         exportMaps((Set<MapMapping<Object,Object>>) (Object) mapMappings, exporter, injector);
     }
 
-    private <K, V> void exportMaps(Set<MapMapping<K, V>> mapMappings, MBeanExporter exporter, Injector injector)
+    private static <K, V> void exportMaps(Set<MapMapping<K, V>> mapMappings, MBeanExporter exporter, Injector injector)
     {
         for (MapMapping<K, V> mapping : mapMappings) {
             ObjectNameFunction<Map.Entry<K, V>> namingFunction = mapping.getObjectNameFunction();
@@ -53,7 +53,7 @@ class GuiceMBeanExporter
         }
     }
 
-    private <T> void exportSets(Set<SetMapping<T>> setMappings, MBeanExporter exporter, Injector injector)
+    private static <T> void exportSets(Set<SetMapping<T>> setMappings, MBeanExporter exporter, Injector injector)
     {
         for (SetMapping<T> mapping : setMappings) {
             ObjectNameFunction<T> objectNameFunction = mapping.getObjectNameFunction();
@@ -67,7 +67,7 @@ class GuiceMBeanExporter
         }
     }
 
-    private void export(Set<Mapping> mappings, MBeanExporter exporter, Injector injector)
+    private static void export(Set<Mapping> mappings, MBeanExporter exporter, Injector injector)
     {
         for (Mapping mapping : mappings) {
             exporter.export(mapping.getName(), injector.getInstance(mapping.getKey()));

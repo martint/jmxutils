@@ -66,12 +66,13 @@ class MBean implements DynamicMBean
 
         mbeanInfo = new MBeanInfo(className,
                 description,
-                attributeInfos.toArray(new MBeanAttributeInfo[attributeInfos.size()]),
+                attributeInfos.toArray(new MBeanAttributeInfo[0]),
                 new ModelMBeanConstructorInfo[0],
-                operationsInfos.toArray(new MBeanOperationInfo[operationsInfos.size()]),
+                operationsInfos.toArray(new MBeanOperationInfo[0]),
                 new ModelMBeanNotificationInfo[0]);
     }
 
+    @Override
     public MBeanInfo getMBeanInfo()
     {
         return mbeanInfo;
@@ -87,6 +88,7 @@ class MBean implements DynamicMBean
         return operations.values();
     }
 
+    @Override
     public Object invoke(String actionName, Object[] params, String[] argTypes)
             throws MBeanException, ReflectionException
     {
@@ -115,6 +117,7 @@ class MBean implements DynamicMBean
         return result;
     }
 
+    @Override
     public Object getAttribute(String name)
             throws AttributeNotFoundException, MBeanException, ReflectionException
     {
@@ -127,6 +130,7 @@ class MBean implements DynamicMBean
         return value;
     }
 
+    @Override
     public void setAttribute(Attribute attribute)
             throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException
     {
@@ -142,6 +146,7 @@ class MBean implements DynamicMBean
         mbeanAttribute.setValue(value);
     }
 
+    @Override
     public AttributeList getAttributes(String[] attributes)
     {
         // no attributes is a noop
@@ -161,6 +166,7 @@ class MBean implements DynamicMBean
         return attributeList;
     }
 
+    @Override
     public AttributeList setAttributes(AttributeList attributes)
     {
         // no attributes is a noop
@@ -180,7 +186,7 @@ class MBean implements DynamicMBean
         return response;
     }
 
-    private void assertNotNull(String name, Object value)
+    private static void assertNotNull(String name, Object value)
     {
         if (value == null) {
             throw new RuntimeOperationsException(new NullPointerException(name + " is null"));

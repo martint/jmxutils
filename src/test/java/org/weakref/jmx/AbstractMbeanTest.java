@@ -122,7 +122,7 @@ public abstract class AbstractMbeanTest<T>
         }
     }
 
-    protected MBeanAttributeInfo getAttributeInfo(MBeanInfo info, String attributeName)
+    private static MBeanAttributeInfo getAttributeInfo(MBeanInfo info, String attributeName)
     {
         for (MBeanAttributeInfo attributeInfo : info.getAttributes()) {
             if (attributeInfo.getName().equals(attributeName)) {
@@ -344,7 +344,7 @@ public abstract class AbstractMbeanTest<T>
         };
     }
 
-    protected String toFeatureName(String attribute, T t)
+    private String toFeatureName(String attribute, T t)
     {
         String attributeName;
         if (getObject(t) instanceof NestedObject) {
@@ -356,7 +356,7 @@ public abstract class AbstractMbeanTest<T>
         return attributeName;
     }
 
-    protected SimpleObject toSimpleObject(T t)
+    private SimpleObject toSimpleObject(T t)
     {
         SimpleObject simpleObject;
         if (getObject(t) instanceof SimpleObject) {

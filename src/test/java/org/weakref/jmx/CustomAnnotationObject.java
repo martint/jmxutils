@@ -10,7 +10,7 @@ public class CustomAnnotationObject
 {
 
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ ElementType.METHOD })
+    @Target(ElementType.METHOD)
     @ManagedAnnotation
     public @interface Managed1
     {
@@ -18,7 +18,7 @@ public class CustomAnnotationObject
     }
 
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ ElementType.METHOD })
+    @Target(ElementType.METHOD)
     @ManagedAnnotation
     public @interface Managed2
     {

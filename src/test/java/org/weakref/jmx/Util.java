@@ -19,10 +19,12 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Util
+public final class Util
 {
-    private final static AtomicInteger id = new AtomicInteger(0);
-    
+    private static final AtomicInteger id = new AtomicInteger(0);
+
+    private Util() {}
+
     public static ObjectName getUniqueObjectName()
     {
         try {

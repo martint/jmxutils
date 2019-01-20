@@ -40,22 +40,26 @@ class NestedMBeanAttribute implements MBeanAttribute
                 delegateInfo.getDescriptor());
     }
 
+    @Override
     public MBeanAttributeInfo getInfo()
     {
         return info;
     }
 
+    @Override
     public String getName()
     {
         return info.getName();
     }
 
+    @Override
     public Object getValue()
             throws AttributeNotFoundException, MBeanException, ReflectionException
     {
         return delegate.getValue();
     }
 
+    @Override
     public void setValue(Object value)
             throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException
     {

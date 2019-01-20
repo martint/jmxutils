@@ -33,19 +33,19 @@ public class TestInheritance9
         }
     }
 
-    private static interface C
+    private interface C
         extends E
     {
         Object method();
     }
 
-    private static interface E
+    private interface E
     {
         @Managed(description = "C")
         Object method();
     }
 
-    private static interface D
+    private interface D
     {
         @Managed(description = "D")
         Object method();

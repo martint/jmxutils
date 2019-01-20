@@ -20,20 +20,14 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.multibindings.Multibinder;
-import com.google.inject.name.Names;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.weakref.jmx.SimpleObject;
 import org.weakref.jmx.Util;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
-import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.management.ReflectionException;
-import java.io.IOException;
+
 import java.lang.management.ManagementFactory;
 
 import static com.google.inject.Stage.PRODUCTION;
@@ -44,7 +38,7 @@ public class TestMBeanModule
 {
     @Test
     public void testExportedInDevelopmentStageToo() 
-    	throws IntrospectionException, InstanceNotFoundException, ReflectionException 
+    	throws Exception
     {
     	final ObjectName name = Util.getUniqueObjectName();
 
@@ -68,7 +62,7 @@ public class TestMBeanModule
 
     @Test
     public void testBasic()
-            throws IOException, IntrospectionException, InstanceNotFoundException, ReflectionException, MalformedObjectNameException, MBeanRegistrationException
+            throws Exception
     {
         final ObjectName name = Util.getUniqueObjectName();
 
@@ -94,7 +88,7 @@ public class TestMBeanModule
 
     @Test
     public void testGeneratedNames()
-            throws IOException, IntrospectionException, InstanceNotFoundException, ReflectionException, MalformedObjectNameException, MBeanRegistrationException
+            throws Exception
     {
         final ObjectName name = new ObjectName(generatedNameOf(SimpleObject.class));
 
@@ -120,8 +114,7 @@ public class TestMBeanModule
 
     @Test
     public void testGeneratedNameOnNamedAnnotation()
-            throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, ReflectionException,
-            MBeanRegistrationException
+            throws Exception
     {
         final ObjectName name = new ObjectName(generatedNameOf(SimpleObject.class, named("hello")));
 
@@ -147,7 +140,7 @@ public class TestMBeanModule
     
     @Test
     public void testAnnotation()
-            throws IntrospectionException, InstanceNotFoundException, IOException, ReflectionException, MalformedObjectNameException, MBeanRegistrationException
+            throws Exception
     {
         final ObjectName objectName = Util.getUniqueObjectName();
 
@@ -173,7 +166,7 @@ public class TestMBeanModule
 
     @Test
     public void testNamedAnnotations()
-            throws IOException, IntrospectionException, InstanceNotFoundException, ReflectionException, MalformedObjectNameException, MBeanRegistrationException
+            throws Exception
     {
         final ObjectName objectName1 = Util.getUniqueObjectName();
         final ObjectName objectName2 = Util.getUniqueObjectName();
@@ -186,13 +179,13 @@ public class TestMBeanModule
                 binder().requireExplicitBindings();
                 binder().disableCircularProxies();
 
-                bind(SimpleObject.class).annotatedWith(Names.named("1")).toInstance(new SimpleObject());
-                bind(SimpleObject.class).annotatedWith(Names.named("2")).toInstance(new SimpleObject());
+                bind(SimpleObject.class).annotatedWith(named("1")).toInstance(new SimpleObject());
+                bind(SimpleObject.class).annotatedWith(named("2")).toInstance(new SimpleObject());
                 bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
 
                 ExportBinder exporter = ExportBinder.newExporter(binder());
-                exporter.export(SimpleObject.class).annotatedWith(Names.named("1")).as(objectName1.getCanonicalName());
-                exporter.export(SimpleObject.class).annotatedWith(Names.named("2")).as(objectName2.getCanonicalName());
+                exporter.export(SimpleObject.class).annotatedWith(named("1")).as(objectName1.getCanonicalName());
+                exporter.export(SimpleObject.class).annotatedWith(named("2")).as(objectName2.getCanonicalName());
             }
         });
 
@@ -207,7 +200,7 @@ public class TestMBeanModule
 
     @Test
     public void testExportKey()
-            throws IntrospectionException, InstanceNotFoundException, ReflectionException, MBeanRegistrationException
+            throws Exception
     {
         final ObjectName objectName1 = Util.getUniqueObjectName();
         final ObjectName objectName2 = Util.getUniqueObjectName();
@@ -222,7 +215,7 @@ public class TestMBeanModule
 
                 bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
                 bind(SimpleObject.class).toInstance(new SimpleObject());
-                bind(SimpleObject.class).annotatedWith(Names.named("1")).toInstance(new SimpleObject());
+                bind(SimpleObject.class).annotatedWith(named("1")).toInstance(new SimpleObject());
 
                 ExportBinder exporter = ExportBinder.newExporter(binder());
                 exporter.export(Key.get(SimpleObject.class))

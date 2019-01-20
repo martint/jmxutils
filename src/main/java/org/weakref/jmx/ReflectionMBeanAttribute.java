@@ -47,6 +47,7 @@ class ReflectionMBeanAttribute implements MBeanAttribute
         this.setter = setter;
     }
 
+    @Override
     public MBeanAttributeInfo getInfo()
     {
         return info;
@@ -57,11 +58,13 @@ class ReflectionMBeanAttribute implements MBeanAttribute
         return target;
     }
 
+    @Override
     public String getName()
     {
         return name;
     }
 
+    @Override
     public Object getValue()
             throws AttributeNotFoundException, MBeanException, ReflectionException
     {
@@ -72,6 +75,7 @@ class ReflectionMBeanAttribute implements MBeanAttribute
         return result;
     }
 
+    @Override
     public void setValue(Object value)
             throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException
     {

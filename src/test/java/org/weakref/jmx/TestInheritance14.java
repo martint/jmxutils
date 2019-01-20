@@ -55,11 +55,13 @@ public class TestInheritance14
         }
     }
 
+    @Override
     public Method getTargetMethod() throws NoSuchMethodException
     {
         return target.getMethod("method", String.class);
     }
 
+    @Override
     public Method expected() throws NoSuchMethodException
     {
         return source.getDeclaredMethod("method", String.class);

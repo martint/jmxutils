@@ -37,13 +37,14 @@ public class TestInheritance6
             extends A
             implements C5
     {
+        @Override
         public Object method()
         {
             return null;
         }
     }
 
-    private static interface C5
+    private interface C5
     {
         @Managed(description = "C5")
         Object method();

@@ -15,24 +15,24 @@
  */
 package org.weakref.jmx;
 
-import static org.weakref.jmx.ReflectionUtils.getAttributeName;
-import static org.weakref.jmx.ReflectionUtils.isGetter;
-import static org.weakref.jmx.ReflectionUtils.isSetter;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-class MBeanBuilder
+import static org.weakref.jmx.ReflectionUtils.getAttributeName;
+import static org.weakref.jmx.ReflectionUtils.isGetter;
+import static org.weakref.jmx.ReflectionUtils.isSetter;
+
+final class MBeanBuilder
 {
-    private String className;
+    private final String className;
     private final List<MBeanAttributeBuilder> attributeBuilders = new ArrayList<MBeanAttributeBuilder>();
     private final List<MBeanOperationBuilder> operationBuilders = new ArrayList<MBeanOperationBuilder>();
     private String description;
 
-    public MBeanBuilder(String className)
+    private MBeanBuilder(String className)
     {
         this.className = className;
     }
@@ -91,9 +91,7 @@ class MBeanBuilder
             }
         }
 
-        for (MBeanAttributeBuilder attributeBuilder : attributeBuilders.values()) {
-            this.attributeBuilders.add(attributeBuilder);
-        }
+        this.attributeBuilders.addAll(attributeBuilders.values());
 
         className = target.getClass().getName();
         description = AnnotationUtils.getDescription(target.getClass().getAnnotations());

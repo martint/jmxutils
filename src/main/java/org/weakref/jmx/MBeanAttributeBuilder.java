@@ -15,12 +15,10 @@
  */
 package org.weakref.jmx;
 
-import static org.weakref.jmx.ReflectionUtils.isValidGetter;
-import static org.weakref.jmx.ReflectionUtils.isValidSetter;
-
 import javax.management.Descriptor;
 import javax.management.ImmutableDescriptor;
 import javax.management.MBeanAttributeInfo;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,9 +26,12 @@ import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.weakref.jmx.ReflectionUtils.isValidGetter;
+import static org.weakref.jmx.ReflectionUtils.isValidSetter;
+
 public class MBeanAttributeBuilder
 {
-    private final static Pattern getterOrSetterPattern = Pattern.compile("(get|set|is)(.+)");
+    private static final Pattern getterOrSetterPattern = Pattern.compile("(get|set|is)(.+)");
     private Object target;
     private String name;
     private Method concreteGetter;
@@ -42,14 +43,18 @@ public class MBeanAttributeBuilder
 
     public MBeanAttributeBuilder onInstance(Object target)
     {
-        if (target == null) throw new NullPointerException("target is null");
+        if (target == null) {
+            throw new NullPointerException("target is null");
+        }
         this.target = target;
         return this;
     }
 
     public MBeanAttributeBuilder named(String name)
     {
-        if (name == null) throw new NullPointerException("name is null");
+        if (name == null) {
+            throw new NullPointerException("name is null");
+        }
         this.name = name;
         return this;
     }

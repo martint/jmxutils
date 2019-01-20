@@ -20,8 +20,8 @@ import static java.lang.String.format;
 
 public class TestUnexporter
 {
-    private MBeanServer server = null;
-    private MBeanExporter exporter = null;
+    private MBeanServer server;
+    private MBeanExporter exporter;
 
     private List<ObjectName> objectNames;
 

@@ -33,14 +33,18 @@ public class MBeanOperationBuilder
 
     public MBeanOperationBuilder onInstance(Object target)
     {
-        if (target == null) throw new NullPointerException("target is null");
+        if (target == null) {
+            throw new NullPointerException("target is null");
+        }
         this.target = target;
         return this;
     }
 
     public MBeanOperationBuilder named(String name)
     {
-        if (name == null) throw new NullPointerException("name is null");
+        if (name == null) {
+            throw new NullPointerException("name is null");
+        }
         this.name = name;
         return this;
     }

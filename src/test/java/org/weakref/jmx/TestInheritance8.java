@@ -33,13 +33,13 @@ public class TestInheritance8
         }
     }
 
-    private static interface C
+    private interface C
     {
         @Managed(description = "C")
         Object method();
     }
 
-    private static interface D
+    private interface D
     {
         @Managed(description = "D")
         Object method();

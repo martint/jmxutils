@@ -23,6 +23,7 @@ import javax.management.InvalidAttributeValueException;
 
 public interface MBeanAttribute extends MBeanFeature
 {
+    @Override
     MBeanAttributeInfo getInfo();
 
     String getName();
