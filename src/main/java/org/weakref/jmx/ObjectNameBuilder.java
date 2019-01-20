@@ -14,15 +14,17 @@ public class ObjectNameBuilder
     private final StringBuilder objectName;
     private final Set<String> properties = new HashSet<>();
 
-    public ObjectNameBuilder(String packageName)
+    public ObjectNameBuilder(String domain)
     {
-        requireNonNull(packageName, "packageName is null");
-        checkArgument(!BAD_PACKAGENAME_PATTERN.matcher(packageName).find(), "packageName is invalid");
-        this.objectName = new StringBuilder(packageName);
+        requireNonNull(domain, "domain is null");
+        checkArgument(!BAD_PACKAGENAME_PATTERN.matcher(domain).find(), "domain is invalid");
+        this.objectName = new StringBuilder(domain);
     }
 
     public ObjectNameBuilder withProperty(String name, String value)
     {
+        checkArgument(!properties.contains(name), "Duplicate property name: %s", name);
+
         if (properties.isEmpty()) {
             objectName.append(":");
         }
@@ -30,9 +32,8 @@ public class ObjectNameBuilder
             objectName.append(",");
         }
 
-        checkArgument(properties.add(name), "Duplicate property name " + name);
-
         objectName.append(name).append('=').append(quoteValueIfNecessary(value));
+        properties.add(name);
         return this;
     }
 
