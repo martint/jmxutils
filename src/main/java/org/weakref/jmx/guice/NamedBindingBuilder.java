@@ -15,13 +15,12 @@
  */
 package org.weakref.jmx.guice;
 
-import static org.weakref.jmx.ObjectNames.generatedNameOf;
-
-import com.google.inject.name.Named;
-import org.weakref.jmx.ObjectNames;
-
 import com.google.inject.Key;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Named;
+import org.weakref.jmx.ObjectNameGenerator;
+
+import java.util.function.Function;
 
 @Deprecated
 public class NamedBindingBuilder
@@ -36,28 +35,33 @@ public class NamedBindingBuilder
     }
 
     /**
-     * Names the MBean according to {@link ObjectNames} name generator methods.
+     * Names the MBean according to {@link org.weakref.jmx.ObjectNames} name generator methods.
      */
     public void withGeneratedName()
     {
         if (key.getAnnotation() != null) {
             if (key.getAnnotation() instanceof Named) {
-                as(generatedNameOf(key.getTypeLiteral().getRawType(), (Named) key.getAnnotation()));
+                as(factory -> factory.generatedNameOf(key.getTypeLiteral().getRawType(), ((Named) key.getAnnotation()).value()));
             }
             else {
-                as(generatedNameOf(key.getTypeLiteral().getRawType(), key.getAnnotation()));
+                as(factory -> factory.generatedNameOf(key.getTypeLiteral().getRawType(), key.getAnnotation().annotationType().getSimpleName()));
             }
         }
         else if (key.getAnnotationType() != null) {
-            as(generatedNameOf(key.getTypeLiteral().getRawType(), key.getAnnotationType()));
+            as(factory -> factory.generatedNameOf(key.getTypeLiteral().getRawType(), key.getAnnotationType().getSimpleName()));
         }
         else {
-            as(generatedNameOf(key.getTypeLiteral().getRawType()));
+            as(factory -> factory.generatedNameOf(key.getTypeLiteral().getRawType()));
         }
     }
 
     public void as(String name)
     {
-        binder.addBinding().toInstance(new Mapping(name, key));
+        as(factory -> name);
+    }
+
+    private void as(Function<ObjectNameGenerator, String> mappingNameFactory)
+    {
+        binder.addBinding().toInstance(new Mapping(mappingNameFactory, key));
     }
 }

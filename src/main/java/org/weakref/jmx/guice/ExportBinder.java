@@ -13,7 +13,10 @@ public class ExportBinder
     private final Multibinder<SetMapping<?>> collectionBinder;
     private final Multibinder<MapMapping<?, ?>> mapBinder;
 
-    ExportBinder(Multibinder<Mapping> binder, Multibinder<SetMapping<?>> collectionBinder, Multibinder<MapMapping<?, ?>> mapBinder)
+    ExportBinder(
+            Multibinder<Mapping> binder,
+            Multibinder<SetMapping<?>> collectionBinder,
+            Multibinder<MapMapping<?, ?>> mapBinder)
     {
         this.binder = binder;
         this.collectionBinder = collectionBinder;

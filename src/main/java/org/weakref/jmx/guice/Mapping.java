@@ -16,21 +16,24 @@
 package org.weakref.jmx.guice;
 
 import com.google.inject.Key;
+import org.weakref.jmx.ObjectNameGenerator;
+
+import java.util.function.Function;
 
 class Mapping
 {
-    private final String name;
+    private final Function<ObjectNameGenerator, String> nameFactory;
     private final Key<?> key;
 
-    Mapping(String name, Key<?> key)
+    Mapping(Function<ObjectNameGenerator, String> nameFactory, Key<?> key)
     {
-        this.name = name;
+        this.nameFactory = nameFactory;
         this.key = key;
     }
 
-    public String getName()
+    public String getName(ObjectNameGenerator objectNameGenerator)
     {
-        return name;
+        return nameFactory.apply(objectNameGenerator);
     }
 
     public Key<?> getKey()

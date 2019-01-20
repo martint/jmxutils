@@ -21,8 +21,10 @@ import com.google.inject.Key;
 import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import org.weakref.jmx.MBeanExporter;
+import org.weakref.jmx.ObjectNameGenerator;
 
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
+import static com.google.inject.multibindings.OptionalBinder.newOptionalBinder;
 
 public class MBeanModule
         extends AbstractModule
@@ -37,6 +39,7 @@ public class MBeanModule
         bind(GuiceMBeanExporter.class).asEagerSingleton();
         bind(MBeanExporter.class).in(Scopes.SINGLETON);
 
+        newOptionalBinder(binder(), ObjectNameGenerator.class);
         newSetBinder(binder(), new TypeLiteral<SetMapping<?>>() {});
         newSetBinder(binder(), new TypeLiteral<MapMapping<?, ?>>() {});
 

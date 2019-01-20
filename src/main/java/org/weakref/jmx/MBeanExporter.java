@@ -34,22 +34,61 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+
+import static java.util.Objects.requireNonNull;
 
 public class MBeanExporter
 {
     private final MBeanServer server;
     private final Map<ObjectName, Object> exportedObjects;
+    private final ObjectNameGenerator objectNameGenerator;
 
     MBeanExporter()
     {
         this(ManagementFactory.getPlatformMBeanServer());
     }
 
-    @Inject
     public MBeanExporter(MBeanServer server)
     {
+        this(server, Optional.empty());
+    }
+
+    @Inject
+    public MBeanExporter(MBeanServer server, Optional<ObjectNameGenerator> objectNameGenerator)
+    {
         this.server = server;
+        this.objectNameGenerator = objectNameGenerator.orElseGet(ObjectNameGenerator::defaultObjectNameGenerator);
         exportedObjects = new MapMaker().weakValues().makeMap();
+    }
+
+    public void exportWithGeneratedName(Object object)
+    {
+        requireNonNull(object, "object is null");
+        export(objectNameGenerator.generatedNameOf(object.getClass()), object);
+    }
+
+    public void exportWithGeneratedName(Object object, Class<?> type)
+    {
+        requireNonNull(object, "object is null");
+        requireNonNull(type, "type is null");
+        export(objectNameGenerator.generatedNameOf(type), object);
+    }
+
+    public void exportWithGeneratedName(Object object, Class<?> type, String name)
+    {
+        requireNonNull(object, "object is null");
+        requireNonNull(type, "type is null");
+        requireNonNull(name, "name is null");
+        export(objectNameGenerator.generatedNameOf(type, name), object);
+    }
+
+    public void exportWithGeneratedName(Object object, Class<?> type, Map<String, String> properties)
+    {
+        requireNonNull(object, "object is null");
+        requireNonNull(type, "type is null");
+        requireNonNull(properties, "properties is null");
+        export(objectNameGenerator.generatedNameOf(type, properties), object);
     }
 
     public void export(String name, Object object)
@@ -89,6 +128,26 @@ public class MBeanExporter
             // MBeanBuilder should never construct invalid mbeans
             throw new AssertionError(e);
         }
+    }
+
+    public void unexportWithGeneratedName(Class<?> type)
+    {
+        requireNonNull(type, "type is null");
+        unexport(objectNameGenerator.generatedNameOf(type));
+    }
+
+    public void unexportWithGeneratedName(Class<?> type, String name)
+    {
+        requireNonNull(type, "type is null");
+        requireNonNull(name, "name is null");
+        unexport(objectNameGenerator.generatedNameOf(type, name));
+    }
+
+    public void unexportWithGeneratedName(Class<?> type, Map<String, String> properties)
+    {
+        requireNonNull(type, "type is null");
+        requireNonNull(properties, "properties is null");
+        unexport(objectNameGenerator.generatedNameOf(type, properties));
     }
 
     public void unexport(String name)

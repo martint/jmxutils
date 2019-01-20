@@ -1,12 +1,13 @@
 package org.weakref.jmx.guice;
 
 import com.google.inject.multibindings.Multibinder;
-import org.weakref.jmx.ObjectNames;
+import org.weakref.jmx.ObjectNameGenerator;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.BiFunction;
 
 public class MapExportBinder<K, V>
 {
@@ -21,47 +22,48 @@ public class MapExportBinder<K, V>
         this.valueClass = valueClass;
     }
 
-    public void withGeneratedName(final NamingFunction<V> valueNamingFunction)
+    public void withGeneratedName(NamingFunction<V> valueNamingFunction)
     {
-        ObjectNameFunction<Map.Entry<K, V>> objectNameFunction = entry -> {
+        BiFunction<ObjectNameGenerator, Entry<K, V>, ObjectName> nameFactory = (factory, entry) -> {
             try {
                 String itemName = valueNamingFunction.name(entry.getValue());
-                return new ObjectName(ObjectNames.generatedNameOf(valueClass, itemName));
+                return new ObjectName(factory.generatedNameOf(valueClass, itemName));
             }
             catch (MalformedObjectNameException e) {
                 throw new RuntimeException(e);
             }
         };
 
-        binder.addBinding().toInstance(new MapMapping<>(keyClass, valueClass, objectNameFunction));
+        as(nameFactory);
     }
 
-    public void withGeneratedName(final ObjectNameFunction<V> valueNamingFunction)
+    public void withGeneratedName(ObjectNameFunction<V> valueNamingFunction)
     {
-        ObjectNameFunction<Map.Entry<K, V>> objectNameFunction = entry -> valueNamingFunction.name(entry.getValue());
-
-        binder.addBinding().toInstance(new MapMapping<>(keyClass, valueClass, objectNameFunction));
+        as((factory, entry) -> valueNamingFunction.name(entry.getValue()));
     }
 
-    public void withGeneratedName(final MapNamingFunction<K, V> valueNamingFunction)
+    public void withGeneratedName(MapNamingFunction<K, V> valueNamingFunction)
     {
-        ObjectNameFunction<Map.Entry<K, V>> objectNameFunction = entry -> {
+        BiFunction<ObjectNameGenerator, Entry<K, V>, ObjectName> nameFactory = (factory, entry) -> {
             try {
                 String itemName = valueNamingFunction.name(entry.getKey(), entry.getValue());
-                return new ObjectName(ObjectNames.generatedNameOf(valueClass, itemName));
+                return new ObjectName(factory.generatedNameOf(valueClass, itemName));
             }
             catch (MalformedObjectNameException e) {
                 throw new RuntimeException(e);
             }
         };
 
-        binder.addBinding().toInstance(new MapMapping<>(keyClass, valueClass, objectNameFunction));
+        as(nameFactory);
     }
 
-    public void withGeneratedName(final MapObjectNameFunction<K, V> valueNamingFunction)
+    public void withGeneratedName(MapObjectNameFunction<K, V> valueNamingFunction)
     {
-        ObjectNameFunction<Map.Entry<K, V>> objectNameFunction = entry -> valueNamingFunction.name(entry.getKey(), entry.getValue());
+        as((factory, entry) -> valueNamingFunction.name(entry.getKey(), entry.getValue()));
+    }
 
-        binder.addBinding().toInstance(new MapMapping<>(keyClass, valueClass, objectNameFunction));
+    public void as(BiFunction<ObjectNameGenerator, Entry<K, V>, ObjectName> nameFactory)
+    {
+        binder.addBinding().toInstance(new MapMapping<>(keyClass, valueClass, nameFactory));
     }
 }

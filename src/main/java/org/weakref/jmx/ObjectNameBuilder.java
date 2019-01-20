@@ -1,6 +1,8 @@
 package org.weakref.jmx;
 
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -34,6 +36,14 @@ public class ObjectNameBuilder
 
         objectName.append(name).append('=').append(quoteValueIfNecessary(value));
         properties.add(name);
+        return this;
+    }
+
+    public ObjectNameBuilder withProperties(Map<String, String> properties)
+    {
+        for (Entry<String, String> property : properties.entrySet()) {
+            withProperty(property.getKey(), property.getValue());
+        }
         return this;
     }
 

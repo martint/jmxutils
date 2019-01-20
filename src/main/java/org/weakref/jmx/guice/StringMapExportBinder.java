@@ -1,12 +1,13 @@
 package org.weakref.jmx.guice;
 
 import com.google.inject.multibindings.Multibinder;
-import org.weakref.jmx.ObjectNames;
+import org.weakref.jmx.ObjectNameGenerator;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import java.util.Map.Entry;
+import java.util.function.BiFunction;
 
 public class StringMapExportBinder<V>
     extends MapExportBinder<String, V>
@@ -21,15 +22,15 @@ public class StringMapExportBinder<V>
 
     public void withGeneratedName()
     {
-        ObjectNameFunction<Entry<String, V>> namingFunction = entry -> {
+        BiFunction<ObjectNameGenerator, Entry<String, V>, ObjectName> nameFactory = (factory, entry) -> {
             try {
-                return new ObjectName(ObjectNames.generatedNameOf(valueClass, entry.getKey()));
+                return new ObjectName(factory.generatedNameOf(valueClass, entry.getKey()));
             }
             catch (MalformedObjectNameException e) {
                 throw new RuntimeException(e);
             }
         };
 
-        binder.addBinding().toInstance(new MapMapping<>(String.class, valueClass, namingFunction));
+        as(nameFactory);
     }
 }

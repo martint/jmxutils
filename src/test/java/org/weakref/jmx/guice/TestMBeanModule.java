@@ -19,18 +19,27 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.weakref.jmx.ObjectNameBuilder;
+import org.weakref.jmx.ObjectNameGenerator;
 import org.weakref.jmx.SimpleObject;
 import org.weakref.jmx.Util;
 
+import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
+import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import javax.management.ReflectionException;
 
 import java.lang.management.ManagementFactory;
+import java.util.Map;
 
 import static com.google.inject.Stage.PRODUCTION;
+import static com.google.inject.multibindings.OptionalBinder.newOptionalBinder;
 import static com.google.inject.name.Names.named;
 import static org.weakref.jmx.ObjectNames.generatedNameOf;
 
@@ -90,9 +99,23 @@ public class TestMBeanModule
     public void testGeneratedNames()
             throws Exception
     {
-        final ObjectName name = new ObjectName(generatedNameOf(SimpleObject.class));
+        assertGeneratedNames(new ObjectName(generatedNameOf(SimpleObject.class)), binder -> {});
+    }
 
-        Injector injector = Guice.createInjector(PRODUCTION, new MBeanModule(), new AbstractModule()
+    @Test
+    public void testCustomGeneratedNames()
+            throws Exception
+    {
+        assertGeneratedNames(
+                new ObjectName("test:name=" + SimpleObject.class.getSimpleName()),
+                binder -> newOptionalBinder(binder, ObjectNameGenerator.class)
+                        .setBinding().to(TestObjectNameGenerator.class));
+    }
+
+    private static void assertGeneratedNames(ObjectName name, Module additionalBindings)
+            throws Exception
+    {
+        Injector injector = Guice.createInjector(PRODUCTION, new MBeanModule(), additionalBindings, new AbstractModule()
         {
             @Override
             protected void configure()
@@ -116,9 +139,23 @@ public class TestMBeanModule
     public void testGeneratedNameOnNamedAnnotation()
             throws Exception
     {
-        final ObjectName name = new ObjectName(generatedNameOf(SimpleObject.class, named("hello")));
+        assertGeneratedNameOnNamedAnnotation(new ObjectName(generatedNameOf(SimpleObject.class, named("hello"))), binder -> {});
+    }
 
-        Injector injector = Guice.createInjector(PRODUCTION, new MBeanModule(), new AbstractModule()
+    @Test
+    public void testCustomObjectNameGeneratorWithAnnotation()
+            throws Exception
+    {
+        assertGeneratedNameOnNamedAnnotation(
+                new ObjectName("test:name=hello,type=" + SimpleObject.class.getSimpleName()),
+                binder -> newOptionalBinder(binder, ObjectNameGenerator.class)
+                        .setBinding().to(TestObjectNameGenerator.class));
+    }
+
+    private static void assertGeneratedNameOnNamedAnnotation(ObjectName name, Module additionalBindings)
+            throws InstanceNotFoundException, IntrospectionException, ReflectionException, MBeanRegistrationException
+    {
+        Injector injector = Guice.createInjector(PRODUCTION, new MBeanModule(), additionalBindings, new AbstractModule()
         {
             @Override
             protected void configure()
@@ -137,7 +174,7 @@ public class TestMBeanModule
         Assert.assertNotNull(server.getMBeanInfo(name));
         server.unregisterMBean(name);
     }
-    
+
     @Test
     public void testAnnotation()
             throws Exception
@@ -234,16 +271,34 @@ public class TestMBeanModule
         server.unregisterMBean(objectName2);
     }
 
-
-
     @Test
     public void testSet()
             throws Exception
     {
-        final ObjectName name1 = new ObjectName(generatedNameOf(SimpleObject.class, "blue"));
-        final ObjectName name2 = new ObjectName(generatedNameOf(SimpleObject.class, "red"));
+        assertSet(
+                new ObjectName(generatedNameOf(SimpleObject.class, "blue")),
+                new ObjectName(generatedNameOf(SimpleObject.class, "red")),
+                binder -> {});
+    }
 
-        Injector injector = Guice.createInjector(PRODUCTION, new MBeanModule(), new AbstractModule()
+    @Test
+    public void testCustomSet()
+            throws Exception
+    {
+        final ObjectName name1 = new ObjectName("test:name=blue,type=" + SimpleObject.class.getSimpleName());
+        final ObjectName name2 = new ObjectName("test:name=red,type=" + SimpleObject.class.getSimpleName());;
+
+        assertSet(
+                name1,
+                name2,
+                binder -> newOptionalBinder(binder, ObjectNameGenerator.class)
+                        .setBinding().to(TestObjectNameGenerator.class));
+    }
+
+    private static void assertSet(ObjectName name1, ObjectName name2, Module additionalBindings)
+            throws InstanceNotFoundException, IntrospectionException, ReflectionException, MBeanRegistrationException
+    {
+        Injector injector = Guice.createInjector(PRODUCTION, new MBeanModule(), additionalBindings, new AbstractModule()
         {
             @Override
             protected void configure()
@@ -275,4 +330,15 @@ public class TestMBeanModule
         server.unregisterMBean(name2);
     }
 
+    public static final class TestObjectNameGenerator
+            implements ObjectNameGenerator
+    {
+        @Override
+        public String generatedNameOf(Class<?> type, Map<String, String> properties)
+        {
+            return new ObjectNameBuilder("test")
+                    .withProperties(properties)
+                    .build();
+        }
+    }
 }
