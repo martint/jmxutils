@@ -262,13 +262,7 @@ public class TestMBeanModule
                 multibinder.addBinding().toInstance(object2);
 
                 bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
-                ExportBinder.newExporter(binder()).exportSet(SimpleObject.class).withGeneratedName(new NamingFunction<SimpleObject>()
-                {
-                    public String name(SimpleObject object)
-                    {
-                        return object.getStringValue();
-                    }
-                });
+                ExportBinder.newExporter(binder()).exportSet(SimpleObject.class).withGeneratedName(SimpleObject::getStringValue);
             }
         });
 

@@ -23,17 +23,13 @@ public class MapExportBinder<K, V>
 
     public void withGeneratedName(final NamingFunction<V> valueNamingFunction)
     {
-        ObjectNameFunction<Map.Entry<K, V>> objectNameFunction = new ObjectNameFunction<Map.Entry<K, V>>()
-        {
-            public ObjectName name(Map.Entry<K, V> entry)
-            {
-                try {
-                    String itemName = valueNamingFunction.name(entry.getValue());
-                    return new ObjectName(ObjectNames.generatedNameOf(valueClass, itemName));
-                }
-                catch (MalformedObjectNameException e) {
-                    throw Throwables.propagate(e);
-                }
+        ObjectNameFunction<Map.Entry<K, V>> objectNameFunction = entry -> {
+            try {
+                String itemName = valueNamingFunction.name(entry.getValue());
+                return new ObjectName(ObjectNames.generatedNameOf(valueClass, itemName));
+            }
+            catch (MalformedObjectNameException e) {
+                throw Throwables.propagate(e);
             }
         };
 
@@ -42,30 +38,20 @@ public class MapExportBinder<K, V>
 
     public void withGeneratedName(final ObjectNameFunction<V> valueNamingFunction)
     {
-        ObjectNameFunction<Map.Entry<K, V>> objectNameFunction = new ObjectNameFunction<Map.Entry<K, V>>()
-        {
-            public ObjectName name(Map.Entry<K, V> entry)
-            {
-                return valueNamingFunction.name(entry.getValue());
-            }
-        };
+        ObjectNameFunction<Map.Entry<K, V>> objectNameFunction = entry -> valueNamingFunction.name(entry.getValue());
 
         binder.addBinding().toInstance(new MapMapping<>(keyClass, valueClass, objectNameFunction));
     }
 
     public void withGeneratedName(final MapNamingFunction<K, V> valueNamingFunction)
     {
-        ObjectNameFunction<Map.Entry<K, V>> objectNameFunction = new ObjectNameFunction<Map.Entry<K, V>>()
-        {
-            public ObjectName name(Map.Entry<K, V> entry)
-            {
-                try {
-                    String itemName = valueNamingFunction.name(entry.getKey(), entry.getValue());
-                    return new ObjectName(ObjectNames.generatedNameOf(valueClass, itemName));
-                }
-                catch (MalformedObjectNameException e) {
-                    throw Throwables.propagate(e);
-                }
+        ObjectNameFunction<Map.Entry<K, V>> objectNameFunction = entry -> {
+            try {
+                String itemName = valueNamingFunction.name(entry.getKey(), entry.getValue());
+                return new ObjectName(ObjectNames.generatedNameOf(valueClass, itemName));
+            }
+            catch (MalformedObjectNameException e) {
+                throw Throwables.propagate(e);
             }
         };
 
@@ -74,13 +60,7 @@ public class MapExportBinder<K, V>
 
     public void withGeneratedName(final MapObjectNameFunction<K, V> valueNamingFunction)
     {
-        ObjectNameFunction<Map.Entry<K, V>> objectNameFunction = new ObjectNameFunction<Map.Entry<K, V>>()
-        {
-            public ObjectName name(Map.Entry<K, V> entry)
-            {
-                return valueNamingFunction.name(entry.getKey(), entry.getValue());
-            }
-        };
+        ObjectNameFunction<Map.Entry<K, V>> objectNameFunction = entry -> valueNamingFunction.name(entry.getKey(), entry.getValue());
 
         binder.addBinding().toInstance(new MapMapping<>(keyClass, valueClass, objectNameFunction));
     }

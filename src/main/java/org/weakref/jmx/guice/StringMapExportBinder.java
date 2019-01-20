@@ -6,7 +6,7 @@ import org.weakref.jmx.ObjectNames;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import java.util.Map;
+
 import java.util.Map.Entry;
 
 public class StringMapExportBinder<V>
@@ -22,16 +22,12 @@ public class StringMapExportBinder<V>
 
     public void withGeneratedName()
     {
-        ObjectNameFunction<Entry<String, V>> namingFunction = new ObjectNameFunction<Map.Entry<String, V>>()
-        {
-            public ObjectName name(Map.Entry<String, V> entry)
-            {
-                try {
-                    return new ObjectName(ObjectNames.generatedNameOf(valueClass, entry.getKey()));
-                }
-                catch (MalformedObjectNameException e) {
-                    throw Throwables.propagate(e);
-                }
+        ObjectNameFunction<Entry<String, V>> namingFunction = entry -> {
+            try {
+                return new ObjectName(ObjectNames.generatedNameOf(valueClass, entry.getKey()));
+            }
+            catch (MalformedObjectNameException e) {
+                throw Throwables.propagate(e);
             }
         };
 
