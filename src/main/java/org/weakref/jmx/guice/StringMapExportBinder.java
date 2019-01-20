@@ -1,6 +1,5 @@
 package org.weakref.jmx.guice;
 
-import com.google.common.base.Throwables;
 import com.google.inject.multibindings.Multibinder;
 import org.weakref.jmx.ObjectNames;
 
@@ -27,7 +26,7 @@ public class StringMapExportBinder<V>
                 return new ObjectName(ObjectNames.generatedNameOf(valueClass, entry.getKey()));
             }
             catch (MalformedObjectNameException e) {
-                throw Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
         };
 
