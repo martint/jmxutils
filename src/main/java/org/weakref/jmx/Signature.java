@@ -17,11 +17,14 @@ package org.weakref.jmx;
 
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import static java.util.Collections.unmodifiableList;
 import java.util.List;
+import java.util.Objects;
+
+import static java.util.Collections.unmodifiableList;
 
 final class Signature
 {
@@ -73,23 +76,21 @@ final class Signature
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Signature signature1 = (Signature) o;
-
-        if (!actionName.equals(signature1.actionName)) return false;
-        if (!parameterTypes.equals(signature1.parameterTypes)) return false;
-
-        return true;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Signature signature = (Signature) o;
+        return Objects.equals(actionName, signature.actionName) &&
+                Objects.equals(parameterTypes, signature.parameterTypes);
     }
 
     @Override
     public int hashCode()
     {
-        int result = actionName.hashCode();
-        result = 31 * result + parameterTypes.hashCode();
-        return result;
+        return Objects.hash(actionName, parameterTypes);
     }
 
     @Override
