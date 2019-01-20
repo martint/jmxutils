@@ -20,17 +20,13 @@ public class SetExportBinder<T>
 
     public void withGeneratedName(final NamingFunction<T> itemNamingFunction)
     {
-        ObjectNameFunction<T> objectNameFunction = new ObjectNameFunction<T>()
-        {
-            public ObjectName name(T object)
-            {
-                try {
-                    String itemName = itemNamingFunction.name(object);
-                    return new ObjectName(ObjectNames.generatedNameOf(clazz, itemName));
-                }
-                catch (MalformedObjectNameException e) {
-                    throw Throwables.propagate(e);
-                }
+        ObjectNameFunction<T> objectNameFunction = object -> {
+            try {
+                String itemName = itemNamingFunction.name(object);
+                return new ObjectName(ObjectNames.generatedNameOf(clazz, itemName));
+            }
+            catch (MalformedObjectNameException e) {
+                throw Throwables.propagate(e);
             }
         };
 
@@ -39,14 +35,6 @@ public class SetExportBinder<T>
 
     public void withGeneratedName(final ObjectNameFunction<T> itemNamingFunction)
     {
-        ObjectNameFunction<T> objectNameFunction = new ObjectNameFunction<T>()
-        {
-            public ObjectName name(T object)
-            {
-                return itemNamingFunction.name(object);
-            }
-        };
-
-        binder.addBinding().toInstance(new SetMapping<>(clazz, objectNameFunction));
+        binder.addBinding().toInstance(new SetMapping<>(clazz, itemNamingFunction::name));
     }
 }
