@@ -62,46 +62,46 @@ public class MBeanExporter
         exportedObjects = new MapMaker().weakValues().makeMap();
     }
 
-    public void exportWithGeneratedName(Object object)
+    public MBeanExport exportWithGeneratedName(Object object)
     {
         requireNonNull(object, "object is null");
-        export(objectNameGenerator.generatedNameOf(object.getClass()), object);
+        ObjectName objectName = createObjectName(objectNameGenerator.generatedNameOf(object.getClass()));
+        export(objectName, object);
+        return new MBeanExport(objectName, () -> unexport(objectName));
     }
 
-    public void exportWithGeneratedName(Object object, Class<?> type)
+    public MBeanExport exportWithGeneratedName(Object object, Class<?> type)
     {
         requireNonNull(object, "object is null");
         requireNonNull(type, "type is null");
-        export(objectNameGenerator.generatedNameOf(type), object);
+        ObjectName objectName = createObjectName(objectNameGenerator.generatedNameOf(type));
+        export(objectName, object);
+        return new MBeanExport(objectName, () -> unexport(objectName));
     }
 
-    public void exportWithGeneratedName(Object object, Class<?> type, String name)
+    public MBeanExport exportWithGeneratedName(Object object, Class<?> type, String name)
     {
         requireNonNull(object, "object is null");
         requireNonNull(type, "type is null");
         requireNonNull(name, "name is null");
-        export(objectNameGenerator.generatedNameOf(type, name), object);
+        ObjectName objectName = createObjectName(objectNameGenerator.generatedNameOf(type, name));
+        export(objectName, object);
+        return new MBeanExport(objectName, () -> unexport(objectName));
     }
 
-    public void exportWithGeneratedName(Object object, Class<?> type, Map<String, String> properties)
+    public MBeanExport exportWithGeneratedName(Object object, Class<?> type, Map<String, String> properties)
     {
         requireNonNull(object, "object is null");
         requireNonNull(type, "type is null");
         requireNonNull(properties, "properties is null");
-        export(objectNameGenerator.generatedNameOf(type, properties), object);
+        ObjectName objectName = createObjectName(objectNameGenerator.generatedNameOf(type, properties));
+        export(objectName, object);
+        return new MBeanExport(objectName, () -> unexport(objectName));
     }
 
     public void export(String name, Object object)
     {
-        ObjectName objectName;
-        try {
-            objectName = new ObjectName(name);
-        }
-        catch (MalformedObjectNameException e) {
-            throw new JmxException(Reason.MALFORMED_OBJECT_NAME, e.getMessage());
-        }
-
-        export(objectName, object);
+        export(createObjectName(name), object);
     }
 
     public void export(ObjectName objectName, Object object)
@@ -152,16 +152,7 @@ public class MBeanExporter
 
     public void unexport(String name)
     {
-        ObjectName objectName;
-
-        try {
-            objectName = new ObjectName(name);
-        }
-        catch (MalformedObjectNameException e) {
-            throw new JmxException(Reason.MALFORMED_OBJECT_NAME, e.getMessage());
-        }
-
-        unexport(objectName);
+        unexport(createObjectName(name));
     }
 
     public void unexport(ObjectName objectName)
@@ -240,5 +231,17 @@ public class MBeanExporter
     public static MBeanExporter withPlatformMBeanServer()
     {
         return new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
+    }
+
+    private static ObjectName createObjectName(String name)
+    {
+        ObjectName objectName;
+        try {
+            objectName = new ObjectName(name);
+        }
+        catch (MalformedObjectNameException e) {
+            throw new JmxException(Reason.MALFORMED_OBJECT_NAME, e.getMessage());
+        }
+        return objectName;
     }
 }
