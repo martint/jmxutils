@@ -21,6 +21,7 @@ import javax.management.ReflectionException;
 
 interface MBeanOperation extends MBeanFeature
 {
+    @Override
     MBeanOperationInfo getInfo();
 
     Signature getSignature();

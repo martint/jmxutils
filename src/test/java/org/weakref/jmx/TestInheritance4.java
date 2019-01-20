@@ -24,7 +24,7 @@ public class TestInheritance4
         super(B.class, A.class);
     }
 
-    private static interface A
+    private interface A
     {
         @Managed(description="A")
         Object method();

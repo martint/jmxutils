@@ -40,16 +40,19 @@ class NestedMBeanOperation implements MBeanOperation
         signature = new Signature(this.info);
     }
 
+    @Override
     public MBeanOperationInfo getInfo()
     {
         return info;
     }
 
+    @Override
     public Signature getSignature()
     {
         return signature;
     }
 
+    @Override
     public Object invoke(Object[] params)
             throws MBeanException, ReflectionException
     {

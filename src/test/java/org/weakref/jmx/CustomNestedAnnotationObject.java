@@ -23,13 +23,14 @@ import java.lang.annotation.Target;
 public class CustomNestedAnnotationObject extends NestedObject
 {
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.METHOD})
+    @Target(ElementType.METHOD)
     @Nested
     public @interface CustomNested
     {
-        public abstract String description() default "";
+        String description() default "";
     }
 
+    @Override
     @CustomNested
     public SimpleObject getSimpleObject()
     {

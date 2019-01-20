@@ -36,6 +36,7 @@ public class TestInheritance3
     private static class B
             extends A
     {
+        @Override
         @Managed(description = "B")
         public Object method()
         {

@@ -15,6 +15,12 @@
  */
 package org.weakref.jmx;
 
+import org.weakref.jmx.JmxException.Reason;
+
+import javax.management.Descriptor;
+import javax.management.DescriptorKey;
+import javax.management.ImmutableDescriptor;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -26,12 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
-import javax.management.Descriptor;
-import javax.management.DescriptorKey;
-import javax.management.ImmutableDescriptor;
-
-import org.weakref.jmx.JmxException.Reason;
 
 import static java.util.Arrays.asList;
 
@@ -58,7 +58,7 @@ final class AnnotationUtils
         return new ImmutableDescriptor(fields);
     }
 
-    public static List<Annotation> computeWalkSequence(Annotation... annotations)
+    private static List<Annotation> computeWalkSequence(Annotation... annotations)
     {
         Set<Annotation> seen = new HashSet<Annotation>();
         List<Annotation> result = new ArrayList<Annotation>();
@@ -194,7 +194,7 @@ final class AnnotationUtils
         return null;
     }
 
-    public static String getDescription(Method annotatedMethod)
+    private static String getDescription(Method annotatedMethod)
     {
         return getDescription(annotatedMethod.getAnnotations());
     }
@@ -249,16 +249,13 @@ final class AnnotationUtils
         return result;
     }
 
-    public static Method findManagedMethod(Method method)
-    {
-        return findManagedMethod(method.getDeclaringClass(), method.getName(), method.getParameterTypes());
-    }
-
-    public static Method findManagedMethod(Class<?> clazz, String methodName, Class<?>[] paramTypes)
+    private static Method findManagedMethod(Class<?> clazz, String methodName, Class<?>[] paramTypes)
     {
         try {
             Method method = clazz.getDeclaredMethod(methodName, paramTypes);
-            if (isManagedMethod(method)) return method;
+            if (isManagedMethod(method)) {
+                return method;
+            }
         }
         catch (NoSuchMethodException e) {
             // ignore
@@ -281,7 +278,7 @@ final class AnnotationUtils
         return null;
     }
 
-    public static boolean isManagedMethod(Method method)
+    private static boolean isManagedMethod(Method method)
     {
         for (Annotation annotation : method.getAnnotations()) {
             if (annotation.annotationType().isAnnotationPresent(ManagedAnnotation.class)) {

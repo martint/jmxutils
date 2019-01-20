@@ -1,22 +1,22 @@
 package org.weakref.jmx;
 
-import java.lang.management.ManagementFactory;
-
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
+import java.lang.management.ManagementFactory;
+
 public class TestExports
 {
-    private MBeanServer server = null;
-    private MBeanExporter exporter = null;
+    private MBeanServer server;
+    private MBeanExporter exporter;
 
-    private ObjectName objectName = null;
-    private String name = null;
+    private ObjectName objectName;
+    private String name;
 
     @BeforeMethod
     public void setUp()

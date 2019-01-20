@@ -26,12 +26,9 @@ import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
 import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
-import java.io.IOException;
-import java.rmi.NotBoundException;
 import java.util.ArrayList;
 
 import static org.testng.Assert.assertEquals;
@@ -95,7 +92,6 @@ public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
 
     @BeforeMethod
     void setup()
-            throws IOException, MalformedObjectNameException, NotBoundException
     {
         server = new TestingMBeanServer();
 
@@ -118,34 +114,15 @@ public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
     {
         MBeanExporter exporter = new MBeanExporter(server);
 
-        exporter.export(new String("test:test=test"), new SimpleObject());
+        exporter.export("test:test=test", new SimpleObject());
         try {
-            exporter.export(new String("test:test=test"), new SimpleObject());
+            exporter.export("test:test=test", new SimpleObject());
         }
         catch(JmxException e) {
             // do nothing
         }
         assertEquals(exporter.getExportedObjects().size(), 1);
     }
-
-//    @AfterTest
-//    public void teardown()
-//            throws IOException, InstanceNotFoundException, MBeanRegistrationException
-//    {
-//        for (NamedObject pair : objects) {
-//            server.unregisterMBean(pair.objectName);
-//        }
-//    }
-
-//    @Test
-//    public void testMBeanInfo()
-//            throws IntrospectionException, InstanceNotFoundException, ReflectionException
-//    {
-//        for (NamedObject pair : objects) {
-//            info.get
-//        }
-//    }
-
 }
 
 

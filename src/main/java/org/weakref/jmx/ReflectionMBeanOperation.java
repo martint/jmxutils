@@ -36,6 +36,7 @@ class ReflectionMBeanOperation implements MBeanOperation
         this.signature = new Signature(method);
     }
 
+    @Override
     public MBeanOperationInfo getInfo()
     {
         return info;
@@ -46,6 +47,7 @@ class ReflectionMBeanOperation implements MBeanOperation
         return target;
     }
 
+    @Override
     public Signature getSignature()
     {
         return signature;
@@ -56,6 +58,7 @@ class ReflectionMBeanOperation implements MBeanOperation
         return method;
     }
 
+    @Override
     public Object invoke(Object[] params)
             throws MBeanException, ReflectionException
     {

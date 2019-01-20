@@ -15,22 +15,20 @@
  */
 package org.weakref.jmx.guice;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
-import org.testng.Assert;
-import org.testng.annotations.Test;
-import org.weakref.jmx.Managed;
-import org.weakref.jmx.testing.TestingMBeanServer;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
-import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import org.weakref.jmx.Managed;
+import org.weakref.jmx.testing.TestingMBeanServer;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 
 public class TestModuleSubclassing
 {
@@ -88,6 +86,6 @@ public class TestModuleSubclassing
         {
             return name;
         }
-    };
+    }
 }
 

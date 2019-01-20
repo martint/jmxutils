@@ -23,13 +23,14 @@ import java.lang.annotation.Target;
 public class CustomFlattenAnnotationObject extends FlattenObject
 {
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.METHOD})
+    @Target(ElementType.METHOD)
     @Flatten
     public @interface CustomFlatten
     {
         String description() default "";
     }
 
+    @Override
     @CustomFlatten
     public SimpleObject getSimpleObject()
     {
