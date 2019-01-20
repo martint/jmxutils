@@ -12,7 +12,7 @@ public class ObjectNameBuilder
 {
     private static final Pattern BAD_PACKAGENAME_PATTERN = Pattern.compile("[:?*]");
     private final StringBuilder objectName;
-    private final Set<String> properties = new HashSet<String>();
+    private final Set<String> properties = new HashSet<>();
 
     public ObjectNameBuilder(String packageName)
     {

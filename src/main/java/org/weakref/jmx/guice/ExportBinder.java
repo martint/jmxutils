@@ -40,17 +40,17 @@ public class ExportBinder
 
     public <T> SetExportBinder<T> exportSet(Class<T> clazz)
     {
-        return new SetExportBinder<T>(collectionBinder, clazz);
+        return new SetExportBinder<>(collectionBinder, clazz);
     }
 
     public <V> StringMapExportBinder<V> exportMap(Class<V> valueClass)
     {
-        return new StringMapExportBinder<V>(mapBinder, valueClass);
+        return new StringMapExportBinder<>(mapBinder, valueClass);
     }
 
     public <K, V> MapExportBinder<K, V> exportMap(Class<K> keyClass, Class<V> valueClass)
     {
-        return new MapExportBinder<K, V>(mapBinder, keyClass, valueClass);
+        return new MapExportBinder<>(mapBinder, keyClass, valueClass);
     }
 
 }

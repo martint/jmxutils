@@ -104,7 +104,7 @@ public class TestObjectNames {
   @DataProvider(name = "names")
   public Object[][] getNames()
   {
-      ArrayList<Object[]> names = new ArrayList<Object[]>();
+      ArrayList<Object[]> names = new ArrayList<>();
       for (char c = 0; c < 500; ++c) {
           names.add(new Object[] {String.valueOf(c), ",=:*?\"\n".indexOf(c) != -1});
       }

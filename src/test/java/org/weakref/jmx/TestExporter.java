@@ -95,7 +95,7 @@ public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
     {
         server = new TestingMBeanServer();
 
-        objects = new ArrayList<NamedObject>(2);
+        objects = new ArrayList<>(2);
         objects.add(NamedObject.of(getUniqueObjectName(), new SimpleObject()));
         objects.add(NamedObject.of(getUniqueObjectName(), new CustomAnnotationObject()));
         objects.add(NamedObject.of(getUniqueObjectName(), new FlattenObject()));

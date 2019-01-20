@@ -37,7 +37,7 @@ final class ReflectionUtils
     private static final Map<Class<?>, Class<?>> primitiveToWrapper;
 
     static {
-        Map<Class<?>, Class<?>> map = new LinkedHashMap<Class<?>, Class<?>>();
+        Map<Class<?>, Class<?>> map = new LinkedHashMap<>();
         map.put(boolean.class, Boolean.class);
         map.put(char.class, Character.class);
         map.put(byte.class, Byte.class);

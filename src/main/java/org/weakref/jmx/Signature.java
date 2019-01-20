@@ -32,7 +32,7 @@ final class Signature
     {
         this.actionName = method.getName();
 
-        List<String> builder = new ArrayList<String>();
+        List<String> builder = new ArrayList<>();
         for (Class<?> type : method.getParameterTypes()) {
             builder.add(type.getName());
         }
@@ -53,7 +53,7 @@ final class Signature
     public Signature(MBeanOperationInfo info) {
         this.actionName = info.getName();
 
-        List<String> parameterTypes = new ArrayList<String>(info.getSignature().length);
+        List<String> parameterTypes = new ArrayList<>(info.getSignature().length);
         for (MBeanParameterInfo parameterInfo : info.getSignature()) {
             parameterTypes.add(parameterInfo.getType());
         }

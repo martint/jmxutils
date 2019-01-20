@@ -48,7 +48,7 @@ final class AnnotationUtils
 
     public static Descriptor buildDescriptor(Annotation... annotations)
     {
-        Map<String, Object> fields = new TreeMap<String, Object>();
+        Map<String, Object> fields = new TreeMap<>();
 
         // process all direct annotations
         for (Annotation annotation : computeWalkSequence(annotations)) {
@@ -60,12 +60,12 @@ final class AnnotationUtils
 
     private static List<Annotation> computeWalkSequence(Annotation... annotations)
     {
-        Set<Annotation> seen = new HashSet<Annotation>();
-        List<Annotation> result = new ArrayList<Annotation>();
+        Set<Annotation> seen = new HashSet<>();
+        List<Annotation> result = new ArrayList<>();
 
         computeWalkSequence(seen, result, annotations);
 
-        return new ArrayList<Annotation>(result);
+        return new ArrayList<>(result);
     }
 
     private static void computeWalkSequence(Set<Annotation> seen, List<Annotation> result, Annotation... annotations)
@@ -229,7 +229,7 @@ final class AnnotationUtils
      */
     public static Map<Method, Method> findManagedMethods(Class<?> clazz)
     {
-        Map<Method, Method> result = new HashMap<Method, Method>();
+        Map<Method, Method> result = new HashMap<>();
 
         // gather all publicly available methods
         // this returns everything, even if it's declared in a parent
@@ -290,12 +290,12 @@ final class AnnotationUtils
 
     public static boolean isFlatten(Method method)
     {
-        return method != null && isAnnotationPresent(Flatten.class, new HashSet<Class<? extends Annotation>>(), method.getAnnotations());
+        return method != null && isAnnotationPresent(Flatten.class, new HashSet<>(), method.getAnnotations());
     }
 
     public static boolean isNested(Method method)
     {
-        return method != null && isAnnotationPresent(Nested.class, new HashSet<Class<? extends Annotation>>(), method.getAnnotations());
+        return method != null && isAnnotationPresent(Nested.class, new HashSet<>(), method.getAnnotations());
     }
 
     private static boolean isAnnotationPresent(Class<? extends Annotation> annotationClass, Set<Class<? extends Annotation>> processedTypes, Annotation... annotations)

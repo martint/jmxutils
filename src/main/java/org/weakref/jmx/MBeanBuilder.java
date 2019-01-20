@@ -28,8 +28,8 @@ import static org.weakref.jmx.ReflectionUtils.isSetter;
 final class MBeanBuilder
 {
     private final String className;
-    private final List<MBeanAttributeBuilder> attributeBuilders = new ArrayList<MBeanAttributeBuilder>();
-    private final List<MBeanOperationBuilder> operationBuilders = new ArrayList<MBeanOperationBuilder>();
+    private final List<MBeanAttributeBuilder> attributeBuilders = new ArrayList<>();
+    private final List<MBeanOperationBuilder> operationBuilders = new ArrayList<>();
     private String description;
 
     private MBeanBuilder(String className)
@@ -53,7 +53,7 @@ final class MBeanBuilder
             throw new NullPointerException("target is null");
         }
 
-        Map<String, MBeanAttributeBuilder> attributeBuilders = new TreeMap<String, MBeanAttributeBuilder>();
+        Map<String, MBeanAttributeBuilder> attributeBuilders = new TreeMap<>();
 
         for (Map.Entry<Method, Method> entry : AnnotationUtils.findManagedMethods(target.getClass()).entrySet()) {
             Method concreteMethod = entry.getKey();
@@ -117,8 +117,8 @@ final class MBeanBuilder
 
     public MBean build()
     {
-        List<MBeanAttribute> attributes = new ArrayList<MBeanAttribute>();
-        List<MBeanOperation> operations = new ArrayList<MBeanOperation>();
+        List<MBeanAttribute> attributes = new ArrayList<>();
+        List<MBeanOperation> operations = new ArrayList<>();
         for (MBeanAttributeBuilder attributeBuilder : attributeBuilders) {
             for (MBeanFeature feature : attributeBuilder.build()) {
                 if (feature instanceof MBeanAttribute) {
