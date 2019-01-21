@@ -39,7 +39,6 @@ import java.lang.management.ManagementFactory;
 import java.util.Map;
 
 import static com.google.inject.Stage.PRODUCTION;
-import static com.google.inject.multibindings.OptionalBinder.newOptionalBinder;
 import static com.google.inject.name.Names.named;
 import static org.weakref.jmx.ObjectNames.generatedNameOf;
 
@@ -108,8 +107,7 @@ public class TestMBeanModule
     {
         assertGeneratedNames(
                 new ObjectName("test:name=" + SimpleObject.class.getSimpleName()),
-                binder -> newOptionalBinder(binder, ObjectNameGenerator.class)
-                        .setBinding().to(TestObjectNameGenerator.class));
+                binder -> binder.bind(ObjectNameGenerator.class).to(TestObjectNameGenerator.class));
     }
 
     private static void assertGeneratedNames(ObjectName name, Module additionalBindings)
@@ -148,8 +146,7 @@ public class TestMBeanModule
     {
         assertGeneratedNameOnNamedAnnotation(
                 new ObjectName("test:name=hello,type=" + SimpleObject.class.getSimpleName()),
-                binder -> newOptionalBinder(binder, ObjectNameGenerator.class)
-                        .setBinding().to(TestObjectNameGenerator.class));
+                binder -> binder.bind(ObjectNameGenerator.class).to(TestObjectNameGenerator.class));
     }
 
     private static void assertGeneratedNameOnNamedAnnotation(ObjectName name, Module additionalBindings)
@@ -291,8 +288,7 @@ public class TestMBeanModule
         assertSet(
                 name1,
                 name2,
-                binder -> newOptionalBinder(binder, ObjectNameGenerator.class)
-                        .setBinding().to(TestObjectNameGenerator.class));
+                binder -> binder.bind(ObjectNameGenerator.class).to(TestObjectNameGenerator.class));
     }
 
     private static void assertSet(ObjectName name1, ObjectName name2, Module additionalBindings)
