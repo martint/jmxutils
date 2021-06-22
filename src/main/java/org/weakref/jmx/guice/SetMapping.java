@@ -1,15 +1,14 @@
 package org.weakref.jmx.guice;
 
-import com.google.common.reflect.TypeParameter;
-import com.google.common.reflect.TypeToken;
 import com.google.inject.Key;
 import org.weakref.jmx.ObjectNameGenerator;
 
 import javax.management.ObjectName;
 
-import java.lang.reflect.Type;
 import java.util.Set;
 import java.util.function.BiFunction;
+
+import static com.google.inject.util.Types.setOf;
 
 class SetMapping<T>
 {
@@ -27,14 +26,9 @@ class SetMapping<T>
         return objectNameFunction;
     }
 
+    @SuppressWarnings("unchecked")
     public Key<Set<T>> getKey()
     {
         return (Key<Set<T>>) Key.get(setOf(clazz));
     }
-
-    private static <K> Type setOf(Class<K> clazz)
-    {
-        return new TypeToken<Set<K>>() {}.where(new TypeParameter<K>() {}, TypeToken.of(clazz)).getType();
-    }
-
 }
