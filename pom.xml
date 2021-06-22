@@ -29,7 +29,7 @@
     </scm>
 
     <properties>
-        <shadeBase>org.weakref.jmx.internal</shadeBase>
+        <shadeBase>org.weakref.jmx.\$internal</shadeBase>
     </properties>
 
     <dependencies>
