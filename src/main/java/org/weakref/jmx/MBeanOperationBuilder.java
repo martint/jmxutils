@@ -15,14 +15,15 @@
  */
 package org.weakref.jmx;
 
-import com.thoughtworks.paranamer.BytecodeReadingParanamer;
-import com.thoughtworks.paranamer.Paranamer;
-
 import javax.management.Descriptor;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.List;
+
+import static io.airlift.parameternames.ParameterNames.getParameterNames;
 
 public class MBeanOperationBuilder
 {
@@ -85,8 +86,7 @@ public class MBeanOperationBuilder
 
         //
         // Build Parameter Infos
-        // Extract parameter names from debug symbols
-        String[] parameterNames = getParameterNames(concreteMethod);
+        List<String> parameterNames = getParameterNames(concreteMethod);
         Class<?>[] types = concreteMethod.getParameterTypes();
 
         // Parameter annotations used form descriptor come from the annotated method, not the public method
@@ -95,18 +95,18 @@ public class MBeanOperationBuilder
             parameterAnnotations = annotatedMethod.getParameterAnnotations();
         }
         else {
-            parameterAnnotations = new Annotation[parameterNames.length][];
+            parameterAnnotations = new Annotation[parameterNames.size()][];
         }
 
-        MBeanParameterInfo[] parameterInfos = new MBeanParameterInfo[parameterNames.length];
-        for (int i = 0; i < parameterNames.length; ++i) {
+        MBeanParameterInfo[] parameterInfos = new MBeanParameterInfo[parameterNames.size()];
+        for (int i = 0; i < parameterNames.size(); i++) {
             // Parameter Descriptor
             Descriptor parameterDescriptor = AnnotationUtils.buildDescriptor(parameterAnnotations[i]);
             // Parameter Description
             String parameterDescription = AnnotationUtils.getDescription(parameterDescriptor, parameterAnnotations[i]);
 
             parameterInfos[i] = new MBeanParameterInfo(
-                    parameterNames[i],
+                    parameterNames.get(i),
                     types[i].getName(),
                     parameterDescription,
                     parameterDescriptor);
@@ -130,20 +130,5 @@ public class MBeanOperationBuilder
                 descriptor);
 
         return new ReflectionMBeanOperation(mbeanOperationInfo, target, concreteMethod);
-    }
-
-    private static String[] getParameterNames(Method method)
-    {
-        try {
-            Paranamer paranamer = new BytecodeReadingParanamer();
-            return paranamer.lookupParameterNames(method);
-        }
-        catch (RuntimeException e) {
-            String[] names = new String[method.getParameterTypes().length];
-            for (int i = 0; i < names.length; i++) {
-                names[i] = "p" + i;
-            }
-            return names;
-        }
     }
 }

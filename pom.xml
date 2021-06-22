@@ -41,9 +41,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.thoughtworks.paranamer</groupId>
-            <artifactId>paranamer</artifactId>
-            <version>2.1</version>
+            <groupId>io.airlift</groupId>
+            <artifactId>parameternames</artifactId>
+            <version>1.5</version>
         </dependency>
 
         <dependency>
@@ -118,14 +118,14 @@
                             <dependencyReducedPomLocation>${project.build.directory}/pom.xml</dependencyReducedPomLocation>
                             <artifactSet>
                                 <includes>
-                                    <include>com.thoughtworks.paranamer:paranamer</include>
+                                    <include>io.airlift:parameternames</include>
                                     <include>com.google.guava:guava</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
                                 <relocation>
-                                    <pattern>com.thoughtworks.paranamer</pattern>
-                                    <shadedPattern>${shadeBase}.paranamer</shadedPattern>
+                                    <pattern>io.airlift.parameternames</pattern>
+                                    <shadedPattern>${shadeBase}.parameternames</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.google.common</pattern>
@@ -138,7 +138,7 @@
                             </relocations>
                             <filters>
                                 <filter>
-                                    <artifact>com.thoughtworks.paranamer:paranamer</artifact>
+                                    <artifact>io.airlift:parameternames</artifact>
                                     <excludes>
                                         <exclude>META-INF/maven/**</exclude>
                                     </excludes>
