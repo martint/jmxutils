@@ -49,23 +49,15 @@
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
-            <version>4.2.2</version>
+            <version>5.1.0</version>
             <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>26.0-jre</version>
+            <version>31.1-jre</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.google.inject.extensions</groupId>
-            <artifactId>guice-multibindings</artifactId>
-            <version>4.2.2</version>
-            <optional>true</optional>
-        </dependency>
-
     </dependencies>
     <build>
         <plugins>
