@@ -222,6 +222,13 @@ public class MBeanExporter
             return builder.build();
         }
     }
+
+    public Optional<Object> getExportedObject(ObjectName objectName)
+    {
+        synchronized (exportedObjects) {
+            return Optional.ofNullable(exportedObjects.get(objectName));
+        }
+    }
     
     /**
      * Get an MBeanExporter that uses the default platform mbean server
