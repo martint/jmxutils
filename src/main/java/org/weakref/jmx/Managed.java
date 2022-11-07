@@ -26,4 +26,5 @@ import java.lang.annotation.Target;
 public @interface Managed
 {
 	String description() default "";
+	String name() default "";
 }

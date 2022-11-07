@@ -194,7 +194,7 @@ final class AnnotationUtils
         return null;
     }
 
-    private static String getDescription(Method annotatedMethod)
+    public static String getDescription(Method annotatedMethod)
     {
         return getDescription(annotatedMethod.getAnnotations());
     }
@@ -212,6 +212,28 @@ final class AnnotationUtils
             }
         }
         return description;
+    }
+
+    public static String getName(Method annotatedMethod)
+    {
+        return getName(annotatedMethod.getAnnotations());
+    }
+
+    public static String getName(Annotation... annotations)
+    {
+        String name = "";
+        for (Annotation annotation : annotations) {
+            if (annotation instanceof Managed) {
+                try {
+                    Method nameMethod = annotation.annotationType().getMethod("name");
+                    name = nameMethod.invoke(annotation).toString();
+                }
+                catch (ReflectiveOperationException e) {
+                    // ignore
+                }
+            }
+        }
+        return name;
     }
 
     /**
