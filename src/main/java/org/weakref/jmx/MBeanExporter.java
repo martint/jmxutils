@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Objects.requireNonNull;
 
@@ -43,6 +44,7 @@ public class MBeanExporter
     private final MBeanServer server;
     private final Map<ObjectName, Object> exportedObjects;
     private final ObjectNameGenerator objectNameGenerator;
+    private final Map<ObjectName, ManagedClass> exportedManagedClasses = new ConcurrentHashMap<>();
 
     MBeanExporter()
     {
@@ -117,6 +119,8 @@ public class MBeanExporter
                 server.registerMBean(mbean, objectName);
                 exportedObjects.put(objectName, object);
             }
+
+            exportedManagedClasses.put(objectName, ManagedClass.fromExportedObject(object));
         }
         catch (InstanceAlreadyExistsException e) {
             throw new JmxException(Reason.INSTANCE_ALREADY_EXISTS, e.getMessage());
@@ -221,6 +225,15 @@ public class MBeanExporter
             }
             return builder.build();
         }
+    }
+
+    public Map<String, ManagedClass> getManagedClasses()
+    {
+        ImmutableMap.Builder<String, ManagedClass> builder = ImmutableMap.builder();
+        for (Entry<ObjectName, ManagedClass> entry : exportedManagedClasses.entrySet()) {
+            builder.put(entry.getKey().toString(), entry.getValue());
+        }
+        return builder.build();
     }
 
     public Optional<Object> getExportedObject(ObjectName objectName)
