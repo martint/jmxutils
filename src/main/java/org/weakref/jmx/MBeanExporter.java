@@ -20,6 +20,7 @@ import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 import org.weakref.jmx.JmxException.Reason;
 
+import javax.annotation.PreDestroy;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
@@ -62,6 +63,17 @@ public class MBeanExporter
         this.server = server;
         this.objectNameGenerator = objectNameGenerator.orElseGet(ObjectNameGenerator::defaultObjectNameGenerator);
         exportedObjects = new MapMaker().weakValues().makeMap();
+    }
+
+    @PreDestroy
+    public void destroy()
+    {
+        Map<String, Exception> errors = unexportAllAndReportMissing();
+        if (!errors.isEmpty()) {
+            RuntimeException exception = new RuntimeException("Failed to unexport MBeans: " + errors.keySet());
+            errors.values().forEach(exception::addSuppressed);
+            throw exception;
+        }
     }
 
     public MBeanExport exportWithGeneratedName(Object object)
