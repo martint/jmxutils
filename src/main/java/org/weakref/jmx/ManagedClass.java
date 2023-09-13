@@ -58,7 +58,7 @@ public class ManagedClass
                     attributeName = getAttributeName(concreteMethod);
                 }
 
-                if (AnnotationUtils.isNested(annotatedMethod)) {
+                if (AnnotationUtils.isNested(annotatedMethod) || AnnotationUtils.isFlatten(annotatedMethod)) {
                     try {
                         Object childTarget = concreteMethod.invoke(target);
                         if (childTarget != null) {
