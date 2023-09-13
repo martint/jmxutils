@@ -30,13 +30,16 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import static org.weakref.jmx.Util.getUniqueObjectName;
 
 public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
 {
     private MBeanServer server;
+    private MBeanExporter exporter;
 
     static class NamedObject
     {
@@ -103,9 +106,28 @@ public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
         objects.add(NamedObject.of(getUniqueObjectName(), new NestedObject()));
         objects.add(NamedObject.of(getUniqueObjectName(), new CustomNestedAnnotationObject()));
 
-        MBeanExporter exporter = new MBeanExporter(server);
+        exporter = new MBeanExporter(server);
         for (NamedObject namedObject : objects) {
             exporter.export(namedObject.objectName.getCanonicalName(), namedObject.object);
+        }
+    }
+
+    @Test
+    void testManagedClasses()
+    {
+        Map<String, ManagedClass> managedClasses = exporter.getManagedClasses();
+        for(NamedObject namedObject : objects) {
+            String name = namedObject.objectName.getCanonicalName();
+
+            assertTrue(managedClasses.containsKey(name));
+
+            ManagedClass managedClass = managedClasses.get(name);
+            assertEquals(namedObject.object, managedClass.getTarget());
+
+            if(namedObject.object instanceof NestedObject || namedObject.object instanceof FlattenObject) {
+                assertEquals(managedClass.getChildren().size(), 1);
+                assertEquals(managedClass.getChildren().get("SimpleObject").getTargetClass(), SimpleObject.class);
+            }
         }
     }
 
