@@ -178,6 +178,8 @@ public class MBeanExporter
                 server.unregisterMBean(objectName);
                 exportedObjects.remove(objectName);
             }
+
+            exportedManagedClasses.remove(objectName);
         }
         catch (MBeanRegistrationException e) {
             throw new JmxException(Reason.MBEAN_REGISTRATION, e.getMessage(), e.getCause());
@@ -223,6 +225,8 @@ public class MBeanExporter
             }
 
             exportedObjects.keySet().removeAll(toRemove);
+
+            exportedManagedClasses.keySet().removeAll(toRemove);
         }
 
         return errors;
