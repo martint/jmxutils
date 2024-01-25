@@ -25,6 +25,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -267,14 +268,14 @@ final class AnnotationUtils
 
     private static Method findManagedMethod(Class<?> clazz, String methodName, Class<?>[] paramTypes)
     {
-        try {
-            Method method = clazz.getDeclaredMethod(methodName, paramTypes);
-            if (isManagedMethod(method)) {
-                return method;
+        // manually search methods instead of using Class.getDeclaredMethod() as it
+        // will throw NoSuchMethodException when not found which requires the JDK to build a stacktrace, etc.
+        for (Method method : clazz.getDeclaredMethods()) {
+            if (method.getName().equals(methodName) && Arrays.equals(method.getParameterTypes(), paramTypes)) {
+                if (isManagedMethod(method)) {
+                    return method;
+                }
             }
-        }
-        catch (NoSuchMethodException e) {
-            // ignore
         }
 
         if (clazz.getSuperclass() != null) {
