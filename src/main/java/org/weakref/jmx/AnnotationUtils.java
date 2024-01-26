@@ -248,6 +248,8 @@ final class AnnotationUtils
     {
         Map<Method, Method> result = new HashMap<>();
 
+        Method[] declaredMethods = clazz.getDeclaredMethods();
+
         // gather all publicly available methods
         // this returns everything, even if it's declared in a parent
         for (Method method : clazz.getMethods()) {
@@ -257,7 +259,7 @@ final class AnnotationUtils
             }
 
             // look for annotations recursively in superclasses or interfaces
-            Method managedMethod = findManagedMethod(clazz, method.getName(), method.getParameterTypes());
+            Method managedMethod = findManagedMethod(clazz, declaredMethods, method.getName(), method.getParameterTypes());
             if (managedMethod != null) {
                 result.put(method, managedMethod);
             }
@@ -266,11 +268,11 @@ final class AnnotationUtils
         return result;
     }
 
-    private static Method findManagedMethod(Class<?> clazz, String methodName, Class<?>[] paramTypes)
+    private static Method findManagedMethod(Class<?> clazz, Method[] declaredMethods, String methodName, Class<?>[] paramTypes)
     {
         // manually search methods instead of using Class.getDeclaredMethod() as it
         // will throw NoSuchMethodException when not found which requires the JDK to build a stacktrace, etc.
-        for (Method method : clazz.getDeclaredMethods()) {
+        for (Method method : declaredMethods) {
             if (method.getName().equals(methodName) && Arrays.equals(method.getParameterTypes(), paramTypes)) {
                 if (isManagedMethod(method)) {
                     return method;
@@ -278,15 +280,16 @@ final class AnnotationUtils
             }
         }
 
-        if (clazz.getSuperclass() != null) {
-            Method managedMethod = findManagedMethod(clazz.getSuperclass(), methodName, paramTypes);
+        Class<?> superclass = clazz.getSuperclass();
+        if (superclass != null) {
+            Method managedMethod = findManagedMethod(superclass, superclass.getDeclaredMethods(), methodName, paramTypes);
             if (managedMethod != null) {
                 return managedMethod;
             }
         }
 
         for (Class<?> iface : clazz.getInterfaces()) {
-            Method managedMethod = findManagedMethod(iface, methodName, paramTypes);
+            Method managedMethod = findManagedMethod(iface, iface.getDeclaredMethods(), methodName, paramTypes);
             if (managedMethod != null) {
                 return managedMethod;
             }
