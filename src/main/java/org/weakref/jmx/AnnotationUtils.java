@@ -31,8 +31,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 
@@ -202,17 +204,15 @@ final class AnnotationUtils
 
     public static String getDescription(Annotation... annotations)
     {
-        String description = "";
-        for (Annotation annotation : annotations) {
-            try {
-                Method descriptionMethod = annotation.annotationType().getMethod("description");
-                description = descriptionMethod.invoke(annotation).toString();
-            }
-            catch (ReflectiveOperationException e) {
-                // ignore
-            }
-        }
-        return description;
+        return Stream.of(annotations)
+                .flatMap(annotation -> Arrays.stream(annotation.annotationType().getDeclaredMethods())
+                        .filter(method -> "description".equals(method.getName()))
+                        .findFirst()
+                        .flatMap(descriptionMethod -> tryInvoke(descriptionMethod, annotation))
+                        .stream()
+                )
+                .findFirst()
+                .orElse("");
     }
 
     public static String getName(Method annotatedMethod)
@@ -222,19 +222,16 @@ final class AnnotationUtils
 
     public static String getName(Annotation... annotations)
     {
-        String name = "";
-        for (Annotation annotation : annotations) {
-            if (annotation instanceof Managed) {
-                try {
-                    Method nameMethod = annotation.annotationType().getMethod("name");
-                    name = nameMethod.invoke(annotation).toString();
-                }
-                catch (ReflectiveOperationException e) {
-                    // ignore
-                }
-            }
-        }
-        return name;
+        return Stream.of(annotations)
+                .filter(annotation -> annotation instanceof Managed)
+                .flatMap(managedAnnotation -> Arrays.stream(managedAnnotation.annotationType().getDeclaredMethods())
+                        .filter(method -> "name".equals(method.getName()))
+                        .findFirst()
+                        .flatMap(nameMethod -> tryInvoke(nameMethod, managedAnnotation))
+                        .stream()
+                )
+                .findFirst()
+                .orElse("");
     }
 
     /**
@@ -335,5 +332,16 @@ final class AnnotationUtils
         }
 
         return false;
+    }
+
+    private static Optional<String> tryInvoke(Method method, Annotation annotation)
+    {
+        try {
+            return Optional.of(method.invoke(annotation).toString());
+        }
+        catch (ReflectiveOperationException e) {
+            // ignore
+            return Optional.empty();
+        }
     }
 }
