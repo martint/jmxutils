@@ -13,7 +13,7 @@
  */
 package org.weakref.jmx;
 
-import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -21,14 +21,19 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static org.weakref.jmx.ReflectionUtils.getAttributeName;
 import static org.weakref.jmx.ReflectionUtils.isGetter;
 
 public class ManagedClass
 {
+    private static final Map<Class<?>, ManagedAttributeCacheEntry> managedClassDefinitionCache = new ConcurrentHashMap<>();
+
     private final WeakReference<Object> target;
     private final Map<String, ManagedClass> children;
     private final Map<String, ManagedAttribute> attributes;
@@ -42,38 +47,50 @@ public class ManagedClass
 
     public static ManagedClass fromExportedObject(Object target)
     {
-        ImmutableMap.Builder<String, ManagedAttribute> attributes = ImmutableMap.builder();
+        Class<?> targetClass = target.getClass();
         ImmutableMap.Builder<String, ManagedClass> children = ImmutableMap.builder();
-
-        for (Map.Entry<Method, Method> entry : AnnotationUtils.findManagedMethods(target.getClass()).entrySet()) {
-            Method concreteMethod = entry.getKey();
-            Method annotatedMethod = entry.getValue();
-
-            if (isGetter(concreteMethod)) { // is it an attribute?
-
-                String attributeName = AnnotationUtils.getName(annotatedMethod);
-                String description = AnnotationUtils.getDescription(annotatedMethod);
-
-                if (attributeName == null || attributeName.equals("")) {
-                    attributeName = getAttributeName(concreteMethod);
-                }
-
-                if (AnnotationUtils.isNested(annotatedMethod) || AnnotationUtils.isFlatten(annotatedMethod)) {
-                    try {
-                        Object childTarget = concreteMethod.invoke(target);
-                        if (childTarget != null) {
-                            children.put(attributeName, fromExportedObject(childTarget));
-                        }
-                    }
-                    catch (ReflectiveOperationException e) {
-                        // Ignore and continue
+        ManagedAttributeCacheEntry managedAttributeCacheEntry = computeManagedClassAttributeDefinitions(targetClass);
+        for (ManagedAttributeDefinition attributeDefinition : managedAttributeCacheEntry.managedAttributeDefinitions()) {
+            if (attributeDefinition.isAnnotatedMethodNestedOrFlatten()) {
+                ManagedAttribute managedAttribute = attributeDefinition.managedAttribute();
+                try {
+                    Object childTarget = managedAttribute.getMethod().invoke(target);
+                    if (childTarget != null) {
+                        children.put(managedAttribute.getName(), fromExportedObject(childTarget));
                     }
                 }
-
-                attributes.put(attributeName, new ManagedAttribute(concreteMethod, attributeName, description, AnnotationUtils.isFlatten(concreteMethod)));
+                catch (ReflectiveOperationException e) {
+                    // Ignore and continue
+                }
             }
         }
-        return new ManagedClass(target, children.build(), attributes.build());
+        return new ManagedClass(target, children.build(), managedAttributeCacheEntry.attributes());
+    }
+
+    private static ManagedAttributeCacheEntry computeManagedClassAttributeDefinitions(Class<?> targetClass)
+    {
+        return managedClassDefinitionCache.computeIfAbsent(targetClass, clazz -> {
+            ImmutableList.Builder<ManagedAttributeDefinition> builder = ImmutableList.builder();
+            for (Map.Entry<Method, Method> entry : AnnotationUtils.findManagedMethods(targetClass).entrySet()) {
+                Method concreteMethod = entry.getKey();
+                Method annotatedMethod = entry.getValue();
+
+                if (isGetter(concreteMethod)) { // is it an attribute?
+
+                    String attributeName = AnnotationUtils.getName(annotatedMethod);
+                    String description = AnnotationUtils.getDescription(annotatedMethod);
+
+                    if (attributeName == null || attributeName.equals("")) {
+                        attributeName = getAttributeName(concreteMethod);
+                    }
+
+                    builder.add(new ManagedAttributeDefinition(new ManagedAttribute(concreteMethod, attributeName, description, AnnotationUtils.isFlatten(concreteMethod)), AnnotationUtils.isNested(annotatedMethod) || AnnotationUtils.isFlatten(annotatedMethod)));
+                }
+            }
+            List<ManagedAttributeDefinition> attributeDefinitions = builder.build();
+            Map<String, ManagedAttribute> attributes = attributeDefinitions.stream().collect(toImmutableMap(attributeDefinition -> attributeDefinition.managedAttribute().getName(), ManagedAttributeDefinition::managedAttribute));
+            return new ManagedAttributeCacheEntry(attributeDefinitions, attributes);
+        });
     }
 
     public Class getTargetClass()
@@ -130,4 +147,8 @@ public class ManagedClass
         }
         return managedAttribute;
     }
+
+    private record ManagedAttributeDefinition(ManagedAttribute managedAttribute, boolean isAnnotatedMethodNestedOrFlatten) {}
+
+    private record ManagedAttributeCacheEntry(List<ManagedAttributeDefinition> managedAttributeDefinitions, Map<String, ManagedAttribute> attributes) {}
 }

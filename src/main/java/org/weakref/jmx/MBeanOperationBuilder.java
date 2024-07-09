@@ -22,14 +22,21 @@ import javax.management.MBeanParameterInfo;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.airlift.parameternames.ParameterNames.getParameterNames;
 
 public class MBeanOperationBuilder
 {
+    private record OperationKey(Class<?> clazz, String operationName) {}
+
+    private static final Map<OperationKey, MBeanOperationInfo> methodOperationInfoCache = new ConcurrentHashMap<>();
+
     private Object target;
     private String name;
     private Method concreteMethod;
+
     private Method annotatedMethod;
 
     public MBeanOperationBuilder onInstance(Object target)
@@ -79,55 +86,56 @@ public class MBeanOperationBuilder
             throw new IllegalArgumentException("JmxOperation must have a concrete method");
         }
 
-        String operationName = name;
-        if (operationName == null) {
-            operationName = concreteMethod.getName();
-        }
+        final String operationName = name != null ?
+                name :
+                concreteMethod.getName();
 
-        //
-        // Build Parameter Infos
-        List<String> parameterNames = getParameterNames(concreteMethod);
-        Class<?>[] types = concreteMethod.getParameterTypes();
+        MBeanOperationInfo mbeanOperationInfo = methodOperationInfoCache.computeIfAbsent(new OperationKey(target.getClass(), operationName), methods -> {
+            //
+            // Build Parameter Infos
+            List<String> parameterNames = getParameterNames(concreteMethod);
+            Class<?>[] types = concreteMethod.getParameterTypes();
 
-        // Parameter annotations used form descriptor come from the annotated method, not the public method
-        Annotation[][] parameterAnnotations;
-        if (annotatedMethod != null) {
-            parameterAnnotations = annotatedMethod.getParameterAnnotations();
-        }
-        else {
-            parameterAnnotations = new Annotation[parameterNames.size()][];
-        }
+            // Parameter annotations used form descriptor come from the annotated method, not the public method
+            Annotation[][] parameterAnnotations;
+            if (annotatedMethod != null) {
+                parameterAnnotations = annotatedMethod.getParameterAnnotations();
+            }
+            else {
+                parameterAnnotations = new Annotation[parameterNames.size()][];
+            }
 
-        MBeanParameterInfo[] parameterInfos = new MBeanParameterInfo[parameterNames.size()];
-        for (int i = 0; i < parameterNames.size(); i++) {
-            // Parameter Descriptor
-            Descriptor parameterDescriptor = AnnotationUtils.buildDescriptor(parameterAnnotations[i]);
-            // Parameter Description
-            String parameterDescription = AnnotationUtils.getDescription(parameterDescriptor, parameterAnnotations[i]);
+            MBeanParameterInfo[] parameterInfos = new MBeanParameterInfo[parameterNames.size()];
+            for (int i = 0; i < parameterNames.size(); i++) {
+                // Parameter Descriptor
+                Descriptor parameterDescriptor = AnnotationUtils.buildDescriptor(parameterAnnotations[i]);
+                // Parameter Description
+                String parameterDescription = AnnotationUtils.getDescription(parameterDescriptor, parameterAnnotations[i]);
 
-            parameterInfos[i] = new MBeanParameterInfo(
-                    parameterNames.get(i),
-                    types[i].getName(),
-                    parameterDescription,
-                    parameterDescriptor);
-        }
+                parameterInfos[i] = new MBeanParameterInfo(
+                        parameterNames.get(i),
+                        types[i].getName(),
+                        parameterDescription,
+                        parameterDescriptor);
+            }
 
-        // Descriptor
-        Descriptor descriptor = null;
-        if (annotatedMethod != null) {
-            descriptor = AnnotationUtils.buildDescriptor(annotatedMethod);
-        }
+            // Descriptor
+            Descriptor descriptor = null;
+            if (annotatedMethod != null) {
+                descriptor = AnnotationUtils.buildDescriptor(annotatedMethod);
+            }
 
-        // Description
-        String description = AnnotationUtils.getDescription(descriptor, annotatedMethod);
+            // Description
+            String description = AnnotationUtils.getDescription(descriptor, annotatedMethod);
 
-        MBeanOperationInfo mbeanOperationInfo = new MBeanOperationInfo(
-                operationName,
-                description,
-                parameterInfos,
-                concreteMethod.getReturnType().getName(),
-                MBeanOperationInfo.UNKNOWN,
-                descriptor);
+            return new MBeanOperationInfo(
+                    operationName,
+                    description,
+                    parameterInfos,
+                    concreteMethod.getReturnType().getName(),
+                    MBeanOperationInfo.UNKNOWN,
+                    descriptor);
+        });
 
         return new ReflectionMBeanOperation(mbeanOperationInfo, target, concreteMethod);
     }
