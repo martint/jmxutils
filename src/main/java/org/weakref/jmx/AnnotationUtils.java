@@ -15,6 +15,7 @@
  */
 package org.weakref.jmx;
 
+import com.google.common.collect.ImmutableMap;
 import org.weakref.jmx.JmxException.Reason;
 
 import javax.management.Descriptor;
@@ -27,17 +28,19 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Arrays.asList;
 
 final class AnnotationUtils
 {
+    private static final Map<Class<?>, Map<Method, Method>> managedMethodsCache = new ConcurrentHashMap<>();
+
     private AnnotationUtils()
     {
     }
@@ -246,26 +249,27 @@ final class AnnotationUtils
      */
     public static Map<Method, Method> findManagedMethods(Class<?> clazz)
     {
-        Map<Method, Method> result = new HashMap<>();
+        return managedMethodsCache.computeIfAbsent(clazz, c -> {
+            ImmutableMap.Builder<Method, Method> result = ImmutableMap.builder();
 
-        Method[] declaredMethods = clazz.getDeclaredMethods();
+            Method[] declaredMethods = clazz.getDeclaredMethods();
 
-        // gather all publicly available methods
-        // this returns everything, even if it's declared in a parent
-        for (Method method : clazz.getMethods()) {
-            // skip methods that are used internally by the vm for implementing covariance, etc
-            if (method.isSynthetic() || method.isBridge()) {
-                continue;
+            // gather all publicly available methods
+            // this returns everything, even if it's declared in a parent
+            for (Method method : clazz.getMethods()) {
+                // skip methods that are used internally by the vm for implementing covariance, etc
+                if (method.isSynthetic() || method.isBridge()) {
+                    continue;
+                }
+
+                // look for annotations recursively in superclasses or interfaces
+                Method managedMethod = findManagedMethod(clazz, declaredMethods, method.getName(), method.getParameterTypes());
+                if (managedMethod != null) {
+                    result.put(method, managedMethod);
+                }
             }
-
-            // look for annotations recursively in superclasses or interfaces
-            Method managedMethod = findManagedMethod(clazz, declaredMethods, method.getName(), method.getParameterTypes());
-            if (managedMethod != null) {
-                result.put(method, managedMethod);
-            }
-        }
-
-        return result;
+            return result.buildKeepingLast();
+        });
     }
 
     private static Method findManagedMethod(Class<?> clazz, Method[] declaredMethods, String methodName, Class<?>[] paramTypes)

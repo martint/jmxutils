@@ -23,6 +23,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,6 +33,10 @@ import static org.weakref.jmx.ReflectionUtils.isValidSetter;
 
 public class MBeanAttributeBuilder
 {
+    private record AttributeKey(Class<?> clazz, String attributeName) {}
+
+    private static final Map<AttributeKey, MBeanAttributeInfo> classAttributeInfoCache = new ConcurrentHashMap<>();;
+
     private static final Pattern getterOrSetterPattern = Pattern.compile("(get|set|is)(.+)");
     private Object target;
     private String name;
@@ -126,10 +132,9 @@ public class MBeanAttributeBuilder
         }
 
         // Name
-        String attributeName = name;
-        if (attributeName == null) {
-            attributeName = getAttributeName(concreteGetter, concreteSetter, annotatedGetter, annotatedSetter);
-        }
+        final String attributeName = name != null ?
+                name :
+                getAttributeName(concreteGetter, concreteSetter, annotatedGetter, annotatedSetter);
 
         if (flatten || AnnotationUtils.isFlatten(annotatedGetter)) {
             // must have a getter
@@ -182,47 +187,48 @@ public class MBeanAttributeBuilder
             return Collections.unmodifiableCollection(features);
         }
         else {
-            // We must have a getter or a setter
-            if (concreteGetter == null && concreteSetter == null) {
-                throw new IllegalArgumentException("JmxAttribute must have a concrete getter or setter method");
-            }
+            MBeanAttributeInfo mbeanAttributeInfo = classAttributeInfoCache.computeIfAbsent(new AttributeKey(target.getClass(), attributeName), clazz -> {
+                // We must have a getter or a setter
+                if (concreteGetter == null && concreteSetter == null) {
+                    throw new IllegalArgumentException("JmxAttribute must have a concrete getter or setter method");
+                }
 
-            // Type
-            Class<?> attributeType;
-            if (concreteGetter != null) {
-                attributeType = concreteGetter.getReturnType();
-            }
-            else {
-                attributeType = concreteSetter.getParameterTypes()[0];
-            }
-
-            // Descriptor
-            Descriptor descriptor = null;
-            if (annotatedGetter != null) {
-                descriptor = AnnotationUtils.buildDescriptor(annotatedGetter);
-            }
-            if (annotatedSetter != null) {
-                Descriptor setterDescriptor = AnnotationUtils.buildDescriptor(annotatedSetter);
-                if (descriptor == null) {
-                    descriptor = setterDescriptor;
+                // Type
+                Class<?> attributeType;
+                if (concreteGetter != null) {
+                    attributeType = concreteGetter.getReturnType();
                 }
                 else {
-                    descriptor = ImmutableDescriptor.union(descriptor, setterDescriptor);
+                    attributeType = concreteSetter.getParameterTypes()[0];
                 }
-            }
 
-            // Description
-            String description = AnnotationUtils.getDescription(descriptor, annotatedGetter, annotatedSetter);
+                // Descriptor
+                Descriptor descriptor = null;
+                if (annotatedGetter != null) {
+                    descriptor = AnnotationUtils.buildDescriptor(annotatedGetter);
+                }
+                if (annotatedSetter != null) {
+                    Descriptor setterDescriptor = AnnotationUtils.buildDescriptor(annotatedSetter);
+                    if (descriptor == null) {
+                        descriptor = setterDescriptor;
+                    }
+                    else {
+                        descriptor = ImmutableDescriptor.union(descriptor, setterDescriptor);
+                    }
+                }
 
-            MBeanAttributeInfo mbeanAttributeInfo = new MBeanAttributeInfo(
-                    attributeName,
-                    attributeType.getName(),
-                    description,
-                    concreteGetter != null,
-                    concreteSetter != null,
-                    concreteGetter != null && concreteGetter.getName().startsWith("is"),
-                    descriptor);
+                // Description
+                String description = AnnotationUtils.getDescription(descriptor, annotatedGetter, annotatedSetter);
 
+                return new MBeanAttributeInfo(
+                        attributeName,
+                        attributeType.getName(),
+                        description,
+                        concreteGetter != null,
+                        concreteSetter != null,
+                        concreteGetter != null && concreteGetter.getName().startsWith("is"),
+                        descriptor);
+            });
 
             return Collections.singleton(new ReflectionMBeanAttribute(mbeanAttributeInfo, target, concreteGetter, concreteSetter));
         }
