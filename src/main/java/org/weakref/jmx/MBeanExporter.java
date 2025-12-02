@@ -20,7 +20,7 @@ import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 import org.weakref.jmx.JmxException.Reason;
 
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
