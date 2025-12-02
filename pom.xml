@@ -164,6 +164,7 @@
                 <configuration>
                     <quiet>true</quiet>
                     <additionalOptions>-Xdoclint:-missing</additionalOptions>
+                    <encoding>UTF-8</encoding>
                 </configuration>
                 <executions>
                     <execution>
