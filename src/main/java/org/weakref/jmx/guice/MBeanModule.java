@@ -57,6 +57,8 @@ public class MBeanModule
      * When ExportBuilder is used, a raw MBeanModule can be imported to trigger the
      * registration of exported mbeans:
      *
+     * <pre>
+     * {@code
      * Injector injector = Guice.createInjector(new MBeanModule(),
      *      new AbstractModule() {
      *          @Override
@@ -65,6 +67,8 @@ public class MBeanModule
      *              builder.export(AnotherManagedObject.class).as("test:name="Z");
      *          }
      *      });
+     * }
+     * </pre>
      *
      *  @deprecated subclassing no longer supported. Use ExportBinder instead
      */
