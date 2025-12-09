@@ -25,8 +25,8 @@ public class ExportBinder
 
     public static ExportBinder newExporter(Binder binder)
     {
-        Multibinder<SetMapping<?>> collectionBinder = newSetBinder(binder, new TypeLiteral<SetMapping<?>>() {});
-        Multibinder<MapMapping<?, ?>> mapBinder = newSetBinder(binder, new TypeLiteral<MapMapping<?, ?>>() {});
+        Multibinder<SetMapping<?>> collectionBinder = newSetBinder(binder, new TypeLiteral<>() {});
+        Multibinder<MapMapping<?, ?>> mapBinder = newSetBinder(binder, new TypeLiteral<>() {});
 
         return new ExportBinder(newSetBinder(binder, Mapping.class), collectionBinder, mapBinder);
     }
