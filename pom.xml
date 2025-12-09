@@ -30,7 +30,21 @@
 
     <properties>
         <shadeBase>org.weakref.jmx.\$internal</shadeBase>
+        <dep.plugin.njord.version>0.8.7</dep.plugin.njord.version>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>sonatype-central-portal</id>
+            <name>Sonatype Central Portal</name>
+            <url>https://central.sonatype.com/repository/maven/</url>
+        </repository>
+        <snapshotRepository>
+            <id>sonatype-central-portal</id>
+            <name>Sonatype Central Portal</name>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>
@@ -67,6 +81,18 @@
         </dependency>
     </dependencies>
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>eu.maveniverse.maven.plugins</groupId>
+                    <artifactId>njord</artifactId>
+                    <version>${dep.plugin.njord.version}</version>
+                    <configuration>
+                        <publisher>sonatype-cp</publisher>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -79,6 +105,17 @@
                     <parameters>true</parameters>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.4</version>
+                <configuration>
+                    <!-- Stage files to the local directory, njord will push them to central -->
+                    <altDeploymentRepository>id::default::njord:</altDeploymentRepository>
+                </configuration>
+            </plugin>
+
             <!-- Resource plugins should always use UTF-8 (hello, mac universe) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -155,6 +192,7 @@
                     <pushChanges>false</pushChanges>
                     <localCheckout>true</localCheckout>
                     <tagNameFormat>@{project.version}</tagNameFormat>
+                    <releaseProfiles>release</releaseProfiles>
                 </configuration>
             </plugin>
 
@@ -178,29 +216,20 @@
                 </executions>
             </plugin>
         </plugins>
+        <extensions>
+            <extension>
+                <groupId>eu.maveniverse.maven.njord</groupId>
+                <artifactId>extension3</artifactId>
+                <version>${dep.plugin.njord.version}</version>
+            </extension>
+        </extensions>
     </build>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sonatype Nexus Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>sonatype-nexus-staging</id>
-            <name>Nexus Release Repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
 
     <profiles>
         <profile>
-            <id>release-sign-artifacts</id>
+            <id>release</id>
             <activation>
-                <property>
-                    <name>performRelease</name>
-                    <value>true</value>
-                </property>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <build>
                 <plugins>
