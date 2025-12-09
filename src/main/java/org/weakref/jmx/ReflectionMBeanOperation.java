@@ -20,6 +20,8 @@ import javax.management.MBeanOperationInfo;
 import javax.management.ReflectionException;
 import java.lang.reflect.Method;
 
+import static java.util.Objects.requireNonNull;
+
 class ReflectionMBeanOperation implements MBeanOperation
 {
     private final MBeanOperationInfo info;
@@ -29,9 +31,9 @@ class ReflectionMBeanOperation implements MBeanOperation
 
     public ReflectionMBeanOperation(MBeanOperationInfo info, Object target, Method method)
     {
-        this.info = info;
-        this.target = target;
-        this.method = method;
+        this.info = requireNonNull(info, "info is null");
+        this.target = requireNonNull(target, "target is null");
+        this.method = requireNonNull(method, "method is null");
 
         this.signature = new Signature(method);
     }
