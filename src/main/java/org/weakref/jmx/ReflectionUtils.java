@@ -158,9 +158,8 @@ final class ReflectionUtils
         if (type.isPrimitive()) {
             return primitiveToWrapper.get(type).isInstance(value);
         }
-        else {
-            return value == null || type.isInstance(value);
-        }
+
+        return value == null || type.isInstance(value);
     }
 
     private static void assertNotNull(Object param, String name)
