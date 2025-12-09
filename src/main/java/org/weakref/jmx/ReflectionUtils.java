@@ -150,10 +150,7 @@ final class ReflectionUtils
         if (setter == null) {
             throw new NullPointerException("setter is null");
         }
-        if (setter.getParameterTypes().length != 1) {
-            return false;
-        }
-        return true;
+        return setter.getParameterCount() == 1;
     }
 
     public static boolean isAssignable(Object value, Class<?> type)
