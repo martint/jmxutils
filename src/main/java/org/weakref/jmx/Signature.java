@@ -96,7 +96,7 @@ final class Signature
     @Override
     public String toString()
     {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append(actionName).append('(');
         boolean first = true;
         for (String type : parameterTypes) {
