@@ -212,7 +212,7 @@ final class AnnotationUtils
                         .stream()
                 )
                 .findFirst()
-                .orElse("");
+                .orElse(null);
     }
 
     public static String getName(Method annotatedMethod)
@@ -231,7 +231,7 @@ final class AnnotationUtils
                         .stream()
                 )
                 .findFirst()
-                .orElse("");
+                .orElse(null);
     }
 
     /**
