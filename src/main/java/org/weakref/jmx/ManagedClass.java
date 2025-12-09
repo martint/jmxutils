@@ -53,7 +53,7 @@ public class ManagedClass
                 String attributeName = AnnotationUtils.getName(annotatedMethod);
                 String description = AnnotationUtils.getDescription(annotatedMethod);
 
-                if (attributeName == null || attributeName.equals("")) {
+                if (attributeName == null || attributeName.isEmpty()) {
                     attributeName = getAttributeName(concreteMethod);
                 }
 
