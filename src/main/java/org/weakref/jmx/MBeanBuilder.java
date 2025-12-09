@@ -121,11 +121,11 @@ final class MBeanBuilder
         List<MBeanOperation> operations = new ArrayList<>();
         for (MBeanAttributeBuilder attributeBuilder : attributeBuilders) {
             for (MBeanFeature feature : attributeBuilder.build()) {
-                if (feature instanceof MBeanAttribute) {
-                    attributes.add((MBeanAttribute) feature);
+                if (feature instanceof MBeanAttribute attribute) {
+                    attributes.add(attribute);
                 }
-                if (feature instanceof MBeanOperation) {
-                    operations.add((MBeanOperation) feature);
+                if (feature instanceof MBeanOperation operation) {
+                    operations.add(operation);
                 }
             }
         }
