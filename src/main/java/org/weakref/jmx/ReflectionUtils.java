@@ -59,8 +59,7 @@ final class ReflectionUtils
         requireNonNull(params, "params is null");
 
         try {
-            Object result = method.invoke(target, params);
-            return result;
+            return method.invoke(target, params);
         }
         catch (InvocationTargetException e) {
             // unwrap exception
