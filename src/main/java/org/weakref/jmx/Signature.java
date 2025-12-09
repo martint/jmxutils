@@ -19,27 +19,26 @@ import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 import static java.util.Collections.unmodifiableList;
+import static java.util.stream.Collectors.toUnmodifiableList;
 
-final class Signature
+final record Signature(String actionName, List<String> parameterTypes)
 {
-    private final String actionName;
-    private final List<String> parameterTypes;
+    public Signature
+    {
+        actionName = actionName;
+        parameterTypes = unmodifiableList(parameterTypes);
+    }
 
     public Signature(Method method)
     {
-        this.actionName = method.getName();
-
-        List<String> builder = new ArrayList<>();
-        for (Class<?> type : method.getParameterTypes()) {
-            builder.add(type.getName());
-        }
-        parameterTypes = unmodifiableList(builder);
+        this(method.getName(), Arrays.stream(method.getParameterTypes())
+                .map(Class::getName)
+                .collect(toUnmodifiableList()));
     }
 
     public Signature(String actionName, String... parameterTypes)
@@ -47,50 +46,11 @@ final class Signature
         this(actionName, Arrays.asList(parameterTypes));
     }
 
-    public Signature(String actionName, List<String> parameterTypes)
+    public Signature(MBeanOperationInfo info)
     {
-        this.actionName = actionName;
-        this.parameterTypes = unmodifiableList(parameterTypes);
-    }
-
-    public Signature(MBeanOperationInfo info) {
-        this.actionName = info.getName();
-
-        List<String> parameterTypes = new ArrayList<>(info.getSignature().length);
-        for (MBeanParameterInfo parameterInfo : info.getSignature()) {
-            parameterTypes.add(parameterInfo.getType());
-        }
-        this.parameterTypes = unmodifiableList(parameterTypes);
-    }
-
-    public String getActionName()
-    {
-        return actionName;
-    }
-
-    public List<String> getParameterTypes()
-    {
-        return parameterTypes;
-    }
-
-    @Override
-    public boolean equals(Object o)
-    {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Signature signature = (Signature) o;
-        return Objects.equals(actionName, signature.actionName) &&
-                Objects.equals(parameterTypes, signature.parameterTypes);
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return Objects.hash(actionName, parameterTypes);
+        this(info.getName(), Arrays.stream(info.getSignature())
+                .map(MBeanParameterInfo::getType)
+                .collect(toUnmodifiableList()));
     }
 
     @Override
