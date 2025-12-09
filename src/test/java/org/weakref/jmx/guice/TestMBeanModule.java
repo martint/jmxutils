@@ -291,6 +291,48 @@ public class TestMBeanModule
                 binder -> binder.bind(ObjectNameGenerator.class).to(TestObjectNameGenerator.class));
     }
 
+    @Test
+    public void testCustomNaming()
+            throws Exception
+    {
+        Injector injector = Guice.createInjector(PRODUCTION, new MBeanModule(), new AbstractModule()
+        {
+            @Override
+            protected void configure()
+            {
+                binder().requireExplicitBindings();
+                binder().disableCircularProxies();
+
+                bind(SimpleObject.class).annotatedWith(named("1")).toInstance(new SimpleObject());
+                bind(SimpleObject.class).annotatedWith(named("2")).toInstance(new SimpleObject());
+                bind(SimpleObject.class).annotatedWith(named("3")).toInstance(new SimpleObject());
+
+                bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
+                ExportBinder.newExporter(binder()).export(Key.get(SimpleObject.class, named("1")))
+                        .as(generator -> generator.generatedNameOf("org.example", "LegacyObject"));
+
+                ExportBinder.newExporter(binder()).export(Key.get(SimpleObject.class, named("2")))
+                        .as(generator -> generator.generatedNameOf(SimpleObject.class));
+
+                ExportBinder.newExporter(binder()).export(Key.get(SimpleObject.class, named("3")))
+                        .as(generator -> generator.generatedNameOf(TestMBeanModule.class.getPackage(), "AnotherObject"));
+            }
+        });
+
+        ObjectName name1 = new ObjectName("org.example", "name", "LegacyObject");
+        ObjectName name2 = new ObjectName(generatedNameOf(SimpleObject.class));
+        ObjectName name3 = new ObjectName("org.weakref.jmx.guice", "name", "AnotherObject");
+
+        MBeanServer server = injector.getInstance(MBeanServer.class);
+        Assert.assertNotNull(server.getMBeanInfo(name1));
+        Assert.assertNotNull(server.getMBeanInfo(name2));
+        Assert.assertNotNull(server.getMBeanInfo(name3));
+
+        server.unregisterMBean(name1);
+        server.unregisterMBean(name2);
+        server.unregisterMBean(name3);
+    }
+
     private static void assertSet(ObjectName name1, ObjectName name2, Module additionalBindings)
             throws InstanceNotFoundException, IntrospectionException, ReflectionException, MBeanRegistrationException
     {
@@ -330,7 +372,7 @@ public class TestMBeanModule
             implements ObjectNameGenerator
     {
         @Override
-        public String generatedNameOf(Class<?> type, Map<String, String> properties)
+        public String generatedNameOf(String packageName, Map<String, String> properties)
         {
             return new ObjectNameBuilder("test")
                     .withProperties(properties)
