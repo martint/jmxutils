@@ -136,13 +136,7 @@ final class ReflectionUtils
     public static boolean isValidGetter(Method getter)
     {
         requireNonNull(getter, "getter is null");
-        if (getter.getParameterTypes().length != 0) {
-            return false;
-        }
-        if (getter.getReturnType().equals(Void.TYPE)) {
-            return false;
-        }
-        return true;
+        return getter.getParameterCount() == 0 && !getter.getReturnType().equals(Void.TYPE);
     }
 
     public static boolean isValidSetter(Method setter)
