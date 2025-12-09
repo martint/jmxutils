@@ -21,8 +21,6 @@ import javax.management.RuntimeErrorException;
 import javax.management.RuntimeOperationsException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.Collections;
@@ -35,7 +33,6 @@ final class ReflectionUtils
     {
     }
 
-    private static final Pattern getterOrSetterPattern = Pattern.compile("(get|set|is)(.+)");
     private static final Map<Class<?>, Class<?>> primitiveToWrapper;
 
     static {
@@ -125,11 +122,17 @@ final class ReflectionUtils
 
     public static String getAttributeName(Method method)
     {
-        Matcher matcher = getterOrSetterPattern.matcher(method.getName());
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("method does not represent a getter or setter");
+        String name = method.getName();
+
+        if (name.startsWith("is")) {
+            return name.substring(2);
         }
-        return matcher.group(2);
+
+        if (name.startsWith("get") || name.startsWith("set")) {
+            return name.substring(3);
+        }
+
+        throw new IllegalArgumentException("method does not represent a getter or setter");
     }
 
     public static boolean isValidGetter(Method getter)
