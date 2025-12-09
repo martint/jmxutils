@@ -75,7 +75,7 @@ public class ManagedClass
         return new ManagedClass(target, children.build(), attributes.build());
     }
 
-    public Class getTargetClass()
+    public Class<?> getTargetClass()
     {
         return getTarget().getClass();
     }
