@@ -181,51 +181,50 @@ public class MBeanAttributeBuilder
             }
             return Collections.unmodifiableCollection(features);
         }
-        else {
-            // We must have a getter or a setter
-            if (concreteGetter == null && concreteSetter == null) {
-                throw new IllegalArgumentException("JmxAttribute must have a concrete getter or setter method");
-            }
 
-            // Type
-            Class<?> attributeType;
-            if (concreteGetter != null) {
-                attributeType = concreteGetter.getReturnType();
+        // We must have a getter or a setter
+        if (concreteGetter == null && concreteSetter == null) {
+            throw new IllegalArgumentException("JmxAttribute must have a concrete getter or setter method");
+        }
+
+        // Type
+        Class<?> attributeType;
+        if (concreteGetter != null) {
+            attributeType = concreteGetter.getReturnType();
+        }
+        else {
+            attributeType = concreteSetter.getParameterTypes()[0];
+        }
+
+        // Descriptor
+        Descriptor descriptor = null;
+        if (annotatedGetter != null) {
+            descriptor = AnnotationUtils.buildDescriptor(annotatedGetter);
+        }
+        if (annotatedSetter != null) {
+            Descriptor setterDescriptor = AnnotationUtils.buildDescriptor(annotatedSetter);
+            if (descriptor == null) {
+                descriptor = setterDescriptor;
             }
             else {
-                attributeType = concreteSetter.getParameterTypes()[0];
+                descriptor = ImmutableDescriptor.union(descriptor, setterDescriptor);
             }
-
-            // Descriptor
-            Descriptor descriptor = null;
-            if (annotatedGetter != null) {
-                descriptor = AnnotationUtils.buildDescriptor(annotatedGetter);
-            }
-            if (annotatedSetter != null) {
-                Descriptor setterDescriptor = AnnotationUtils.buildDescriptor(annotatedSetter);
-                if (descriptor == null) {
-                    descriptor = setterDescriptor;
-                }
-                else {
-                    descriptor = ImmutableDescriptor.union(descriptor, setterDescriptor);
-                }
-            }
-
-            // Description
-            String description = AnnotationUtils.getDescription(descriptor, annotatedGetter, annotatedSetter);
-
-            MBeanAttributeInfo mbeanAttributeInfo = new MBeanAttributeInfo(
-                    attributeName,
-                    attributeType.getName(),
-                    description,
-                    concreteGetter != null,
-                    concreteSetter != null,
-                    concreteGetter != null && concreteGetter.getName().startsWith("is"),
-                    descriptor);
-
-
-            return Collections.singleton(new ReflectionMBeanAttribute(mbeanAttributeInfo, target, concreteGetter, concreteSetter));
         }
+
+        // Description
+        String description = AnnotationUtils.getDescription(descriptor, annotatedGetter, annotatedSetter);
+
+        MBeanAttributeInfo mbeanAttributeInfo = new MBeanAttributeInfo(
+                attributeName,
+                attributeType.getName(),
+                description,
+                concreteGetter != null,
+                concreteSetter != null,
+                concreteGetter != null && concreteGetter.getName().startsWith("is"),
+                descriptor);
+
+
+        return Collections.singleton(new ReflectionMBeanAttribute(mbeanAttributeInfo, target, concreteGetter, concreteSetter));
     }
 
     private static String getAttributeName(Method... methods)
