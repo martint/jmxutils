@@ -21,11 +21,13 @@ import javax.management.MBeanParameterInfo;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static io.airlift.parameternames.ParameterNames.getParameterNames;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toUnmodifiableList;
 
 public class MBeanOperationBuilder
 {
@@ -71,7 +73,10 @@ public class MBeanOperationBuilder
 
         //
         // Build Parameter Infos
-        List<String> parameterNames = getParameterNames(concreteMethod);
+        List<String> parameterNames = Arrays.stream(concreteMethod.getParameters())
+                .map(Parameter::getName)
+                .collect(toUnmodifiableList());
+
         Class<?>[] types = concreteMethod.getParameterTypes();
 
         // Parameter annotations used form descriptor come from the annotated method, not the public method
