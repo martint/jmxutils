@@ -63,27 +63,27 @@ final class ReflectionUtils
         catch (InvocationTargetException e) {
             // unwrap exception
             Throwable targetException = e.getTargetException();
-            if (targetException instanceof RuntimeException) {
+            if (targetException instanceof RuntimeException runtimeException) {
                 throw new MBeanException(
-                        (RuntimeException) targetException,
+                        runtimeException,
                         "RuntimeException occurred while invoking " + toSimpleName(method));
             }
-            else if (targetException instanceof ReflectionException) {
+            else if (targetException instanceof ReflectionException exception) {
                 // allow ReflectionException to passthrough
-                throw (ReflectionException) targetException;
+                throw exception;
             }
-            else if (targetException instanceof MBeanException) {
+            else if (targetException instanceof MBeanException exception) {
                 // allow MBeanException to passthrough
-                throw (MBeanException) targetException;
+                throw exception;
             }
-            else if (targetException instanceof Exception) {
+            else if (targetException instanceof Exception exception) {
                 throw new MBeanException(
-                        (Exception) targetException,
+                        exception,
                         "Exception occurred while invoking " + toSimpleName(method));
             }
-            else if (targetException instanceof Error) {
+            else if (targetException instanceof Error error) {
                 throw new RuntimeErrorException(
-                        (Error) targetException,
+                        error,
                         "Error occurred while invoking " + toSimpleName(method));
             }
             else {

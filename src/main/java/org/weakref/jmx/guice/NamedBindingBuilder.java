@@ -40,8 +40,8 @@ public class NamedBindingBuilder
     public void withGeneratedName()
     {
         if (key.getAnnotation() != null) {
-            if (key.getAnnotation() instanceof Named) {
-                as(factory -> factory.generatedNameOf(key.getTypeLiteral().getRawType(), ((Named) key.getAnnotation()).value()));
+            if (key.getAnnotation() instanceof Named annotation) {
+                as(factory -> factory.generatedNameOf(key.getTypeLiteral().getRawType(), annotation.value()));
             }
             else {
                 as(factory -> factory.generatedNameOf(key.getTypeLiteral().getRawType(), key.getAnnotation().annotationType().getSimpleName()));

@@ -121,11 +121,11 @@ final class AnnotationUtils
 
             // Convert Class and Enum value or array value to String or String array
             // see DescriptorKey javadocs for more info
-            if (value instanceof Class) {
-                value = ((Class<?>) value).getName();
+            if (value instanceof Class<?> clazz) {
+                value = clazz.getName();
             }
-            else if (value instanceof Enum) {
-                value = ((Enum<?>) value).name();
+            else if (value instanceof Enum<?> enumValue) {
+                value = enumValue.name();
             }
             else if (value.getClass().isArray()) {
                 Class<?> componentType = value.getClass().getComponentType();
@@ -175,8 +175,8 @@ final class AnnotationUtils
 
         // If that didn't work, look for one in the descriptor object
         Object descriptionValue = descriptor.getFieldValue("description");
-        if (descriptionValue instanceof String) {
-            return (String) descriptionValue;
+        if (descriptionValue instanceof String stringValue) {
+            return stringValue;
         }
         return null;
     }
@@ -191,8 +191,8 @@ final class AnnotationUtils
 
         // If that didn't work, look for one in the descriptor object
         Object descriptionValue = descriptor.getFieldValue("description");
-        if (descriptionValue instanceof String) {
-            return (String) descriptionValue;
+        if (descriptionValue instanceof String stringValue) {
+            return stringValue;
         }
         return null;
     }

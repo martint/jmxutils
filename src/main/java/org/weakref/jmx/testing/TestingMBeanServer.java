@@ -38,11 +38,9 @@ public class TestingMBeanServer
             throw new UnsupportedOperationException("Only explicit name supported at this time");
         }
 
-        if (!(object instanceof DynamicMBean)) {
+        if (!(object instanceof DynamicMBean mbean)) {
             throw new UnsupportedOperationException("Only DynamicMBeans supported at this time");
         }
-
-        DynamicMBean mbean = (DynamicMBean) object;
 
         if (mbeans.containsKey(name)) {
             throw new InstanceAlreadyExistsException(format("MBean already registered: %s", name));
