@@ -23,7 +23,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static io.airlift.parameternames.ParameterNames.getParameterNames;
+import static java.util.Objects.requireNonNull;
 
 public class MBeanOperationBuilder
 {
@@ -34,50 +36,33 @@ public class MBeanOperationBuilder
 
     public MBeanOperationBuilder onInstance(Object target)
     {
-        if (target == null) {
-            throw new NullPointerException("target is null");
-        }
-        this.target = target;
+        this.target = requireNonNull(target, "target is null");
         return this;
     }
 
     public MBeanOperationBuilder named(String name)
     {
-        if (name == null) {
-            throw new NullPointerException("name is null");
-        }
-        this.name = name;
+        this.name = requireNonNull(name, "name is null");
         return this;
     }
 
     public MBeanOperationBuilder withConcreteMethod(Method concreteMethod)
     {
-        if (concreteMethod == null) {
-            throw new NullPointerException("concreteMethod is null");
-        }
-        this.concreteMethod = concreteMethod;
+        this.concreteMethod = requireNonNull(concreteMethod, "concreteMethod is null");
         return this;
     }
 
     public MBeanOperationBuilder withAnnotatedMethod(Method annotatedMethod)
     {
-        if (annotatedMethod == null) {
-            throw new NullPointerException("annotatedMethod is null");
-        }
-        this.annotatedMethod = annotatedMethod;
+        this.annotatedMethod = requireNonNull(annotatedMethod, "annotatedMethod is null");
         return this;
     }
 
     public MBeanOperation build()
     {
-        if (target == null) {
-            throw new IllegalArgumentException("JmxOperation must have a target object");
-        }
-
+        requireNonNull(target, "JmxOperation must have a target object");
         // We must have a method to invoke
-        if (concreteMethod == null) {
-            throw new IllegalArgumentException("JmxOperation must have a concrete method");
-        }
+        requireNonNull(concreteMethod, "JmxOperation must have a concrete method");
 
         String operationName = name;
         if (operationName == null) {

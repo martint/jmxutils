@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.Collections;
 
+import static java.util.Objects.requireNonNull;
+
 final class ReflectionUtils
 {
     private ReflectionUtils()
@@ -52,9 +54,9 @@ final class ReflectionUtils
     public static Object invoke(Object target, Method method, Object... params)
             throws MBeanException, ReflectionException
     {
-        assertNotNull(target, "target");
-        assertNotNull(target, "method");
-        assertNotNull(target, "params");
+        requireNonNull(target, "target is null");
+        requireNonNull(method, "method is ull");
+        requireNonNull(params, "params is null");
 
         try {
             Object result = method.invoke(target, params);
@@ -133,9 +135,7 @@ final class ReflectionUtils
 
     public static boolean isValidGetter(Method getter)
     {
-        if (getter == null) {
-            throw new NullPointerException("getter is null");
-        }
+        requireNonNull(getter, "getter is null");
         if (getter.getParameterTypes().length != 0) {
             return false;
         }
@@ -147,9 +147,7 @@ final class ReflectionUtils
 
     public static boolean isValidSetter(Method setter)
     {
-        if (setter == null) {
-            throw new NullPointerException("setter is null");
-        }
+        requireNonNull(setter, "setter is null");
         return setter.getParameterCount() == 1;
     }
 
@@ -160,12 +158,5 @@ final class ReflectionUtils
         }
 
         return value == null || type.isInstance(value);
-    }
-
-    private static void assertNotNull(Object param, String name)
-    {
-        if (param == null) {
-            throw new RuntimeOperationsException(new NullPointerException(name + " is null"));
-        }
     }
 }

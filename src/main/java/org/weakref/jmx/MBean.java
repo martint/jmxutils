@@ -37,6 +37,8 @@ import java.util.TreeMap;
 import java.util.Collections;
 import java.util.HashMap;
 
+import static java.util.Objects.requireNonNull;
+
 class MBean implements DynamicMBean
 {
     private static final Object[] NO_PARAMS = new Object[0];
@@ -92,7 +94,7 @@ class MBean implements DynamicMBean
     public Object invoke(String actionName, Object[] params, String[] argTypes)
             throws MBeanException, ReflectionException
     {
-        assertNotNull("actionName", actionName);
+        requireNonNull(actionName, "actionName is null");
 
         // params argTypes are allowed to be null and mean no-arg method
         if (params == null) {
@@ -103,7 +105,7 @@ class MBean implements DynamicMBean
         }
 
         for (int i = 0; i < argTypes.length; i++) {
-            assertNotNull("argTypes[" + i + "]", argTypes[i]);
+            requireNonNull(argTypes[i], "argTypes[" + i + "] is null");
         }
 
         Signature signature = new Signature(actionName, argTypes);
@@ -121,7 +123,7 @@ class MBean implements DynamicMBean
     public Object getAttribute(String name)
             throws AttributeNotFoundException, MBeanException, ReflectionException
     {
-        assertNotNull("attribute", name);
+        requireNonNull(name, "name is null");
         MBeanAttribute mbeanAttribute = attributes.get(name);
         if (mbeanAttribute == null) {
             throw new AttributeNotFoundException(name);
@@ -134,9 +136,9 @@ class MBean implements DynamicMBean
     public void setAttribute(Attribute attribute)
             throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException
     {
-        assertNotNull("attribute", attribute);
+        requireNonNull(attribute, "attribute is null");
         String name = attribute.getName();
-        assertNotNull("attribute.name", name);
+        requireNonNull(name, "attribute.name is null");
 
         Object value = attribute.getValue();
         MBeanAttribute mbeanAttribute = attributes.get(name);
@@ -184,12 +186,5 @@ class MBean implements DynamicMBean
             }
         }
         return response;
-    }
-
-    private static void assertNotNull(String name, Object value)
-    {
-        if (value == null) {
-            throw new RuntimeOperationsException(new NullPointerException(name + " is null"));
-        }
     }
 }
