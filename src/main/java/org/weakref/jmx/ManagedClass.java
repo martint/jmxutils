@@ -13,7 +13,6 @@
  */
 package org.weakref.jmx;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -109,17 +108,17 @@ public class ManagedClass
     public Object invokeAttribute(String attributeName)
             throws InvocationTargetException, IllegalAccessException
     {
-        return getManagedAttribute(attributeName).getMethod().invoke(getTarget());
+        return getManagedAttribute(attributeName).method().invoke(getTarget());
     }
 
     public String getAttributeDescription(String attributeName)
     {
-        return getManagedAttribute(attributeName).getDescription();
+        return getManagedAttribute(attributeName).description();
     }
 
     public boolean isAttributeFlatten(String attributeName)
     {
-        return getManagedAttribute(attributeName).isFlatten();
+        return getManagedAttribute(attributeName).flatten();
     }
 
     private ManagedAttribute getManagedAttribute(String attributeName)
