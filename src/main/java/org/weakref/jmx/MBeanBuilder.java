@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static java.util.Objects.requireNonNull;
 import static org.weakref.jmx.ReflectionUtils.getAttributeName;
 import static org.weakref.jmx.ReflectionUtils.isGetter;
 import static org.weakref.jmx.ReflectionUtils.isSetter;
@@ -49,9 +50,7 @@ final class MBeanBuilder
 
     public MBeanBuilder(Object target)
     {
-        if (target == null) {
-            throw new NullPointerException("target is null");
-        }
+        requireNonNull(target, "target is null");
 
         Map<String, MBeanAttributeBuilder> attributeBuilders = new TreeMap<>();
 

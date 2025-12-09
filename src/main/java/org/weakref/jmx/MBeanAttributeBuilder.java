@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.Objects.requireNonNull;
 import static org.weakref.jmx.ReflectionUtils.isValidGetter;
 import static org.weakref.jmx.ReflectionUtils.isValidSetter;
 
@@ -43,27 +44,19 @@ public class MBeanAttributeBuilder
 
     public MBeanAttributeBuilder onInstance(Object target)
     {
-        if (target == null) {
-            throw new NullPointerException("target is null");
-        }
-        this.target = target;
+        this.target = requireNonNull(target, "target is null");
         return this;
     }
 
     public MBeanAttributeBuilder named(String name)
     {
-        if (name == null) {
-            throw new NullPointerException("name is null");
-        }
-        this.name = name;
+        this.name = requireNonNull(name, "name is null");
         return this;
     }
 
     public MBeanAttributeBuilder withConcreteGetter(Method concreteGetter)
     {
-        if (concreteGetter == null) {
-            throw new NullPointerException("concreteGetter is null");
-        }
+        requireNonNull(concreteGetter, "concreteGetter is null");
         if (!isValidGetter(concreteGetter)) {
             throw new IllegalArgumentException("Method is not a valid getter: " + concreteGetter);
         }
@@ -73,9 +66,7 @@ public class MBeanAttributeBuilder
 
     public MBeanAttributeBuilder withAnnotatedGetter(Method annotatedGetter)
     {
-        if (annotatedGetter == null) {
-            throw new NullPointerException("annotatedGetter is null");
-        }
+        requireNonNull(annotatedGetter, "annotatedGetter is null");
         if (!isValidGetter(annotatedGetter)) {
             throw new IllegalArgumentException("Method is not a valid getter: " + annotatedGetter);
         }
@@ -85,9 +76,7 @@ public class MBeanAttributeBuilder
 
     public MBeanAttributeBuilder withConcreteSetter(Method concreteSetter)
     {
-        if (concreteSetter == null) {
-            throw new NullPointerException("concreteSetter is null");
-        }
+        requireNonNull(concreteSetter, "concreteSetter is null");
         if (!isValidSetter(concreteSetter)) {
             throw new IllegalArgumentException("Method is not a valid setter: " + concreteSetter);
         }
@@ -97,9 +86,7 @@ public class MBeanAttributeBuilder
 
     public MBeanAttributeBuilder withAnnotatedSetter(Method annotatedSetter)
     {
-        if (annotatedSetter == null) {
-            throw new NullPointerException("annotatedSetter is null");
-        }
+        requireNonNull(annotatedSetter, "annotatedSetter is null");
         if (!isValidSetter(annotatedSetter)) {
             throw new IllegalArgumentException("Method is not a valid setter: " + annotatedSetter);
         }

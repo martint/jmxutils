@@ -15,6 +15,7 @@
  */
 package org.weakref.jmx;
 
+import static java.util.Objects.requireNonNull;
 import static org.weakref.jmx.ReflectionUtils.invoke;
 
 import javax.management.AttributeNotFoundException;
@@ -34,14 +35,8 @@ class ReflectionMBeanAttribute implements MBeanAttribute
 
     public ReflectionMBeanAttribute(MBeanAttributeInfo info, Object target, Method getter, Method setter)
     {
-        if (info == null) {
-            throw new NullPointerException("info is null");
-        }
-        if (target == null) {
-            throw new NullPointerException("target is null");
-        }
-        this.info = info;
-        this.target = target;
+        this.info = requireNonNull(info, "info is null");
+        this.target = requireNonNull(target, "target is null");
         this.name = info.getName();
         this.getter = getter;
         this.setter = setter;
