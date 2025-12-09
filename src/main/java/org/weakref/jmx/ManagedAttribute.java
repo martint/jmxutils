@@ -17,38 +17,11 @@ import com.google.common.base.Preconditions;
 
 import java.lang.reflect.Method;
 
-public class ManagedAttribute
+public record ManagedAttribute(Method method, String name, String description, boolean flatten)
 {
-    private final Method method;
-    private final String name;
-    private final String description;
-    private final boolean flatten;
-
-    public ManagedAttribute(Method method, String name, String description, boolean flatten)
+    public ManagedAttribute
     {
-        this.method = Preconditions.checkNotNull(method, "method is null");
-        this.name = Preconditions.checkNotNull(name, "name is null");
-        this.description = description;
-        this.flatten = flatten;
-    }
-
-    public Method getMethod()
-    {
-        return method;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public boolean isFlatten()
-    {
-        return flatten;
+        Preconditions.checkNotNull(method, "method is null");
+        Preconditions.checkNotNull(name, "name is null");
     }
 }
