@@ -219,7 +219,6 @@ public class MBeanExporter
                     toRemove.add(objectName);
                 }
                 catch (MBeanRegistrationException e) {
-                    //noinspection ThrowableResultOfMethodCallIgnored
                     errors.put(objectName.toString(), e);
                 }
             }
