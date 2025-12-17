@@ -21,8 +21,12 @@ import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toMap;
 
 public class TestingMBeanServer
         implements MBeanServer
@@ -72,7 +76,14 @@ public class TestingMBeanServer
     @Override
     public Set<ObjectName> queryNames(ObjectName name, QueryExp query)
     {
-        throw new UnsupportedOperationException();
+        if (query != null) {
+            throw new UnsupportedOperationException("QueryExp is not supported");
+        }
+        return mbeans.entrySet()
+                .stream()
+                .filter(entry -> name.apply(entry.getKey()))
+                .map(Map.Entry::getKey)
+                .collect(toImmutableSet());
     }
 
     @Override
