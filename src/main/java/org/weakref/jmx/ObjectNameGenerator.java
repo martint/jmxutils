@@ -8,7 +8,7 @@ public interface ObjectNameGenerator
 {
     static ObjectNameGenerator defaultObjectNameGenerator()
     {
-        return (type, properties) -> new ObjectNameBuilder(type.getPackage().getName())
+        return (domain, properties) -> new ObjectNameBuilder(domain)
                 .withProperties(properties)
                 .build();
     }
@@ -26,5 +26,30 @@ public interface ObjectNameGenerator
                 .build());
     }
 
-    String generatedNameOf(Class<?> type, Map<String, String> properties);
+    default String generatedNameOf(String packageName, String className)
+    {
+        return generatedNameOf(packageName, ImmutableMap.of("name", className));
+    }
+
+    default String generatedNameOf(String packageName, String className, String name)
+    {
+        return generatedNameOf(packageName, ImmutableMap.of("name", className, "type", name));
+    }
+
+    default String generatedNameOf(Package pkg, String className, String name)
+    {
+        return generatedNameOf(pkg.getName(), ImmutableMap.of("name", className, "type", name));
+    }
+
+    default String generatedNameOf(Package pkg, String className)
+    {
+        return generatedNameOf(pkg.getName(), ImmutableMap.of("name", className));
+    }
+
+    default String generatedNameOf(Class<?> type, Map<String, String> properties)
+    {
+        return generatedNameOf(type.getPackage().getName(), properties);
+    }
+
+    String generatedNameOf(String domain, Map<String, String> properties);
 }
