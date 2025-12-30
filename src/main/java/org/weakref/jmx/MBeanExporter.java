@@ -47,11 +47,6 @@ public class MBeanExporter
     private final ObjectNameGenerator objectNameGenerator;
     private final Map<ObjectName, ManagedClass> exportedManagedClasses = new ConcurrentHashMap<>();
 
-    MBeanExporter()
-    {
-        this(ManagementFactory.getPlatformMBeanServer());
-    }
-
     public MBeanExporter(MBeanServer server)
     {
         this(server, Optional.empty());
