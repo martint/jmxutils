@@ -18,9 +18,9 @@ package org.weakref.jmx;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
+import jakarta.annotation.PreDestroy;
 import org.weakref.jmx.JmxException.Reason;
 
-import jakarta.annotation.PreDestroy;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
@@ -47,21 +47,22 @@ public class MBeanExporter
     private final ObjectNameGenerator objectNameGenerator;
     private final Map<ObjectName, ManagedClass> exportedManagedClasses = new ConcurrentHashMap<>();
 
-    MBeanExporter()
-    {
-        this(ManagementFactory.getPlatformMBeanServer());
-    }
-
+    /**
+     * @deprecated Use {@link #MBeanExporter(MBeanServer, ObjectNameGenerator)} instead.
+     * You can obtain an instance of {@link ObjectNameGenerator} via {@link ObjectNameGenerator#defaultObjectNameGenerator()}
+     * if usage of the mbean exporter requires no namespacing.
+     */
+    @Deprecated
     public MBeanExporter(MBeanServer server)
     {
-        this(server, Optional.empty());
+        this(server, ObjectNameGenerator.defaultObjectNameGenerator());
     }
 
     @Inject
-    public MBeanExporter(MBeanServer server, Optional<ObjectNameGenerator> objectNameGenerator)
+    public MBeanExporter(MBeanServer server, ObjectNameGenerator objectNameGenerator)
     {
-        this.server = server;
-        this.objectNameGenerator = objectNameGenerator.orElseGet(ObjectNameGenerator::defaultObjectNameGenerator);
+        this.server = requireNonNull(server, "server is null");
+        this.objectNameGenerator = requireNonNull(objectNameGenerator, "objectNameGenerator is null");
         exportedObjects = new MapMaker().weakValues().makeMap();
     }
 
@@ -265,7 +266,9 @@ public class MBeanExporter
      */
     public static MBeanExporter withPlatformMBeanServer()
     {
-        return new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
+        return new MBeanExporter(
+                ManagementFactory.getPlatformMBeanServer(),
+                ObjectNameGenerator.defaultObjectNameGenerator());
     }
 
     private static ObjectName createObjectName(String name)
