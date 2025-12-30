@@ -34,6 +34,7 @@ public final class MBeanModule
         bind(MBeanExporter.class).in(Scopes.SINGLETON);
 
         newOptionalBinder(binder(), ObjectNameGenerator.class);
+        newSetBinder(binder(), new TypeLiteral<Mapping>() {});
         newSetBinder(binder(), new TypeLiteral<SetMapping<?>>() {});
         newSetBinder(binder(), new TypeLiteral<MapMapping<?, ?>>() {});
     }

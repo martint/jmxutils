@@ -23,6 +23,7 @@ import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.weakref.jmx.MBeanExporter;
 import org.weakref.jmx.ObjectNameBuilder;
 import org.weakref.jmx.ObjectNameGenerator;
 import org.weakref.jmx.SimpleObject;
@@ -266,6 +267,18 @@ public class TestMBeanModule
 
         server.unregisterMBean(objectName1);
         server.unregisterMBean(objectName2);
+    }
+
+    @Test
+    public void testNothingExported() {
+        Injector injector = Guice.createInjector(
+                new MBeanModule(),
+                binder -> {
+                    binder.requireExplicitBindings();
+                    binder.disableCircularProxies();
+                    binder.bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
+                });
+        injector.getInstance(MBeanExporter.class);
     }
 
     @Test
