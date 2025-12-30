@@ -24,7 +24,6 @@ import javax.management.ObjectName;
 
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 
@@ -35,15 +34,14 @@ class GuiceMBeanExporter
             Set<SetMapping<?>> setMappings,
             Set<MapMapping<?, ?>> mapMappings,
             MBeanExporter exporter,
-            Optional<ObjectNameGenerator> objectNameGenerator,
+            ObjectNameGenerator objectNameGenerator,
             Injector injector)
     {
-        ObjectNameGenerator generator = objectNameGenerator.orElseGet(ObjectNameGenerator::defaultObjectNameGenerator);
-        export(mappings, exporter, injector, generator);
+        export(mappings, exporter, injector, objectNameGenerator);
 
         // cast to Object to get around Java's broken generics
-        exportSets(castSetMapping(setMappings), exporter, injector, generator);
-        exportMaps(castMapMappings(mapMappings), exporter, injector, generator);
+        exportSets(castSetMapping(setMappings), exporter, injector, objectNameGenerator);
+        exportMaps(castMapMappings(mapMappings), exporter, injector, objectNameGenerator);
     }
 
     @SuppressWarnings("unchecked")

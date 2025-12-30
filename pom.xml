@@ -73,6 +73,13 @@
             <version>3.0.0</version>
             <optional>true</optional>
         </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.27.6</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <pluginManagement>
