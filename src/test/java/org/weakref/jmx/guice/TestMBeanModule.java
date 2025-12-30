@@ -41,10 +41,38 @@ import java.util.Map;
 
 import static com.google.inject.Stage.PRODUCTION;
 import static com.google.inject.name.Names.named;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.weakref.jmx.ObjectNames.generatedNameOf;
 
 public class TestMBeanModule
 {
+    @Test
+    public void testLegacy()
+    {
+        Injector injector = Guice.createInjector(
+                new MBeanModule(),
+                binder -> binder.bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer()));
+        injector.getInstance(MBeanExporter.class);
+    }
+
+    @Test
+    public void testWithUnnamespacedObjectNames()
+    {
+        Injector injector = Guice.createInjector(
+                MBeanModule.withUnnamespacedObjectNames(),
+                binder -> binder.bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer()));
+        injector.getInstance(MBeanExporter.class);
+    }
+
+    @Test
+    public void testForCustomObjectNameGenerator()
+    {
+        assertThatThrownBy(() -> Guice.createInjector(
+                MBeanModule.forCustomObjectNameGenerator(),
+                binder -> binder.bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer())))
+                .hasMessageContaining("No implementation for ObjectNameGenerator was bound");
+    }
+
     @Test
     public void testExportedInDevelopmentStageToo() 
     	throws Exception
