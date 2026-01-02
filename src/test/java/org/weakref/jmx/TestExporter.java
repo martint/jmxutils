@@ -16,8 +16,9 @@
 
 package org.weakref.jmx;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.weakref.jmx.testing.TestingMBeanServer;
 
 import javax.management.AttributeNotFoundException;
@@ -32,8 +33,8 @@ import javax.management.ReflectionException;
 import java.util.ArrayList;
 import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.weakref.jmx.Assert.assertEquals;
+import static org.weakref.jmx.Assert.assertTrue;
 import static org.weakref.jmx.Util.getUniqueObjectName;
 
 public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
@@ -93,7 +94,7 @@ public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
                                           new String[] { Object.class.getName() });
     }
 
-    @BeforeMethod
+    @BeforeEach
     void setup()
     {
         server = new TestingMBeanServer();
@@ -146,5 +147,3 @@ public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
         assertEquals(exporter.getExportedObjects().size(), 1);
     }
 }
-
-

@@ -1,18 +1,19 @@
 package org.weakref.jmx;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 import org.weakref.jmx.testing.TestingMBeanServer;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.Query;
+
 import java.util.Map;
 import java.util.Set;
 
 import static java.util.Collections.emptySet;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.weakref.jmx.Assert.assertEquals;
+import static org.weakref.jmx.Assert.assertTrue;
 
 public class TestTestingMBeanServer
 {

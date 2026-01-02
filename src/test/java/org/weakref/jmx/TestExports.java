@@ -1,15 +1,18 @@
 package org.weakref.jmx;
 
-import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import java.lang.management.ManagementFactory;
 
+import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
+
+@TestInstance(PER_CLASS)
 public class TestExports
 {
     private MBeanServer server;
@@ -18,7 +21,7 @@ public class TestExports
     private ObjectName objectName;
     private String name;
 
-    @BeforeMethod
+    @BeforeEach
     public void setUp()
     {
         Assert.assertNull(name);
@@ -33,7 +36,7 @@ public class TestExports
         Assert.assertNotNull(name);
     }
 
-    @AfterMethod
+    @AfterEach
     public void tearDown()
     {
         Assert.assertNotNull(name);
