@@ -1,23 +1,28 @@
 package org.weakref.jmx;
 
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
+
 import java.lang.reflect.Method;
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
+import static org.weakref.jmx.Assert.assertEquals;
+import static org.weakref.jmx.Assert.assertFalse;
+import static org.weakref.jmx.Assert.assertNotNull;
+import static org.weakref.jmx.Assert.assertNull;
+import static org.weakref.jmx.Assert.assertTrue;
+import static org.weakref.jmx.Assert.fail;
 
+@TestInstance(PER_CLASS)
 public abstract class AbstractMbeanTest<T>
 {
     protected List<T> objects;
@@ -36,7 +41,8 @@ public abstract class AbstractMbeanTest<T>
     protected abstract Object invoke(T t, Object value, String operationName)
             throws Exception;
 
-    @Test(dataProvider = "fixtures")
+    @ParameterizedTest
+    @MethodSource("getFixtures")
     public void testGetterAttributeInfo(String attribute, boolean isIs, Object[] values, Class<?> clazz)
             throws Exception
     {
@@ -56,7 +62,8 @@ public abstract class AbstractMbeanTest<T>
         }
     }
 
-    @Test(dataProvider = "fixtures")
+    @ParameterizedTest
+    @MethodSource("getFixtures")
     public void testSetterAttributeInfo(String attribute, boolean isIs, Object[] values, Class<?> clazz)
             throws Exception
     {
@@ -132,7 +139,8 @@ public abstract class AbstractMbeanTest<T>
         return null;
     }
 
-    @Test(dataProvider = "fixtures")
+    @ParameterizedTest
+    @MethodSource("getFixtures")
     public void testOperationInfo(String attribute, boolean isIs, Object[] values, Class<?> clazz)
             throws Exception
     {
@@ -158,7 +166,8 @@ public abstract class AbstractMbeanTest<T>
         }
     }
 
-    @Test(dataProvider = "fixtures")
+    @ParameterizedTest
+    @MethodSource("getFixtures")
     public void testGet(String attribute, boolean isIs, Object[] values, Class<?> clazz)
             throws Exception
     {
@@ -176,7 +185,8 @@ public abstract class AbstractMbeanTest<T>
         }
     }
 
-    @Test(dataProvider = "fixtures")
+    @ParameterizedTest
+    @MethodSource("getFixtures")
     public void testSet(String attribute, boolean isIs, Object[] values, Class<?> clazz)
             throws Exception
     {
@@ -285,7 +295,8 @@ public abstract class AbstractMbeanTest<T>
         }
     }
 
-    @Test(dataProvider = "fixtures")
+    @ParameterizedTest
+    @MethodSource("getFixtures")
     public void testOperation(String attribute, boolean isIs, Object[] values, Class<?> clazz)
             throws Exception
     {
@@ -297,8 +308,7 @@ public abstract class AbstractMbeanTest<T>
         }
     }
 
-    @DataProvider(name = "fixtures")
-    Object[][] getFixtures()
+    static Object[][] getFixtures()
     {
         return new Object[][] {
 

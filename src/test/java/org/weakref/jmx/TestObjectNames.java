@@ -1,16 +1,18 @@
 package org.weakref.jmx;
 
 import com.google.inject.name.Names;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.weakref.jmx.Assert.assertEquals;
+import static org.weakref.jmx.Assert.assertTrue;
 import static org.weakref.jmx.ObjectNames.generatedNameOf;
 
 public class TestObjectNames {
@@ -68,7 +70,8 @@ public class TestObjectNames {
         "org.weakref.jmx:type=SimpleObject,name=\"bar,baz\"");
    }
 
-  @Test(dataProvider = "names")
+  @ParameterizedTest
+  @MethodSource("getNames")
   public void testQuotesName(String name, boolean shouldQuote)
           throws MalformedObjectNameException
   {
@@ -102,8 +105,7 @@ public class TestObjectNames {
       }
   }
 
-  @DataProvider(name = "names")
-  public Object[][] getNames()
+  public static Object[][] getNames()
   {
       ArrayList<Object[]> names = new ArrayList<>();
       for (char c = 0; c < 500; ++c) {

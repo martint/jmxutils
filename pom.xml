@@ -31,6 +31,7 @@
     <properties>
         <shadeBase>org.weakref.jmx.\$internal</shadeBase>
         <dep.plugin.njord.version>0.8.7</dep.plugin.njord.version>
+        <dep.junit.version>6.0.1</dep.junit.version>
     </properties>
 
     <distributionManagement>
@@ -47,12 +48,6 @@
     </distributionManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.2.1</version>
-            <scope>test</scope>
-        </dependency>
 
         <dependency>
             <groupId>com.google.inject</groupId>
@@ -73,7 +68,37 @@
             <version>3.0.0</version>
             <optional>true</optional>
         </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${dep.junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${dep.junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${dep.junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.27.6</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
+
     <build>
         <pluginManagement>
             <plugins>
