@@ -1,9 +1,9 @@
 package org.weakref.jmx;
 
-import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
@@ -11,13 +11,17 @@ import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
+
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
+@TestInstance(PER_CLASS)
 public class TestUnexporter
 {
     private MBeanServer server;
@@ -25,7 +29,7 @@ public class TestUnexporter
 
     private List<ObjectName> objectNames;
 
-    @BeforeMethod
+    @BeforeEach
     public void setUp()
     {
         server = ManagementFactory.getPlatformMBeanServer();
@@ -42,7 +46,7 @@ public class TestUnexporter
         Assert.assertNotNull(exporter);
     }
 
-    @AfterMethod
+    @AfterEach
     public void tearDown()
     {
         Assert.assertNotNull(server);
@@ -58,14 +62,15 @@ public class TestUnexporter
         }
     }
 
-    @Test(expectedExceptions = InstanceNotFoundException.class)
+    @Test
     public void testUnexportOk() throws Exception
     {
         ObjectName name = objectNames.get(0);
 
         Assert.assertEquals("Hello!", server.getAttribute(name, "Hello"));
         exporter.unexport(name.getCanonicalName());
-        server.getAttribute(name, "Hello");
+        assertThatThrownBy(() -> server.getAttribute(name, "Hello"))
+                .isInstanceOf(InstanceNotFoundException.class);
     }
 
     @Test

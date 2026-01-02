@@ -15,11 +15,10 @@
  */
 package org.weakref.jmx;
 
+import org.junit.jupiter.api.Test;
+
 import java.lang.reflect.Method;
 import java.util.Map;
-
-import org.testng.Assert;
-import org.testng.annotations.Test;
 
 public abstract class TestInheritanceBase
 {

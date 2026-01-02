@@ -1,11 +1,11 @@
 package org.weakref.jmx;
 
 import com.google.inject.name.Names;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.Annotation;
 
-import static org.testng.Assert.assertEquals;
+import static org.weakref.jmx.Assert.assertEquals;
 
 public class TestObjectNameBuilder
 {

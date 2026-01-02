@@ -22,8 +22,8 @@ import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
+import org.weakref.jmx.Assert;
 import org.weakref.jmx.Managed;
 import org.weakref.jmx.testing.TestingMBeanServer;
 
@@ -88,4 +88,3 @@ public class TestModuleSubclassing
         }
     }
 }
-
