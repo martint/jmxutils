@@ -33,8 +33,7 @@ import javax.management.ReflectionException;
 import java.util.ArrayList;
 import java.util.Map;
 
-import static org.weakref.jmx.Assert.assertEquals;
-import static org.weakref.jmx.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.weakref.jmx.Util.getUniqueObjectName;
 
 public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
@@ -120,14 +119,14 @@ public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
         for(NamedObject namedObject : objects) {
             String name = namedObject.objectName.getCanonicalName();
 
-            assertTrue(managedClasses.containsKey(name));
+            assertThat(managedClasses.containsKey(name)).isTrue();
 
             ManagedClass managedClass = managedClasses.get(name);
-            assertEquals(namedObject.object, managedClass.getTarget());
+            assertThat(managedClass.getTarget()).isEqualTo(namedObject.object);
 
             if(namedObject.object instanceof NestedObject || namedObject.object instanceof FlattenObject) {
-                assertEquals(managedClass.getChildren().size(), 1);
-                assertEquals(managedClass.getChildren().get("SimpleObject").getTargetClass(), SimpleObject.class);
+                assertThat(managedClass.getChildren().size()).isEqualTo(1);
+                assertThat(managedClass.getChildren().get("SimpleObject").getTargetClass()).isEqualTo(SimpleObject.class);
             }
         }
     }
@@ -144,6 +143,6 @@ public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
         catch(JmxException e) {
             // do nothing
         }
-        assertEquals(exporter.getExportedObjects().size(), 1);
+        assertThat(exporter.getExportedObjects().size()).isEqualTo(1);
     }
 }

@@ -5,6 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
 import javax.management.MBeanRegistrationException;
@@ -42,15 +44,15 @@ public class TestUnexporter
             exporter.export(name.getCanonicalName(), new TestBean());
         }
 
-        Assert.assertNotNull(server);
-        Assert.assertNotNull(exporter);
+        assertThat(server).isNotNull();
+        assertThat(exporter).isNotNull();
     }
 
     @AfterEach
     public void tearDown()
     {
-        Assert.assertNotNull(server);
-        Assert.assertNotNull(exporter);
+        assertThat(server).isNotNull();
+        assertThat(exporter).isNotNull();
 
         for (ObjectName name : objectNames) {
             try {
@@ -67,7 +69,7 @@ public class TestUnexporter
     {
         ObjectName name = objectNames.get(0);
 
-        Assert.assertEquals("Hello!", server.getAttribute(name, "Hello"));
+        assertThat(server.getAttribute(name, "Hello")).isEqualTo("Hello!");
         exporter.unexport(name.getCanonicalName());
         assertThatThrownBy(() -> server.getAttribute(name, "Hello"))
                 .isInstanceOf(InstanceNotFoundException.class);
@@ -78,14 +80,14 @@ public class TestUnexporter
     {
         ObjectName name = objectNames.get(0);
 
-        Assert.assertEquals("Hello!", server.getAttribute(name, "Hello"));
+        assertThat(server.getAttribute(name, "Hello")).isEqualTo("Hello!");
         exporter.unexport(name.getCanonicalName());
 
         try {
             exporter.unexport(name.getCanonicalName());
         }
         catch (JmxException e) {
-            Assert.assertEquals(e.getReason(), JmxException.Reason.INSTANCE_NOT_FOUND);
+            assertThat(e.getReason()).isEqualTo(JmxException.Reason.INSTANCE_NOT_FOUND);
         }
     }
 
@@ -98,7 +100,7 @@ public class TestUnexporter
         for (ObjectName name : objectNames) {
             try {
                 server.getMBeanInfo(name);
-                Assert.fail(format("failed to unexport %s", name.getCanonicalName()));
+                throw new AssertionError(format("failed to unexport %s", name.getCanonicalName()));
             }
             catch (InstanceNotFoundException e) {
                 // success
@@ -115,7 +117,7 @@ public class TestUnexporter
         for (ObjectName name : objectNames) {
             try {
                 server.getMBeanInfo(name);
-                Assert.fail(format("failed to unexport %s", name.getCanonicalName()));
+                throw new AssertionError(format("failed to unexport %s", name.getCanonicalName()));
             }
             catch (InstanceNotFoundException e) {
                 // success
@@ -123,7 +125,7 @@ public class TestUnexporter
         }
 
         Map<String,Exception> errors = exporter.unexportAllAndReportMissing();
-        Assert.assertTrue(errors.isEmpty());
+        assertThat(errors.isEmpty()).isTrue();
     }
 
     @Test
@@ -133,12 +135,12 @@ public class TestUnexporter
         server.unregisterMBean(objectNames.get(0));
 
         Map<String,Exception> errors = exporter.unexportAllAndReportMissing();
-        Assert.assertTrue(errors.isEmpty());
+        assertThat(errors.isEmpty()).isTrue();
 
         for (ObjectName name : objectNames) {
             try {
                 server.getMBeanInfo(name);
-                Assert.fail(format("failed to unexport %s", name.getCanonicalName()));
+                throw new AssertionError(format("failed to unexport %s", name.getCanonicalName()));
             }
             catch (InstanceNotFoundException e) {
                 // success

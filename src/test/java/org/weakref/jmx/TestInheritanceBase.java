@@ -20,6 +20,8 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 public abstract class TestInheritanceBase
 {
     protected final Class<?> target;
@@ -55,6 +57,6 @@ public abstract class TestInheritanceBase
     {
         Map<Method, Method> map = AnnotationUtils.findManagedMethods(getTargetClass());
         Method annotatedMethod = map.get(getTargetMethod());
-        Assert.assertEquals(annotatedMethod, expected());
+        assertThat(annotatedMethod).isEqualTo(expected());
     }
 }

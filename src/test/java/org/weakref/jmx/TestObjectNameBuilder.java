@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.Annotation;
 
-import static org.weakref.jmx.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TestObjectNameBuilder
 {
@@ -30,64 +30,56 @@ public class TestObjectNameBuilder
     @Test
     public void testObjectNameBuilder1()
     {
-        assertEquals(
-                ObjectNames.builder(SimpleObject.class).build(),
-                "org.weakref.jmx:name=SimpleObject");
+        assertThat(ObjectNames.builder(SimpleObject.class).build())
+                .isEqualTo("org.weakref.jmx:name=SimpleObject");
     }
 
     @Test
     public void testObjectNameBuilder2()
     {
-        assertEquals(
-                ObjectNames.builder(SimpleObject.class, Names.named("1")).build(),
-                "org.weakref.jmx:type=SimpleObject,name=1");
+        assertThat(ObjectNames.builder(SimpleObject.class, Names.named("1")).build())
+                .isEqualTo("org.weakref.jmx:type=SimpleObject,name=1");
     }
 
     @Test
     public void testObjectNameBuilder3()
     {
-        assertEquals(
-                ObjectNames.builder(SimpleObject.class, Ann.class).build(),
-                "org.weakref.jmx:type=SimpleObject,name=Ann");
+        assertThat(ObjectNames.builder(SimpleObject.class, Ann.class).build())
+                .isEqualTo("org.weakref.jmx:type=SimpleObject,name=Ann");
     }
 
     @Test
     public void testObjectNameBuilder4()
     {
-        assertEquals(
-                ObjectNames.builder(SimpleObject.class, new AnnImpl()).build(),
-                "org.weakref.jmx:type=SimpleObject,name=Ann");
+        assertThat(ObjectNames.builder(SimpleObject.class, new AnnImpl()).build())
+                .isEqualTo("org.weakref.jmx:type=SimpleObject,name=Ann");
     }
 
     @Test
     public void testObjectNameBuilder5()
     {
-        assertEquals(
-                ObjectNames.builder(Inner.class).build(),
-                "org.weakref.jmx:name=Inner");
+        assertThat(ObjectNames.builder(Inner.class).build())
+                .isEqualTo("org.weakref.jmx:name=Inner");
     }
 
     @Test
     public void testObjectNameBuilderWithString()
     {
-        assertEquals(
-                ObjectNames.builder(SimpleObject.class, "foo").build(),
-                "org.weakref.jmx:type=SimpleObject,name=foo");
+        assertThat(ObjectNames.builder(SimpleObject.class, "foo").build())
+                .isEqualTo("org.weakref.jmx:type=SimpleObject,name=foo");
     }
 
     @Test
     public void testObjectNameBuilderWithProperty()
     {
-        assertEquals(
-                ObjectNames.builder(SimpleObject.class).withProperty("id", "5").build(),
-                "org.weakref.jmx:name=SimpleObject,id=5");
+        assertThat(ObjectNames.builder(SimpleObject.class).withProperty("id", "5").build())
+                .isEqualTo("org.weakref.jmx:name=SimpleObject,id=5");
     }
 
     @Test
     public void testObjectNameBuilderQuotesPropertyNames()
     {
-        assertEquals(
-                ObjectNames.builder(SimpleObject.class).withProperty("foo", "bar,baz").build(),
-                "org.weakref.jmx:name=SimpleObject,foo=\"bar,baz\"");
+        assertThat(ObjectNames.builder(SimpleObject.class).withProperty("foo", "bar,baz").build())
+                .isEqualTo("org.weakref.jmx:name=SimpleObject,foo=\"bar,baz\"");
     }
 }

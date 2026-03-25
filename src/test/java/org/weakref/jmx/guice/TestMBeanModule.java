@@ -22,7 +22,7 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 import org.junit.jupiter.api.Test;
-import org.weakref.jmx.Assert;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.weakref.jmx.MBeanExporter;
 import org.weakref.jmx.ObjectNameBuilder;
 import org.weakref.jmx.ObjectNameGenerator;
@@ -66,7 +66,7 @@ public class TestMBeanModule
         });
         
         MBeanServer server = injector.getInstance(MBeanServer.class);
-        Assert.assertNotNull(server.getMBeanInfo(name));
+        assertThat(server.getMBeanInfo(name)).isNotNull();
     }
 
     @Test
@@ -91,7 +91,7 @@ public class TestMBeanModule
 
         MBeanServer server = injector.getInstance(MBeanServer.class);
 
-        Assert.assertNotNull(server.getMBeanInfo(name));
+        assertThat(server.getMBeanInfo(name)).isNotNull();
         server.unregisterMBean(name);
     }
 
@@ -130,7 +130,7 @@ public class TestMBeanModule
 
         MBeanServer server = injector.getInstance(MBeanServer.class);
 
-        Assert.assertNotNull(server.getMBeanInfo(name));
+        assertThat(server.getMBeanInfo(name)).isNotNull();
         server.unregisterMBean(name);
     }
 
@@ -169,7 +169,7 @@ public class TestMBeanModule
 
         MBeanServer server = injector.getInstance(MBeanServer.class);
 
-        Assert.assertNotNull(server.getMBeanInfo(name));
+        assertThat(server.getMBeanInfo(name)).isNotNull();
         server.unregisterMBean(name);
     }
 
@@ -195,7 +195,7 @@ public class TestMBeanModule
 
         MBeanServer server = injector.getInstance(MBeanServer.class);
 
-        Assert.assertNotNull(server.getMBeanInfo(objectName));
+        assertThat(server.getMBeanInfo(objectName)).isNotNull();
         server.unregisterMBean(objectName);
     }
 
@@ -226,8 +226,8 @@ public class TestMBeanModule
 
         MBeanServer server = injector.getInstance(MBeanServer.class);
 
-        Assert.assertNotNull(server.getMBeanInfo(objectName1));
-        Assert.assertNotNull(server.getMBeanInfo(objectName2));
+        assertThat(server.getMBeanInfo(objectName1)).isNotNull();
+        assertThat(server.getMBeanInfo(objectName2)).isNotNull();
 
         server.unregisterMBean(objectName1);
         server.unregisterMBean(objectName2);
@@ -262,8 +262,8 @@ public class TestMBeanModule
 
         MBeanServer server = injector.getInstance(MBeanServer.class);
 
-        Assert.assertNotNull(server.getMBeanInfo(objectName1));
-        Assert.assertNotNull(server.getMBeanInfo(objectName2));
+        assertThat(server.getMBeanInfo(objectName1)).isNotNull();
+        assertThat(server.getMBeanInfo(objectName2)).isNotNull();
 
         server.unregisterMBean(objectName1);
         server.unregisterMBean(objectName2);
@@ -333,8 +333,8 @@ public class TestMBeanModule
 
         MBeanServer server = injector.getInstance(MBeanServer.class);
 
-        Assert.assertNotNull(server.getMBeanInfo(name1));
-        Assert.assertNotNull(server.getMBeanInfo(name2));
+        assertThat(server.getMBeanInfo(name1)).isNotNull();
+        assertThat(server.getMBeanInfo(name2)).isNotNull();
 
         server.unregisterMBean(name1);
         server.unregisterMBean(name2);

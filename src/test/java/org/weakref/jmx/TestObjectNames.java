@@ -11,8 +11,7 @@ import javax.management.ObjectName;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 
-import static org.weakref.jmx.Assert.assertEquals;
-import static org.weakref.jmx.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.weakref.jmx.ObjectNames.generatedNameOf;
 
 public class TestObjectNames {
@@ -30,44 +29,38 @@ public class TestObjectNames {
   
   @Test
   public void testGeneratedNameOf1() {
-    assertEquals(
-        generatedNameOf(SimpleObject.class), 
-        "org.weakref.jmx:name=SimpleObject");
+    assertThat(generatedNameOf(SimpleObject.class))
+        .isEqualTo("org.weakref.jmx:name=SimpleObject");
   }
   
   @Test
   public void testGeneratedNameOf2() {
-    assertEquals(
-        generatedNameOf(SimpleObject.class, Names.named("1")), 
-        "org.weakref.jmx:type=SimpleObject,name=1");
+    assertThat(generatedNameOf(SimpleObject.class, Names.named("1")))
+        .isEqualTo("org.weakref.jmx:type=SimpleObject,name=1");
   }
   
   @Test
   public void testGeneratedNameOf3() {
-    assertEquals(
-        generatedNameOf(SimpleObject.class, Ann.class), 
-        "org.weakref.jmx:type=SimpleObject,name=Ann");
+    assertThat(generatedNameOf(SimpleObject.class, Ann.class))
+        .isEqualTo("org.weakref.jmx:type=SimpleObject,name=Ann");
   }
 
   @Test
   public void testGeneratedNameOf4() {
-    assertEquals(
-        generatedNameOf(SimpleObject.class, new AnnImpl()), 
-        "org.weakref.jmx:type=SimpleObject,name=Ann");
+    assertThat(generatedNameOf(SimpleObject.class, new AnnImpl()))
+        .isEqualTo("org.weakref.jmx:type=SimpleObject,name=Ann");
   }
   
   @Test
   public void testGeneratedNameOf5() {
-    assertEquals(
-        generatedNameOf(Inner.class), 
-        "org.weakref.jmx:name=Inner");
+    assertThat(generatedNameOf(Inner.class))
+        .isEqualTo("org.weakref.jmx:name=Inner");
   }
 
    @Test
    public void testGeneratedNameOfStringWithQuoting() {
-     assertEquals(
-        generatedNameOf(SimpleObject.class, "bar,baz"),
-        "org.weakref.jmx:type=SimpleObject,name=\"bar,baz\"");
+     assertThat(generatedNameOf(SimpleObject.class, "bar,baz"))
+        .isEqualTo("org.weakref.jmx:type=SimpleObject,name=\"bar,baz\"");
    }
 
   @ParameterizedTest
@@ -80,12 +73,12 @@ public class TestObjectNames {
           String quotedName = objectName.getKeyProperty("name");
           int index = 0;
           StringBuilder builder = new StringBuilder();
-          assertEquals(quotedName.charAt(index++), '\"');
+          assertThat(quotedName.charAt(index++)).isEqualTo('\"');
           char c;
           while ((c = quotedName.charAt(index++)) != '\"') {
               if (c == '\\') {
                   c = quotedName.charAt(index++);
-                  assertTrue("*?n\\\"".indexOf(c) != -1, "valid character '" + c + "' after backslash");
+                  assertThat("*?n\\\"".indexOf(c) != -1).describedAs("valid character '" + c + "' after backslash").isTrue();
                   if (c == 'n') {
                       builder.append('\n');
                   }
@@ -97,11 +90,11 @@ public class TestObjectNames {
                 builder.append(c);
               }
           }
-          assertEquals(index, quotedName.length());
-          assertEquals(builder.toString(), name);
+          assertThat(index).isEqualTo(quotedName.length());
+          assertThat(builder.toString()).isEqualTo(name);
       }
       else {
-          assertEquals(objectName.getKeyProperty("name"), name);
+          assertThat(objectName.getKeyProperty("name")).isEqualTo(name);
       }
   }
 

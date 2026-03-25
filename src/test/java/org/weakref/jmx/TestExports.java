@@ -10,6 +10,7 @@ import javax.management.ObjectName;
 
 import java.lang.management.ManagementFactory;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
 @TestInstance(PER_CLASS)
@@ -24,25 +25,25 @@ public class TestExports
     @BeforeEach
     public void setUp()
     {
-        Assert.assertNull(name);
+        assertThat(name).isNull();
         objectName = Util.getUniqueObjectName();
         name = objectName.getCanonicalName();
         server = ManagementFactory.getPlatformMBeanServer();
         exporter = new MBeanExporter(server);
 
-        Assert.assertNotNull(server);
-        Assert.assertNotNull(exporter);
-        Assert.assertNotNull(objectName);
-        Assert.assertNotNull(name);
+        assertThat(server).isNotNull();
+        assertThat(exporter).isNotNull();
+        assertThat(objectName).isNotNull();
+        assertThat(name).isNotNull();
     }
 
     @AfterEach
     public void tearDown()
     {
-        Assert.assertNotNull(name);
-        Assert.assertNotNull(server);
-        Assert.assertNotNull(exporter);
-        Assert.assertNotNull(objectName);
+        assertThat(name).isNotNull();
+        assertThat(server).isNotNull();
+        assertThat(exporter).isNotNull();
+        assertThat(objectName).isNotNull();
 
         exporter.unexport(name);
 
@@ -57,7 +58,7 @@ public class TestExports
     {
         exporter.export(name, new TestBean());
 
-        Assert.assertEquals("Hello!", server.getAttribute(objectName, "Hello"));
+        assertThat(server.getAttribute(objectName, "Hello")).isEqualTo("Hello!");
     }
 
     @Test
@@ -65,13 +66,13 @@ public class TestExports
     {
         exporter.export(name, new TestBean());
 
-        Assert.assertEquals("Hello!", server.getAttribute(objectName, "Hello"));
+        assertThat(server.getAttribute(objectName, "Hello")).isEqualTo("Hello!");
 
         try {
             exporter.export(name, new TestBean());
         }
         catch (JmxException e) {
-            Assert.assertEquals(e.getReason(), JmxException.Reason.INSTANCE_ALREADY_EXISTS);
+            assertThat(e.getReason()).isEqualTo(JmxException.Reason.INSTANCE_ALREADY_EXISTS);
         }
     }
 

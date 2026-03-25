@@ -15,12 +15,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
-import static org.weakref.jmx.Assert.assertEquals;
-import static org.weakref.jmx.Assert.assertFalse;
-import static org.weakref.jmx.Assert.assertNotNull;
-import static org.weakref.jmx.Assert.assertNull;
-import static org.weakref.jmx.Assert.assertTrue;
-import static org.weakref.jmx.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @TestInstance(PER_CLASS)
 public abstract class AbstractMbeanTest<T>
@@ -54,11 +49,11 @@ public abstract class AbstractMbeanTest<T>
 
             MBeanInfo info = getMBeanInfo(t);
             MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
-            assertNotNull(attributeInfo, "AttributeInfo for " + attributeName);
-            assertEquals(attributeInfo.getName(), attributeName, "Attribute Name for " + attributeName);
-            assertEquals(attributeInfo.getType(), setter.getParameterTypes()[0].getName(), "Attribute type for " + attributeName);
-            assertEquals(attributeInfo.isIs(), isIs, "Attribute isIs for " + attributeName);
-            assertTrue(attributeInfo.isReadable(), "Attribute Readable for " + attributeName);
+            assertThat(attributeInfo).describedAs("AttributeInfo for " + attributeName).isNotNull();
+            assertThat(attributeInfo.getName()).describedAs("Attribute Name for " + attributeName).isEqualTo(attributeName);
+            assertThat(attributeInfo.getType()).describedAs("Attribute type for " + attributeName).isEqualTo(setter.getParameterTypes()[0].getName());
+            assertThat(attributeInfo.isIs()).describedAs("Attribute isIs for " + attributeName).isEqualTo(isIs);
+            assertThat(attributeInfo.isReadable()).describedAs("Attribute Readable for " + attributeName).isTrue();
         }
     }
 
@@ -76,10 +71,10 @@ public abstract class AbstractMbeanTest<T>
 
             MBeanInfo info = getMBeanInfo(t);
             MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
-            assertNotNull(attributeInfo, "AttributeInfo for " + attributeName);
-            assertEquals(attributeInfo.getName(), attributeName, "Attribute Name for " + attributeName);
-            assertEquals(attributeInfo.getType(), getter.getReturnType().getName(), "Attribute Type for " + attributeName);
-            assertTrue(attributeInfo.isWritable(), "Attribute Writable for " + attributeName);
+            assertThat(attributeInfo).describedAs("AttributeInfo for " + attributeName).isNotNull();
+            assertThat(attributeInfo.getName()).describedAs("Attribute Name for " + attributeName).isEqualTo(attributeName);
+            assertThat(attributeInfo.getType()).describedAs("Attribute Type for " + attributeName).isEqualTo(getter.getReturnType().getName());
+            assertThat(attributeInfo.isWritable()).describedAs("Attribute Writable for " + attributeName).isTrue();
         }
     }
 
@@ -92,7 +87,7 @@ public abstract class AbstractMbeanTest<T>
             MBeanInfo info = getMBeanInfo(t);
             String attributeName = toFeatureName("NotManaged", t);
             MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
-            assertNull(attributeInfo, "AttributeInfo for " + attributeName);
+            assertThat(attributeInfo).describedAs("AttributeInfo for " + attributeName).isNull();
         }
     }
 
@@ -105,11 +100,11 @@ public abstract class AbstractMbeanTest<T>
 
             String attributeName = toFeatureName("ReadOnly", t);
             MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
-            assertNotNull(attributeInfo, "AttributeInfo for " + attributeName);
-            assertEquals(attributeInfo.getName(), attributeName, "Attribute Name for " + attributeName);
-            assertEquals(attributeInfo.getType(), "int", "Attribute Type for " + attributeName);
-            assertTrue(attributeInfo.isReadable(), "Attribute Readable for " + attributeName);
-            assertFalse(attributeInfo.isWritable(), "Attribute Writable for " + attributeName);
+            assertThat(attributeInfo).describedAs("AttributeInfo for " + attributeName).isNotNull();
+            assertThat(attributeInfo.getName()).describedAs("Attribute Name for " + attributeName).isEqualTo(attributeName);
+            assertThat(attributeInfo.getType()).describedAs("Attribute Type for " + attributeName).isEqualTo("int");
+            assertThat(attributeInfo.isReadable()).describedAs("Attribute Readable for " + attributeName).isTrue();
+            assertThat(attributeInfo.isWritable()).describedAs("Attribute Writable for " + attributeName).isFalse();
         }
     }
 
@@ -121,11 +116,11 @@ public abstract class AbstractMbeanTest<T>
             MBeanInfo info = getMBeanInfo(t);
             String attributeName = toFeatureName("WriteOnly", t);
             MBeanAttributeInfo attributeInfo = getAttributeInfo(info, attributeName);
-            assertNotNull(attributeInfo, "AttributeInfo for " + attributeName);
-            assertEquals(attributeInfo.getName(), attributeName, "Attribute Name for " + attributeName);
-            assertEquals(attributeInfo.getType(), "int", "Attribute Type for " + attributeName);
-            assertFalse(attributeInfo.isReadable(), "Attribute Readable for " + attributeName);
-            assertTrue(attributeInfo.isWritable(), "Attribute Writable for " + attributeName);
+            assertThat(attributeInfo).describedAs("AttributeInfo for " + attributeName).isNotNull();
+            assertThat(attributeInfo.getName()).describedAs("Attribute Name for " + attributeName).isEqualTo(attributeName);
+            assertThat(attributeInfo.getType()).describedAs("Attribute Type for " + attributeName).isEqualTo("int");
+            assertThat(attributeInfo.isReadable()).describedAs("Attribute Readable for " + attributeName).isFalse();
+            assertThat(attributeInfo.isWritable()).describedAs("Attribute Writable for " + attributeName).isTrue();
         }
     }
 
@@ -155,14 +150,14 @@ public abstract class AbstractMbeanTest<T>
                 }
             }
 
-            assertNotNull(operationInfo, "OperationInfo for " + operationName);
-            assertEquals(operationInfo.getName(), operationName, "Operation Name for " + operationName);
-            assertEquals(operationInfo.getImpact(), MBeanOperationInfo.UNKNOWN, "Operation Impact for " + operationName);
-            assertEquals(operationInfo.getReturnType(), Object.class.getName(), "Operation Return Type for " + operationName);
-            assertEquals(operationInfo.getSignature().length, 1, "Operation Parameter Length for " + operationName);
+            assertThat(operationInfo).describedAs("OperationInfo for " + operationName).isNotNull();
+            assertThat(operationInfo.getName()).describedAs("Operation Name for " + operationName).isEqualTo(operationName);
+            assertThat(operationInfo.getImpact()).describedAs("Operation Impact for " + operationName).isEqualTo(MBeanOperationInfo.UNKNOWN);
+            assertThat(operationInfo.getReturnType()).describedAs("Operation Return Type for " + operationName).isEqualTo(Object.class.getName());
+            assertThat(operationInfo.getSignature().length).describedAs("Operation Parameter Length for " + operationName).isEqualTo(1);
             MBeanParameterInfo parameterInfo = operationInfo.getSignature()[0];
-            assertEquals(parameterInfo.getName(), "value", "Operation Parameter[0] Name for " + operationName);
-            assertEquals(parameterInfo.getType(), Object.class.getName(), "Operation Parameter[0] Type for " + operationName);
+            assertThat(parameterInfo.getName()).describedAs("Operation Parameter[0] Name for " + operationName).isEqualTo("value");
+            assertThat(parameterInfo.getType()).describedAs("Operation Parameter[0] Type for " + operationName).isEqualTo(Object.class.getName());
         }
     }
 
@@ -180,7 +175,7 @@ public abstract class AbstractMbeanTest<T>
             for (Object value : values) {
                 setter.invoke(simpleObject, value);
 
-                assertEquals(getAttribute(t, attributeName), value);
+                assertThat(getAttribute(t, attributeName)).isEqualTo(value);
             }
         }
     }
@@ -200,7 +195,7 @@ public abstract class AbstractMbeanTest<T>
             for (Object value : values) {
                 setAttribute(t, attributeName, value);
 
-                assertEquals(getter.invoke(simpleObject), value);
+                assertThat(getter.invoke(simpleObject)).isEqualTo(value);
             }
         }
     }
@@ -215,13 +210,13 @@ public abstract class AbstractMbeanTest<T>
             simpleObject.setNotManaged(1);
             try {
                 setAttribute(t, "NotManaged", 2);
-                fail("Should not allow setting unmanaged attribute");
+                throw new AssertionError("Should not allow setting unmanaged attribute");
             }
             catch (AttributeNotFoundException e) {
                 // ignore
             }
 
-            assertEquals(simpleObject.getNotManaged(), 1);
+            assertThat(simpleObject.getNotManaged()).isEqualTo(1);
         }
     }
 
@@ -233,7 +228,7 @@ public abstract class AbstractMbeanTest<T>
         for (T t : objects) {
             try {
                 getAttribute(t, "NotManaged");
-                fail("Should not allow getting unmanaged attribute");
+                throw new AssertionError("Should not allow getting unmanaged attribute");
             }
             catch (AttributeNotFoundException e) {
                 // ignore
@@ -248,7 +243,7 @@ public abstract class AbstractMbeanTest<T>
         for (T t : objects) {
             try {
                 getAttribute(t, "WriteOnly");
-                fail("Should not allow getting write-only attribute");
+                throw new AssertionError("Should not allow getting write-only attribute");
             }
             catch (AttributeNotFoundException e) {
                 // ignore
@@ -265,13 +260,13 @@ public abstract class AbstractMbeanTest<T>
             simpleObject.setReadOnly(1);
             try {
                 setAttribute(t, "ReadOnly", 2);
-                fail("Should not allow setting read-only attribute");
+                throw new AssertionError("Should not allow setting read-only attribute");
             }
             catch (AttributeNotFoundException e) {
                 // ignore
             }
 
-            assertEquals(simpleObject.getReadOnly(), 1);
+            assertThat(simpleObject.getReadOnly()).isEqualTo(1);
         }
     }
 
@@ -284,14 +279,14 @@ public abstract class AbstractMbeanTest<T>
             for (MBeanAttributeInfo info : getMBeanInfo(t).getAttributes()) {
                 String attributeName = toFeatureName("DescribedInt", t);
                 if (info.getName().equals(attributeName)) {
-                    assertEquals("epic description", info.getDescription());
+                    assertThat(info.getDescription()).isEqualTo("epic description");
                     described = true;
                 }
                 else {
-                    assertEquals("", info.getDescription());
+                    assertThat(info.getDescription()).isEqualTo("");
                 }
             }
-            assertTrue(described);
+            assertThat(described).isTrue();
         }
     }
 
@@ -303,7 +298,7 @@ public abstract class AbstractMbeanTest<T>
         for (T t : objects) {
             for (Object value : values) {
                 String operationName = toFeatureName("echo", t);
-                assertEquals(invoke(t, value, operationName), value);
+                assertThat(invoke(t, value, operationName)).isEqualTo(value);
             }
         }
     }

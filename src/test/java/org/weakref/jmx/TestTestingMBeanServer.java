@@ -12,8 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static java.util.Collections.emptySet;
-import static org.weakref.jmx.Assert.assertEquals;
-import static org.weakref.jmx.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TestTestingMBeanServer
 {
@@ -26,7 +25,7 @@ public class TestTestingMBeanServer
             server.queryNames(makeObjectName("test", Map.of("type", "Test")), Query.eq(Query.attr("a"), Query.value("a")));
         }
         catch (Exception e) {
-            assertTrue(e instanceof UnsupportedOperationException);
+            assertThat(e instanceof UnsupportedOperationException).isTrue();
         }
     }
 
@@ -37,7 +36,7 @@ public class TestTestingMBeanServer
         TestingMBeanServer server = new TestingMBeanServer();
         server.registerMBean(BEAN, makeObjectName("test", Map.of("type", "Other")));
 
-        assertEquals(server.queryNames(makeObjectName("test", Map.of("type", "Test")), null), Set.of());
+        assertThat(server.queryNames(makeObjectName("test", Map.of("type", "Test")), null)).isEqualTo(Set.of());
     }
 
     @Test
@@ -50,8 +49,8 @@ public class TestTestingMBeanServer
         server.registerMBean(BEAN, makeObjectName("test3", Map.of("type", "Other")));
         server.registerMBean(BEAN, makeObjectName("test4", Map.of("type", "Other")));
 
-        assertEquals(server.queryNames(ObjectName.WILDCARD, null).size(), 4);
-        assertEquals(server.queryNames(ObjectName.WILDCARD, null), Set.of(
+        assertThat(server.queryNames(ObjectName.WILDCARD, null).size()).isEqualTo(4);
+        assertThat(server.queryNames(ObjectName.WILDCARD, null)).isEqualTo(Set.of(
                makeObjectName("test1", Map.of("type", "Other")),
                makeObjectName("test2", Map.of("type", "Other")),
                makeObjectName("test3", Map.of("type", "Other")),
@@ -70,7 +69,7 @@ public class TestTestingMBeanServer
         server.registerMBean(BEAN, makeObjectName("test4", Map.of("type", "Other")));
         server.registerMBean(BEAN, makeObjectName("test4", Map.of("type", "Other2")));
 
-        assertEquals(server.queryNames(new ObjectName("test1:*"), null), Set.of(
+        assertThat(server.queryNames(new ObjectName("test1:*"), null)).isEqualTo(Set.of(
                 makeObjectName("test1", Map.of("type", "Other")),
                 makeObjectName("test1", Map.of("type", "Other2"))));
     }
@@ -87,13 +86,13 @@ public class TestTestingMBeanServer
         server.registerMBean(BEAN, makeObjectName("test4", Map.of("type", "Other")));
         server.registerMBean(BEAN, makeObjectName("test4", Map.of("type", "Other2")));
 
-        assertEquals(server.queryNames(new ObjectName("test1:type=*"), null), Set.of(
+        assertThat(server.queryNames(new ObjectName("test1:type=*"), null)).isEqualTo(Set.of(
                 makeObjectName("test1", Map.of("type", "Other")),
                 makeObjectName("test1", Map.of("type", "Other2"))));
 
-        assertEquals(server.queryNames(
-                new ObjectName("test1:type=Other2"), null),
-                Set.of(makeObjectName("test1", Map.of("type", "Other2"))));
+        assertThat(server.queryNames(
+                new ObjectName("test1:type=Other2"), null))
+                .isEqualTo(Set.of(makeObjectName("test1", Map.of("type", "Other2"))));
     }
 
     @Test
@@ -106,34 +105,34 @@ public class TestTestingMBeanServer
         server.registerMBean(BEAN, makeObjectName("test1", Map.of("type", "Another")));
         server.registerMBean(BEAN, makeObjectName("test1", Map.of("type", "Another2")));
 
-        assertEquals(server.queryNames(new ObjectName("test1:type=*"), null), Set.of(
+        assertThat(server.queryNames(new ObjectName("test1:type=*"), null)).isEqualTo(Set.of(
                 makeObjectName("test1", Map.of("type", "Other")),
                 makeObjectName("test1", Map.of("type", "Other2")),
                 makeObjectName("test1", Map.of("type", "Another")),
                 makeObjectName("test1", Map.of("type", "Another2"))));
 
-        assertEquals(server.queryNames(new ObjectName("test1:type=Other"), null), Set.of(
+        assertThat(server.queryNames(new ObjectName("test1:type=Other"), null)).isEqualTo(Set.of(
                 makeObjectName("test1", Map.of("type", "Other"))));
 
-        assertEquals(server.queryNames(new ObjectName("test1:type=Other*"), null), Set.of(
+        assertThat(server.queryNames(new ObjectName("test1:type=Other*"), null)).isEqualTo(Set.of(
                 makeObjectName("test1", Map.of("type", "Other")),
                 makeObjectName("test1", Map.of("type", "Other2"))));
 
-        assertEquals(server.queryNames(new ObjectName("test1:type=Another*"), null), Set.of(
+        assertThat(server.queryNames(new ObjectName("test1:type=Another*"), null)).isEqualTo(Set.of(
                 makeObjectName("test1", Map.of("type", "Another")),
                 makeObjectName("test1", Map.of("type", "Another2"))));
 
-        assertEquals(server.queryNames(new ObjectName("test1:type=*ther*"), null), Set.of(
+        assertThat(server.queryNames(new ObjectName("test1:type=*ther*"), null)).isEqualTo(Set.of(
                 makeObjectName("test1", Map.of("type", "Other")),
                 makeObjectName("test1", Map.of("type", "Other2")),
                 makeObjectName("test1", Map.of("type", "Another")),
                 makeObjectName("test1", Map.of("type", "Another2"))));
 
-        assertEquals(server.queryNames(new ObjectName("test1:type=*ther"), null), Set.of(
+        assertThat(server.queryNames(new ObjectName("test1:type=*ther"), null)).isEqualTo(Set.of(
                 makeObjectName("test1", Map.of("type", "Other")),
                 makeObjectName("test1", Map.of("type", "Another"))));
 
-        assertEquals(server.queryNames(new ObjectName("test1:type=*ther?"), null), Set.of(
+        assertThat(server.queryNames(new ObjectName("test1:type=*ther?"), null)).isEqualTo(Set.of(
                 makeObjectName("test1", Map.of("type", "Other2")),
                 makeObjectName("test1", Map.of("type", "Another2"))));
     }
