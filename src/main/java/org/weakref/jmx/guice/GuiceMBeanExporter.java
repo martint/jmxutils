@@ -20,13 +20,9 @@ import com.google.inject.Injector;
 import org.weakref.jmx.MBeanExporter;
 import org.weakref.jmx.ObjectNameGenerator;
 
-import javax.management.ObjectName;
-
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiFunction;
 
 class GuiceMBeanExporter
 {
@@ -61,13 +57,10 @@ class GuiceMBeanExporter
     private static <K, V> void exportMaps(Set<MapMapping<K, V>> mapMappings, MBeanExporter exporter, Injector injector, ObjectNameGenerator objectNameGenerator)
     {
         for (MapMapping<K, V> mapping : mapMappings) {
-            BiFunction<ObjectNameGenerator, Entry<K, V>, ObjectName> namingFunction = mapping.getObjectNameFunction();
-
             Map<K, V> map = injector.getInstance(mapping.getKey());
 
             for (Map.Entry<K, V> entry : map.entrySet()) {
-                ObjectName name = namingFunction.apply(objectNameGenerator, entry);
-                exporter.export(name, entry.getValue());
+                mapping.export(exporter, objectNameGenerator, entry);
             }
         }
     }
@@ -75,13 +68,10 @@ class GuiceMBeanExporter
     private static <T> void exportSets(Set<SetMapping<T>> setMappings, MBeanExporter exporter, Injector injector, ObjectNameGenerator objectNameGenerator)
     {
         for (SetMapping<T> mapping : setMappings) {
-            BiFunction<ObjectNameGenerator, T, ObjectName> namingFunction = mapping.getObjectNameFunction();
-
             Set<T> set = injector.getInstance(mapping.getKey());
 
             for (T instance : set) {
-                ObjectName name = namingFunction.apply(objectNameGenerator, instance);
-                exporter.export(name, instance);
+                mapping.export(exporter, objectNameGenerator, instance);
             }
         }
     }
@@ -89,7 +79,7 @@ class GuiceMBeanExporter
     private static void export(Set<Mapping> mappings, MBeanExporter exporter, Injector injector, ObjectNameGenerator objectNameGenerator)
     {
         for (Mapping mapping : mappings) {
-            exporter.export(mapping.getName(objectNameGenerator), injector.getInstance(mapping.getKey()));
+            mapping.export(exporter, objectNameGenerator, injector.getInstance(mapping.getKey()));
         }
     }
 }

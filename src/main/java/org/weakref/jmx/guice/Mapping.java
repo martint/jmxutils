@@ -16,28 +16,69 @@
 package org.weakref.jmx.guice;
 
 import com.google.inject.Key;
+import org.weakref.jmx.MBeanExporter;
 import org.weakref.jmx.ObjectNameGenerator;
 
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+
+import java.util.Optional;
 import java.util.function.Function;
 
 class Mapping
 {
-    private final Function<ObjectNameGenerator, String> nameFactory;
     private final Key<?> key;
+    private final ExportAction exportAction;
 
     Mapping(Function<ObjectNameGenerator, String> nameFactory, Key<?> key)
     {
-        this.nameFactory = nameFactory;
-        this.key = key;
+        this(key, (exporter, objectNameGenerator, object) -> exporter.export(nameFactory.apply(objectNameGenerator), object, key.getTypeLiteral().getRawType()));
     }
 
-    public String getName(ObjectNameGenerator objectNameGenerator)
+    private Mapping(Key<?> key, ExportAction exportAction)
     {
-        return nameFactory.apply(objectNameGenerator);
+        this.key = key;
+        this.exportAction = exportAction;
+    }
+
+    public static Mapping generatedName(Key<?> key, Optional<String> generatedName)
+    {
+        return new Mapping(key, (exporter, objectNameGenerator, object) -> {
+            Class<?> type = key.getTypeLiteral().getRawType();
+            if (generatedName.isPresent()) {
+                String name = generatedName.get();
+                ObjectName objectName = createObjectName(objectNameGenerator.generatedNameOf(type, name));
+                exporter.exportWithGeneratedName(objectName, object, type, name);
+            }
+            else {
+                ObjectName objectName = createObjectName(objectNameGenerator.generatedNameOf(type));
+                exporter.exportWithGeneratedName(objectName, object, type);
+            }
+        });
     }
 
     public Key<?> getKey()
     {
         return key;
+    }
+
+    public void export(MBeanExporter exporter, ObjectNameGenerator objectNameGenerator, Object object)
+    {
+        exportAction.export(exporter, objectNameGenerator, object);
+    }
+
+    private interface ExportAction
+    {
+        void export(MBeanExporter exporter, ObjectNameGenerator objectNameGenerator, Object object);
+    }
+
+    static ObjectName createObjectName(String name)
+    {
+        try {
+            return new ObjectName(name);
+        }
+        catch (MalformedObjectNameException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

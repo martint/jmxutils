@@ -3,7 +3,6 @@ package org.weakref.jmx.guice;
 import com.google.inject.multibindings.Multibinder;
 import org.weakref.jmx.ObjectNameGenerator;
 
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import java.util.function.BiFunction;
@@ -21,17 +20,7 @@ public class SetExportBinder<T>
 
     public void withGeneratedName(final NamingFunction<T> itemNamingFunction)
     {
-        BiFunction<ObjectNameGenerator, T, ObjectName> nameFactory = (factory, object) -> {
-            try {
-                String itemName = itemNamingFunction.name(object);
-                return new ObjectName(factory.generatedNameOf(clazz, itemName));
-            }
-            catch (MalformedObjectNameException e) {
-                throw new RuntimeException(e);
-            }
-        };
-
-        as(nameFactory);
+        binder.addBinding().toInstance(SetMapping.generatedName(clazz, itemNamingFunction));
     }
 
     public void withGeneratedName(final ObjectNameFunction<T> itemNamingFunction)

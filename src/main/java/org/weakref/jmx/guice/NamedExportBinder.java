@@ -20,6 +20,7 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Named;
 import org.weakref.jmx.ObjectNameGenerator;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 public class NamedExportBinder
@@ -40,17 +41,17 @@ public class NamedExportBinder
     {
         if (key.getAnnotation() != null) {
             if (key.getAnnotation() instanceof Named annotation) {
-                as(factory -> factory.generatedNameOf(key.getTypeLiteral().getRawType(), annotation.value()));
+                asGeneratedName(annotation.value());
             }
             else {
-                as(factory -> factory.generatedNameOf(key.getTypeLiteral().getRawType(), key.getAnnotation().annotationType().getSimpleName()));
+                asGeneratedName(key.getAnnotation().annotationType().getSimpleName());
             }
         }
         else if (key.getAnnotationType() != null) {
-            as(factory -> factory.generatedNameOf(key.getTypeLiteral().getRawType(), key.getAnnotationType().getSimpleName()));
+            asGeneratedName(key.getAnnotationType().getSimpleName());
         }
         else {
-            as(factory -> factory.generatedNameOf(key.getTypeLiteral().getRawType()));
+            binder.addBinding().toInstance(Mapping.generatedName(key, Optional.empty()));
         }
     }
 
@@ -62,5 +63,10 @@ public class NamedExportBinder
     public void as(Function<ObjectNameGenerator, String> nameFactory)
     {
         binder.addBinding().toInstance(new Mapping(nameFactory, key));
+    }
+
+    private void asGeneratedName(String name)
+    {
+        binder.addBinding().toInstance(Mapping.generatedName(key, Optional.of(name)));
     }
 }

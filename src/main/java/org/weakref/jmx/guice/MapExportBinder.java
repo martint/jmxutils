@@ -3,7 +3,6 @@ package org.weakref.jmx.guice;
 import com.google.inject.multibindings.Multibinder;
 import org.weakref.jmx.ObjectNameGenerator;
 
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import java.util.Map.Entry;
@@ -24,17 +23,7 @@ public class MapExportBinder<K, V>
 
     public void withGeneratedName(NamingFunction<V> valueNamingFunction)
     {
-        BiFunction<ObjectNameGenerator, Entry<K, V>, ObjectName> nameFactory = (factory, entry) -> {
-            try {
-                String itemName = valueNamingFunction.name(entry.getValue());
-                return new ObjectName(factory.generatedNameOf(valueClass, itemName));
-            }
-            catch (MalformedObjectNameException e) {
-                throw new RuntimeException(e);
-            }
-        };
-
-        as(nameFactory);
+        binder.addBinding().toInstance(MapMapping.generatedName(keyClass, valueClass, (key, value) -> valueNamingFunction.name(value)));
     }
 
     public void withGeneratedName(ObjectNameFunction<V> valueNamingFunction)
@@ -44,17 +33,7 @@ public class MapExportBinder<K, V>
 
     public void withGeneratedName(MapNamingFunction<K, V> valueNamingFunction)
     {
-        BiFunction<ObjectNameGenerator, Entry<K, V>, ObjectName> nameFactory = (factory, entry) -> {
-            try {
-                String itemName = valueNamingFunction.name(entry.getKey(), entry.getValue());
-                return new ObjectName(factory.generatedNameOf(valueClass, itemName));
-            }
-            catch (MalformedObjectNameException e) {
-                throw new RuntimeException(e);
-            }
-        };
-
-        as(nameFactory);
+        binder.addBinding().toInstance(MapMapping.generatedName(keyClass, valueClass, valueNamingFunction));
     }
 
     public void withGeneratedName(MapObjectNameFunction<K, V> valueNamingFunction)

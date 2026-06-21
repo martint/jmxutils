@@ -45,7 +45,7 @@ public class MBeanExporter
     private final MBeanServer server;
     private final Map<ObjectName, Object> exportedObjects;
     private final ObjectNameGenerator objectNameGenerator;
-    private final Map<ObjectName, ManagedClass> exportedManagedClasses = new ConcurrentHashMap<>();
+    private final Map<ObjectName, ManagedObjectExport> exportedManagedObjectExports = new ConcurrentHashMap<>();
 
     public MBeanExporter(MBeanServer server)
     {
@@ -74,8 +74,9 @@ public class MBeanExporter
     public MBeanExport exportWithGeneratedName(Object object)
     {
         requireNonNull(object, "object is null");
-        ObjectName objectName = createObjectName(objectNameGenerator.generatedNameOf(object.getClass()));
-        export(objectName, object);
+        Class<?> type = object.getClass();
+        ObjectName objectName = createObjectName(objectNameGenerator.generatedNameOf(type));
+        export(objectName, object, Optional.of(type), Optional.empty(), ImmutableMap.of());
         return new MBeanExport(objectName, () -> unexport(objectName));
     }
 
@@ -84,7 +85,16 @@ public class MBeanExporter
         requireNonNull(object, "object is null");
         requireNonNull(type, "type is null");
         ObjectName objectName = createObjectName(objectNameGenerator.generatedNameOf(type));
-        export(objectName, object);
+        export(objectName, object, Optional.of(type), Optional.empty(), ImmutableMap.of());
+        return new MBeanExport(objectName, () -> unexport(objectName));
+    }
+
+    public MBeanExport exportWithGeneratedName(ObjectName objectName, Object object, Class<?> type)
+    {
+        requireNonNull(objectName, "objectName is null");
+        requireNonNull(object, "object is null");
+        requireNonNull(type, "type is null");
+        export(objectName, object, Optional.of(type), Optional.empty(), ImmutableMap.of());
         return new MBeanExport(objectName, () -> unexport(objectName));
     }
 
@@ -94,7 +104,17 @@ public class MBeanExporter
         requireNonNull(type, "type is null");
         requireNonNull(name, "name is null");
         ObjectName objectName = createObjectName(objectNameGenerator.generatedNameOf(type, name));
-        export(objectName, object);
+        export(objectName, object, Optional.of(type), Optional.of(name), ImmutableMap.of());
+        return new MBeanExport(objectName, () -> unexport(objectName));
+    }
+
+    public MBeanExport exportWithGeneratedName(ObjectName objectName, Object object, Class<?> type, String name)
+    {
+        requireNonNull(objectName, "objectName is null");
+        requireNonNull(object, "object is null");
+        requireNonNull(type, "type is null");
+        requireNonNull(name, "name is null");
+        export(objectName, object, Optional.of(type), Optional.of(name), ImmutableMap.of());
         return new MBeanExport(objectName, () -> unexport(objectName));
     }
 
@@ -104,7 +124,7 @@ public class MBeanExporter
         requireNonNull(type, "type is null");
         requireNonNull(properties, "properties is null");
         ObjectName objectName = createObjectName(objectNameGenerator.generatedNameOf(type, properties));
-        export(objectName, object);
+        export(objectName, object, Optional.of(type), Optional.empty(), properties);
         return new MBeanExport(objectName, () -> unexport(objectName));
     }
 
@@ -113,8 +133,34 @@ public class MBeanExporter
         export(createObjectName(name), object);
     }
 
+    public void export(String name, Object object, Class<?> type)
+    {
+        export(createObjectName(name), object, type);
+    }
+
     public void export(ObjectName objectName, Object object)
     {
+        export(objectName, object, Optional.empty(), Optional.empty(), ImmutableMap.of());
+    }
+
+    public void export(ObjectName objectName, Object object, Class<?> type)
+    {
+        requireNonNull(type, "type is null");
+        export(objectName, object, Optional.of(type), Optional.empty(), ImmutableMap.of());
+    }
+
+    private void export(
+            ObjectName objectName,
+            Object object,
+            Optional<Class<?>> exportedType,
+            Optional<String> originalName,
+            Map<String, String> originalProperties)
+    {
+        requireNonNull(objectName, "objectName is null");
+        requireNonNull(object, "object is null");
+        requireNonNull(exportedType, "exportedType is null");
+        requireNonNull(originalName, "originalName is null");
+        requireNonNull(originalProperties, "originalProperties is null");
         try {
             MBeanBuilder builder = new MBeanBuilder(object);
             MBean mbean = builder.build();
@@ -127,7 +173,8 @@ public class MBeanExporter
                 exportedObjects.put(objectName, object);
             }
 
-            exportedManagedClasses.put(objectName, ManagedClass.fromExportedObject(object));
+            ManagedClass managedClass = ManagedClass.fromExportedObject(object);
+            exportedManagedObjectExports.put(objectName, new ManagedObjectExport(objectName, exportedType, originalName, originalProperties, managedClass));
         }
         catch (InstanceAlreadyExistsException e) {
             throw new JmxException(Reason.INSTANCE_ALREADY_EXISTS, e.getMessage());
@@ -174,7 +221,7 @@ public class MBeanExporter
                 exportedObjects.remove(objectName);
             }
 
-            exportedManagedClasses.remove(objectName);
+            exportedManagedObjectExports.remove(objectName);
         }
         catch (MBeanRegistrationException e) {
             throw new JmxException(Reason.MBEAN_REGISTRATION, e.getMessage(), e.getCause());
@@ -220,7 +267,7 @@ public class MBeanExporter
 
             exportedObjects.keySet().removeAll(toRemove);
 
-            exportedManagedClasses.keySet().removeAll(toRemove);
+            exportedManagedObjectExports.keySet().removeAll(toRemove);
         }
 
         return errors;
@@ -240,10 +287,18 @@ public class MBeanExporter
     public Map<String, ManagedClass> getManagedClasses()
     {
         ImmutableMap.Builder<String, ManagedClass> builder = ImmutableMap.builder();
-        for (Entry<ObjectName, ManagedClass> entry : exportedManagedClasses.entrySet()) {
-            builder.put(entry.getKey().toString(), entry.getValue());
+        for (Entry<ObjectName, ManagedObjectExport> entry : exportedManagedObjectExports.entrySet()) {
+            builder.put(entry.getKey().toString(), entry.getValue().getManagedClass());
         }
         return builder.build();
+    }
+
+    /**
+     * Returns metadata for managed objects exported through this exporter, keyed by final {@link ObjectName}.
+     */
+    public Map<ObjectName, ManagedObjectExport> getManagedObjectExports()
+    {
+        return ImmutableMap.copyOf(exportedManagedObjectExports);
     }
 
     public Optional<Object> getExportedObject(ObjectName objectName)

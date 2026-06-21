@@ -31,6 +31,7 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -129,6 +130,79 @@ public class TestExporter extends AbstractMbeanTest<TestExporter.NamedObject>
                 assertThat(managedClass.getChildren().get("SimpleObject").getTargetClass()).isEqualTo(SimpleObject.class);
             }
         }
+    }
+
+    @Test
+    void testManagedObjectExportsForManualExports()
+    {
+        Map<ObjectName, ManagedObjectExport> managedObjectExports = exporter.getManagedObjectExports();
+        for (NamedObject namedObject : objects) {
+            ManagedObjectExport managedObjectExport = managedObjectExports.get(namedObject.objectName);
+
+            assertThat(managedObjectExport).isNotNull();
+            assertThat(managedObjectExport.getObjectName()).isEqualTo(namedObject.objectName);
+            assertThat(managedObjectExport.getExportedType()).isEmpty();
+            assertThat(managedObjectExport.getOriginalName()).isEmpty();
+            assertThat(managedObjectExport.getOriginalProperties()).isEmpty();
+            assertThat(managedObjectExport.getManagedClass().getTarget()).isEqualTo(namedObject.object);
+        }
+    }
+
+    @Test
+    void testManagedObjectExportsForTypedManualExports()
+    {
+        MBeanExporter exporter = new MBeanExporter(server);
+        ObjectName objectName = getUniqueObjectName();
+        SimpleObject object = new SimpleObject();
+
+        exporter.export(objectName, object, TestExporter.class);
+
+        ManagedObjectExport managedObjectExport = exporter.getManagedObjectExports().get(objectName);
+        assertThat(managedObjectExport.getObjectName()).isEqualTo(objectName);
+        assertThat(managedObjectExport.getExportedType()).contains(TestExporter.class);
+        assertThat(managedObjectExport.getOriginalName()).isEmpty();
+        assertThat(managedObjectExport.getOriginalProperties()).isEmpty();
+        assertThat(managedObjectExport.getManagedClass().getTarget()).isEqualTo(object);
+    }
+
+    @Test
+    void testManagedObjectExportsForGeneratedNames()
+    {
+        MBeanExporter exporter = new MBeanExporter(server);
+
+        SimpleObject defaultObject = new SimpleObject();
+        MBeanExport defaultExport = exporter.exportWithGeneratedName(defaultObject, SimpleObject.class);
+        ManagedObjectExport defaultManagedObjectExport = exporter.getManagedObjectExports().get(defaultExport.getObjectName());
+        assertThat(defaultManagedObjectExport.getObjectName()).isEqualTo(defaultExport.getObjectName());
+        assertThat(defaultManagedObjectExport.getExportedType()).contains(SimpleObject.class);
+        assertThat(defaultManagedObjectExport.getOriginalName()).isEmpty();
+        assertThat(defaultManagedObjectExport.getOriginalProperties()).isEmpty();
+        assertThat(defaultManagedObjectExport.getManagedClass().getTarget()).isEqualTo(defaultObject);
+
+        SimpleObject namedObject = new SimpleObject();
+        MBeanExport namedExport = exporter.exportWithGeneratedName(namedObject, TestExporter.class, "queued");
+        ManagedObjectExport namedManagedObjectExport = exporter.getManagedObjectExports().get(namedExport.getObjectName());
+        assertThat(namedManagedObjectExport.getObjectName()).isEqualTo(namedExport.getObjectName());
+        assertThat(namedManagedObjectExport.getExportedType()).contains(TestExporter.class);
+        assertThat(namedManagedObjectExport.getOriginalName()).contains("queued");
+        assertThat(namedManagedObjectExport.getOriginalProperties()).isEmpty();
+        assertThat(namedManagedObjectExport.getManagedClass().getTarget()).isEqualTo(namedObject);
+
+        Map<String, String> properties = new HashMap<>();
+        properties.put("segment", "x");
+        SimpleObject propertyObject = new SimpleObject();
+        MBeanExport propertyExport = exporter.exportWithGeneratedName(propertyObject, TestExporter.class, properties);
+        properties.put("segment", "changed");
+
+        ManagedObjectExport propertyManagedObjectExport = exporter.getManagedObjectExports().get(propertyExport.getObjectName());
+        assertThat(propertyManagedObjectExport.getObjectName()).isEqualTo(propertyExport.getObjectName());
+        assertThat(propertyManagedObjectExport.getExportedType()).contains(TestExporter.class);
+        assertThat(propertyManagedObjectExport.getOriginalName()).isEmpty();
+        assertThat(propertyManagedObjectExport.getOriginalProperties()).containsExactly(Map.entry("segment", "x"));
+        assertThat(propertyManagedObjectExport.getManagedClass().getTarget()).isEqualTo(propertyObject);
+
+        namedExport.unexport();
+        assertThat(exporter.getManagedObjectExports()).doesNotContainKey(namedExport.getObjectName());
     }
 
     @Test

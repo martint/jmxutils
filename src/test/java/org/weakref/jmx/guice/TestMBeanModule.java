@@ -21,13 +21,15 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.util.Modules;
 import org.junit.jupiter.api.Test;
-import static org.assertj.core.api.Assertions.assertThat;
+import org.weakref.jmx.ManagedObjectExport;
 import org.weakref.jmx.MBeanExporter;
 import org.weakref.jmx.ObjectNameBuilder;
 import org.weakref.jmx.ObjectNameGenerator;
 import org.weakref.jmx.SimpleObject;
 import org.weakref.jmx.Util;
+import org.weakref.jmx.testing.TestingMBeanServer;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
@@ -38,9 +40,12 @@ import javax.management.ReflectionException;
 
 import java.lang.management.ManagementFactory;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.inject.Stage.PRODUCTION;
 import static com.google.inject.name.Names.named;
+import static com.google.inject.multibindings.OptionalBinder.newOptionalBinder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.weakref.jmx.ObjectNames.generatedNameOf;
 
 public class TestMBeanModule
@@ -92,6 +97,11 @@ public class TestMBeanModule
         MBeanServer server = injector.getInstance(MBeanServer.class);
 
         assertThat(server.getMBeanInfo(name)).isNotNull();
+        ManagedObjectExport managedObjectExport = injector.getInstance(MBeanExporter.class).getManagedObjectExports().get(name);
+        assertThat(managedObjectExport.getObjectName()).isEqualTo(name);
+        assertThat(managedObjectExport.getExportedType()).contains(SimpleObject.class);
+        assertThat(managedObjectExport.getOriginalName()).isEmpty();
+        assertThat(managedObjectExport.getOriginalProperties()).isEmpty();
         server.unregisterMBean(name);
     }
 
@@ -131,6 +141,42 @@ public class TestMBeanModule
         MBeanServer server = injector.getInstance(MBeanServer.class);
 
         assertThat(server.getMBeanInfo(name)).isNotNull();
+        ManagedObjectExport managedObjectExport = injector.getInstance(MBeanExporter.class).getManagedObjectExports().get(name);
+        assertThat(managedObjectExport.getObjectName()).isEqualTo(name);
+        assertThat(managedObjectExport.getExportedType()).contains(SimpleObject.class);
+        assertThat(managedObjectExport.getOriginalName()).isEmpty();
+        assertThat(managedObjectExport.getOriginalProperties()).isEmpty();
+        server.unregisterMBean(name);
+    }
+
+    @Test
+    public void testGeneratedNameOnAnnotationClassMetadata()
+            throws Exception
+    {
+        ObjectName name = new ObjectName(generatedNameOf(SimpleObject.class, TestAnnotation.class));
+
+        Injector injector = Guice.createInjector(PRODUCTION, new MBeanModule(), new AbstractModule()
+        {
+            @Override
+            protected void configure()
+            {
+                binder().requireExplicitBindings();
+                binder().disableCircularProxies();
+
+                bind(SimpleObject.class).annotatedWith(TestAnnotation.class).toInstance(new SimpleObject());
+                bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
+                ExportBinder.newExporter(binder()).export(SimpleObject.class).annotatedWith(TestAnnotation.class).withGeneratedName();
+            }
+        });
+
+        MBeanServer server = injector.getInstance(MBeanServer.class);
+
+        assertThat(server.getMBeanInfo(name)).isNotNull();
+        ManagedObjectExport managedObjectExport = injector.getInstance(MBeanExporter.class).getManagedObjectExports().get(name);
+        assertThat(managedObjectExport.getObjectName()).isEqualTo(name);
+        assertThat(managedObjectExport.getExportedType()).contains(SimpleObject.class);
+        assertThat(managedObjectExport.getOriginalName()).contains(TestAnnotation.class.getSimpleName());
+        assertThat(managedObjectExport.getOriginalProperties()).isEmpty();
         server.unregisterMBean(name);
     }
 
@@ -170,7 +216,51 @@ public class TestMBeanModule
         MBeanServer server = injector.getInstance(MBeanServer.class);
 
         assertThat(server.getMBeanInfo(name)).isNotNull();
+        ManagedObjectExport managedObjectExport = injector.getInstance(MBeanExporter.class).getManagedObjectExports().get(name);
+        assertThat(managedObjectExport.getObjectName()).isEqualTo(name);
+        assertThat(managedObjectExport.getExportedType()).contains(SimpleObject.class);
+        assertThat(managedObjectExport.getOriginalName()).contains("hello");
+        assertThat(managedObjectExport.getOriginalProperties()).isEmpty();
         server.unregisterMBean(name);
+    }
+
+    @Test
+    public void testGeneratedNameUsesConfiguredGenerator()
+            throws Exception
+    {
+        MBeanServer server = new TestingMBeanServer();
+        ObjectNameGenerator configuredGenerator = new DomainObjectNameGenerator("from.binding");
+        ObjectNameGenerator exporterGenerator = new DomainObjectNameGenerator("from.exporter");
+
+        Injector injector = Guice.createInjector(PRODUCTION,
+                Modules.override(new MBeanModule()).with(new AbstractModule()
+                {
+                    @Override
+                    protected void configure()
+                    {
+                        binder().requireExplicitBindings();
+                        binder().disableCircularProxies();
+
+                        bind(MBeanServer.class).toInstance(server);
+                        newOptionalBinder(binder(), ObjectNameGenerator.class).setBinding().toInstance(configuredGenerator);
+                        bind(MBeanExporter.class).toInstance(new MBeanExporter(server, Optional.of(exporterGenerator)));
+                        bind(SimpleObject.class).annotatedWith(named("generated")).toInstance(new SimpleObject());
+                        bind(SimpleObject.class).annotatedWith(named("custom")).toInstance(new SimpleObject());
+
+                        ExportBinder exporter = ExportBinder.newExporter(binder());
+                        exporter.export(SimpleObject.class).annotatedWith(named("generated")).withGeneratedName();
+                        exporter.export(SimpleObject.class).annotatedWith(named("custom")).as(generator -> generator.generatedNameOf(SimpleObject.class, "custom"));
+                    }
+                }));
+
+        ObjectName generatedName = new ObjectName("from.binding:type=SimpleObject,name=generated");
+        ObjectName customName = new ObjectName("from.binding:type=SimpleObject,name=custom");
+        ObjectName generatedNameFromExporter = new ObjectName("from.exporter:type=SimpleObject,name=generated");
+
+        Map<ObjectName, ManagedObjectExport> exports = injector.getInstance(MBeanExporter.class).getManagedObjectExports();
+        assertThat(exports).containsKeys(generatedName, customName);
+        assertThat(exports).doesNotContainKey(generatedNameFromExporter);
+        assertThat(exports.get(generatedName).getOriginalName()).contains("generated");
     }
 
     @Test
@@ -347,6 +437,18 @@ public class TestMBeanModule
         public String generatedNameOf(Class<?> type, Map<String, String> properties)
         {
             return new ObjectNameBuilder("test")
+                    .withProperties(properties)
+                    .build();
+        }
+    }
+
+    private record DomainObjectNameGenerator(String domain)
+            implements ObjectNameGenerator
+    {
+        @Override
+        public String generatedNameOf(Class<?> type, Map<String, String> properties)
+        {
+            return new ObjectNameBuilder(domain)
                     .withProperties(properties)
                     .build();
         }
